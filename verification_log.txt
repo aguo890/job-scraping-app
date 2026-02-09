@@ -1,0 +1,20 @@
+2026-02-09 15:11:04,073 - asyncio - DEBUG - Using selector: SelectSelector
+2026-02-09 15:11:04,074 - __main__ - INFO - Starting async fetch for 6 companies...
+2026-02-09 15:11:04,074 - fetchers - INFO - Starting async fetch for 6 companies...
+2026-02-09 15:11:04,160 - utils.network - WARNING - Failed to fetch https://boards-api.greenhouse.io/v1/boards/retool/jobs?content=true: HTTP 404
+2026-02-09 15:11:04,163 - utils.network - WARNING - Failed to fetch https://boards-api.greenhouse.io/v1/boards/zoox/jobs?content=true: HTTP 404
+2026-02-09 15:11:04,166 - utils.network - WARNING - Failed to fetch https://api.ashbyhq.com/posting-api/job-board/scale-ai: HTTP 404
+2026-02-09 15:11:04,219 - fetchers - INFO - Fetched 25 jobs from Ashby for Bedrock Robotics
+2026-02-09 15:11:04,400 - fetchers - INFO - Fetched 596 jobs from Greenhouse for DoorDash
+2026-02-09 15:11:04,988 - fetchers - INFO - Fetched 1448 jobs from Greenhouse for Anduril
+2026-02-09 15:11:04,988 - fetchers - INFO - Total jobs fetched: 2069
+2026-02-09 15:11:04,989 - __main__ - INFO - Finished in 0.92 seconds.
+2026-02-09 15:11:04,990 - __main__ - INFO - Successfully fetched 2069 total jobs.
+2026-02-09 15:11:04,990 - __main__ - INFO - Job Counts by Company:
+2026-02-09 15:11:04,991 - __main__ - INFO - \u2705 Anduril: 1448 jobs
+2026-02-09 15:11:04,993 - __main__ - INFO - \u2705 DoorDash: 596 jobs
+2026-02-09 15:11:04,993 - __main__ - INFO - \u274c Scale AI: 0 jobs
+2026-02-09 15:11:04,993 - __main__ - INFO - \u274c Zoox: 0 jobs
+2026-02-09 15:11:04,993 - __main__ - INFO - \u274c Retool: 0 jobs
+2026-02-09 15:11:04,994 - __main__ - INFO - \u2705 Bedrock Robotics: 25 jobs
+2026-02-09 15:11:04,994 - __main__ - INFO - SUCCESS: Async scraper working.

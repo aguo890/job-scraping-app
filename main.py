@@ -6,6 +6,7 @@ import os
 import sys
 import logging
 import yaml
+import asyncio
 from datetime import datetime
 from pathlib import Path
 
@@ -36,6 +37,10 @@ def setup_logging():
     
     # Root logger
     root_logger = logging.getLogger()
+    # Reset handlers to avoid duplication
+    if root_logger.hasHandlers():
+        root_logger.handlers.clear()
+        
     root_logger.setLevel(logging.DEBUG)
     root_logger.addHandler(console_handler)
     root_logger.addHandler(file_handler)
@@ -56,7 +61,7 @@ def load_config(config_file: str):
         raise
 
 
-def main():
+async def main():
     """Main execution flow"""
     logger = setup_logging()
     logger.info("=" * 80)
@@ -82,7 +87,8 @@ def main():
         
         # Fetch jobs
         logger.info("Fetching jobs from all sources...")
-        raw_jobs = fetcher_manager.fetch_all_jobs(companies)
+        # Await the async fetcher
+        raw_jobs = await fetcher_manager.fetch_all_jobs(companies)
         logger.info(f"Fetched {len(raw_jobs)} raw job postings")
         
         if not raw_jobs:
@@ -103,9 +109,10 @@ def main():
         report_files = reporter.generate_reports(processed_jobs)
         logger.info(f"Generated reports: {list(report_files.values())}")
         
-        # AI Analysis (optional - only if API key is configured)
-        logger.info("Running AI analysis on top jobs...")
-        ai_results = ai_assistant.analyze_top_jobs(processed_jobs, top_n=5)
+        # AI Analysis (DISABLED by user request)
+        logger.info("Skipping AI analysis (disabled)...")
+        ai_results = {'enabled': False}
+        # ai_results = ai_assistant.analyze_top_jobs(processed_jobs, top_n=5)
         
         if ai_results.get('enabled'):
             logger.info(f"AI analysis completed for {ai_results.get('total_analyzed')} jobs")
@@ -155,7 +162,8 @@ def main():
         logger.info("Job Scraping Complete!")
         logger.info(f"  - Total jobs fetched: {len(raw_jobs)}")
         logger.info(f"  - Jobs after processing: {len(processed_jobs)}")
-        logger.info(f"  - Top job score: {processed_jobs[0].get('score', 0):.1f}")
+        if processed_jobs:
+            logger.info(f"  - Top job score: {processed_jobs[0].get('score', 0):.1f}")
         logger.info(f"  - Reports generated: {len(report_files)}")
         logger.info(f"  - JSON output: {report_files.get('json')}")
         logger.info(f"  - Markdown report: {report_files.get('markdown')}")
@@ -169,4 +177,9 @@ def main():
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    if sys.platform == 'win32':
+        asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+    try:
+        sys.exit(asyncio.run(main()))
+    except KeyboardInterrupt:
+        pass

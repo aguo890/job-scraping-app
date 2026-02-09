@@ -1,78 +1,62 @@
-# Keywords configuration for job filtering and ranking
-
-# Keywords to search for in job titles and descriptions
 keywords:
+  # 1. BOOST these words (Higher Score)
   high_priority:
-    - "SDET"
-    - "Senior QA"
-    - "QA Lead"
-    - "Principal QA Engineer"
-    - "Software QA Manager"
-    - "QA Manager"
-    - "Senior QA Engineer"
-    - "QA Engineer"
-    - "Automation Engineer"
-    - "Engineering Lead"
-    - "Tech Lead"
+    - "Intern"
+    - "Internship"
+    - "New Grad"
+    - "University Grad"
+    - "Entry Level"
+    - "Junior"
+    - "Associate"
+    - "2026"
+    - "Early Career"
 
-  medium_priority:
-    - "Test Engineer"
-    - "Automation Engineer"
-    - "Quality Assurance"
-    - "Software Tester"
-    - "Dev Manager"
-    - "Development Manager"
-    - "Engineering Manager"
-    - "Senior Engineering Manager"
+  # 2. BAN these words (Remove from list entirely)
+  exclude:
+    # Seniority (You are Class of 2026, these are a waste of time)
+    - "Senior"
+    - "Sr."
+    - "Staff"
+    - "Principal"
+    - "Lead"
+    - "Director"
+    - "Manager"
+    - "VP"
+    - "Head of"
     
-  low_priority:
-    - "Junior QA"
-    - "Associate QA"
-    - "QA Intern"
-    - "Entry Level QA"
+    # Non-Tech Roles (The "Garbage")
+    - "Account Executive"
+    - "Sales"
+    - "Recruiter"
+    - "Sourcer"
+    - "Talent"
+    - "HR"
+    - "People"
+    - "Legal"
+    - "Counsel"
+    - "Policy"
+    - "Finance"
+    - "Accounting"
+    - "Marketing"
+    - "Producer"
+    - "Creative"
+    - "Support"
+    - "Success"
+    - "Operations"
+    - "Executive Assistant"
 
-# Skills to boost ranking (QA and Engineering focused)
+# 3. Match your CV Skills (For the "Keyword Matcher" Logic)
 preferred_skills:
-  - "Selenium"
-  - "Cypress"
-  - "Playwright"
-  - "TestNG"
-  - "JUnit"
-  - "Appium"
-  - "Postman"
-  - "Jenkins"
-  - "GitLab CI"
   - "Python"
-  - "Java"
-  - "JavaScript"
-  - "TypeScript"
   - "React"
-  - "Node.js"
+  - "SQL"
   - "AWS"
-  - "Kubernetes"
   - "Docker"
+  - "FastAPI"
   - "PostgreSQL"
-  - "MongoDB"
-  - "Angular"
-  - "Postgres"
-  - "Mongo"
-  - "Lambda"
-  - "Serverless"
-  - "Microservices"
-  - "CI/CD"
-  - "Agile"
-  - "Scrum"
-  - "Kanban"
+  - "Data Engineering"
 
-# Locations preference (higher score for preferred locations)
-preferred_locations:
-  - "Remote"
-  - "Pittsburgh"
-  - "Greater Pittsburgh Area"
-  
-
-# Exclude jobs with these keywords
-exclude_keywords:
-  - "Clearance Required"
-  - "Security Clearance"
-  - "Top Secret"
+# 4. Global Filtering Settings
+filtering:
+  is_enabled: true
+  max_years_experience: 3  # Jobs requiring more than 3 years will be skipped

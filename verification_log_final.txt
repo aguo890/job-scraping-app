@@ -1,0 +1,18 @@
+2026-02-09 15:58:13,690 - asyncio - DEBUG - Using selector: SelectSelector
+2026-02-09 15:58:13,691 - __main__ - INFO - Starting async fetch for 6 companies...
+2026-02-09 15:58:13,697 - fetchers - INFO - Starting async fetch for 6 companies...
+2026-02-09 15:58:13,816 - fetchers - INFO - Fetched 32 jobs from Greenhouse for Scale AI
+2026-02-09 15:58:13,860 - fetchers - INFO - Fetched 0 jobs from Ashby for Retool
+2026-02-09 15:58:14,061 - fetchers - INFO - Fetched 31 jobs from Greenhouse for DoorDash
+2026-02-09 15:58:14,591 - fetchers - INFO - Fetched 12 jobs from Ashby for Bedrock Robotics
+2026-02-09 15:58:14,940 - fetchers - INFO - Fetched 289 jobs from Greenhouse for Anduril
+2026-02-09 15:58:16,587 - fetchers - INFO - Fetched 80 jobs from Lever for Zoox
+2026-02-09 15:58:16,588 - fetchers - INFO - Total jobs fetched: 444
+2026-02-09 15:58:16,589 - __main__ - INFO - Successfully fetched 444 total jobs.
+2026-02-09 15:58:16,589 - __main__ - INFO - Job Counts by Company:
+2026-02-09 15:58:16,589 - __main__ - INFO - \u2705 Anduril: 289 jobs
+2026-02-09 15:58:16,590 - __main__ - INFO - \u2705 DoorDash: 31 jobs
+2026-02-09 15:58:16,590 - __main__ - INFO - \u2705 Scale AI: 32 jobs
+2026-02-09 15:58:16,590 - __main__ - INFO - \u2705 Zoox: 80 jobs
+2026-02-09 15:58:16,590 - __main__ - INFO - \u2705 Bedrock Robotics: 12 jobs
+2026-02-09 15:58:16,590 - __main__ - INFO - \u274c Retool: 0 jobs

@@ -13,14 +13,36 @@ class AIAssistant:
     """ChatGPT integration for job analysis and career assistance"""
     
     def __init__(self, api_key: Optional[str] = None):
-        self.api_key = api_key or os.getenv('OPENAI_API_KEY')
-        self.api_url = "https://api.openai.com/v1/chat/completions"
-        self.model = "gpt-3.5-turbo"
+        self.api_key = api_key or os.getenv('DEEPSEEK_API_KEY') or os.getenv('OPENAI_API_KEY')
+        
+        base_url = os.getenv('AI_BASE_URL', 'https://api.openai.com/v1')
+        if not base_url.endswith('/v1') and not base_url.endswith('/'):
+             base_url += '/v1' # Normalize somewhat, though DeepSeek usage varies.
+             # Actually, DeepSeek is compatible with OpenAI SDK.
+             # If user provided https://api.deepseek.com, we might need /chat/completions.
+             # Let's just use the full path construction.
+        
+        # Better approach: Flexible base URL
+        base_url = os.getenv('AI_BASE_URL', 'https://api.openai.com/v1')
+        self.api_url = f"{base_url.rstrip('/')}/chat/completions"
+            
+        self.model = os.getenv('AI_MODEL', 'gpt-3.5-turbo')
     
+    def load_user_profile(self) -> str:
+        """Load user profile/CV from data directory"""
+        try:
+            cv_path = os.path.join('data', 'cv.txt')
+            if os.path.exists(cv_path):
+                with open(cv_path, 'r', encoding='utf-8') as f:
+                    return f.read().strip()
+        except Exception as e:
+            logger.warning(f"Could not load CV: {e}")
+        return ""
+
     def _call_chatgpt(self, messages: List[Dict[str, str]], max_tokens: int = 500) -> Optional[str]:
-        """Make API call to ChatGPT"""
+        """Make API call to LLM (ChatGPT/DeepSeek)"""
         if not self.api_key:
-            logger.warning("OpenAI API key not configured - skipping AI analysis")
+            logger.warning("AI API key not configured - skipping AI analysis")
             return None
         
         try:
@@ -43,10 +65,10 @@ class AIAssistant:
             return result['choices'][0]['message']['content']
         
         except requests.exceptions.RequestException as e:
-            logger.error(f"Error calling ChatGPT API: {e}")
+            logger.error(f"Error calling AI API: {e}")
             return None
         except Exception as e:
-            logger.error(f"Unexpected error in ChatGPT call: {e}")
+            logger.error(f"Unexpected error in AI call: {e}")
             return None
     
     def analyze_job_description(self, job: Dict[str, Any]) -> Optional[Dict[str, Any]]:
@@ -101,7 +123,10 @@ Provide the analysis in a structured format."""
         description = job.get('description', '')[:2000]
         
         skills_context = ""
-        if user_skills:
+        user_cv = self.load_user_profile()
+        if user_cv:
+            skills_context = f"\n\nCandidate's CV/Profile:\n{user_cv}"
+        elif user_skills:
             skills_context = f"\n\nCandidate's skills: {', '.join(user_skills)}"
         
         messages = [
@@ -134,6 +159,9 @@ Focus on:
         title = job.get('title', '')
         company = job.get('company', '')
         description = job.get('description', '')[:2000]
+        
+        user_cv = self.load_user_profile()
+        cv_context = f"\n\nCandidate's CV:\n{user_cv}" if user_cv else ""
         
         messages = [
             {

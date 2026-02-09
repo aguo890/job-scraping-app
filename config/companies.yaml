@@ -1,43 +1,322 @@
 # Companies configuration for job scraping
-# Format: company_name: {ats_type, board_url}
+# Format: company_name: {ats_type, board_url/board_token}
 
 companies:
+  # ---------------------------------------------------------
+  # CATEGORY 1: MIDSIZE / HIGH GROWTH (ASHBY)
+  # ---------------------------------------------------------
+  - name: "Notion"
+    ats: "ashby"
+    board_url: "https://jobs.ashbyhq.com/notion"
+    
+  - name: "Figma"
+    ats: "ashby"
+    board_url: "https://jobs.ashbyhq.com/figma"
+    
+  - name: "Reddit"
+    ats: "ashby"
+    board_url: "https://jobs.ashbyhq.com/reddit"
+    
+  - name: "PostHog"
+    ats: "ashby"
+    board_url: "https://jobs.ashbyhq.com/posthog"
+    
   - name: "OpenAI"
-    ats: "greenhouse"
-    board_token: "openai"
+    ats: "ashby"
+    board_url: "https://jobs.ashbyhq.com/openai"
     
   - name: "Anthropic"
     ats: "ashby"
     board_url: "https://jobs.ashbyhq.com/anthropic"
     
+  - name: "Snowflake"
+    ats: "ashby"
+    board_url: "https://jobs.ashbyhq.com/snowflake"
+    
+  - name: "Airwallex"
+    ats: "ashby"
+    board_url: "https://jobs.ashbyhq.com/airwallex"
+    
+  - name: "Quora"
+    ats: "ashby"
+    board_url: "https://jobs.ashbyhq.com/quora"
+    
+  - name: "Deliveroo"
+    ats: "ashby"
+    board_url: "https://jobs.ashbyhq.com/deliveroo"
+    
+  - name: "Linear"
+    ats: "ashby"
+    board_url: "https://jobs.ashbyhq.com/linear"
+
+  - name: "Vanta"
+    ats: "ashby"
+    board_url: "https://jobs.ashbyhq.com/vanta"
+
+  - name: "Deel"
+    ats: "ashby"
+    board_url: "https://jobs.ashbyhq.com/deel"
+
+  - name: "Whatnot"
+    ats: "ashby"
+    board_url: "https://jobs.ashbyhq.com/whatnot"
+
+  - name: "Cursor"
+    ats: "ashby"
+    board_url: "https://api.ashbyhq.com/posting-api/job-board/cursor"
+
+  - name: "Ironclad"
+    ats: "ashby"
+    board_url: "https://api.ashbyhq.com/posting-api/job-board/Ironclad"
+
+  - name: "Zapier"
+    ats: "ashby"
+    board_url: "https://api.ashbyhq.com/posting-api/job-board/zapier"
+
+  - name: "Coder"
+    ats: "ashby"
+    board_url: "https://api.ashbyhq.com/posting-api/job-board/coder"
+
+  - name: "Owner.com"
+    ats: "ashby"
+    board_url: "https://api.ashbyhq.com/posting-api/job-board/owner"
+
+  - name: "PermitFlow"
+    ats: "ashby"
+    board_url: "https://api.ashbyhq.com/posting-api/job-board/permitflow"
+
+  - name: "Thinkific"
+    ats: "ashby"
+    board_url: "https://api.ashbyhq.com/posting-api/job-board/thinkific"
+
+  - name: "Lemonade"
+    ats: "ashby"
+    board_url: "https://api.ashbyhq.com/posting-api/job-board/lemonade"
+
+  - name: "Gorgias"
+    ats: "ashby"
+    board_url: "https://api.ashbyhq.com/posting-api/job-board/gorgias"
+
+  - name: "Harvey"
+    ats: "ashby"
+    board_url: "https://api.ashbyhq.com/posting-api/job-board/harvey"
+
+  - name: "Cointracker"
+    ats: "ashby"
+    board_url: "https://api.ashbyhq.com/posting-api/job-board/cointracker"
+
+  - name: "Rippling"
+    ats: "ashby"
+    board_url: "https://jobs.ashbyhq.com/rippling"
+
+  - name: "Marqeta"
+    ats: "ashby"
+    board_url: "https://api.ashbyhq.com/posting-api/job-board/marqeta"
+
+  - name: "Replit"
+    ats: "ashby"
+    board_url: "https://jobs.ashbyhq.com/replit"
+
+  - name: "Bedrock Robotics"
+    ats: "ashby"
+    board_url: "https://jobs.ashbyhq.com/bedrock-robotics"
+
+  # ---------------------------------------------------------
+  # CATEGORY 2: HIGH GROWTH TECH (GREENHOUSE)
+  # ---------------------------------------------------------
+  - name: "Anduril"
+    ats: "greenhouse"
+    board_token: "andurilindustries"
+
+  - name: "Retool"
+    ats: "ashby"
+    board_url: "https://jobs.ashbyhq.com/retool"
+    
+  - name: "Benchling"
+    ats: "greenhouse"
+    board_token: "benchling"
+    
+  - name: "Hex"
+    ats: "greenhouse"
+    board_token: "hextechnologies"
+    
+  - name: "Verkada"
+    ats: "greenhouse"
+    board_token: "verkada"
+    
+  - name: "Datadog"
+    ats: "greenhouse"
+    board_token: "datadog"
+    
+  - name: "Flexport"
+    ats: "greenhouse"
+    board_token: "flexport"
+    
+  - name: "Harry's"
+    ats: "greenhouse"
+    board_token: "harrys"
+
+  - name: "Databricks"
+    ats: "greenhouse"
+    board_token: "databricks"
+
+  - name: "Runway ML"
+    ats: "greenhouse"
+    board_token: "runwayml"
+
+  - name: "Scale AI"
+    ats: "greenhouse"
+    board_token: "scaleai"
+
+  # ---------------------------------------------------------
+  # CATEGORY 3: FINTECH & PAYMENTS (GREENHOUSE DOMINANT)
+  # ---------------------------------------------------------
   - name: "Stripe"
     ats: "greenhouse"
     board_token: "stripe"
     
-  - name: "Airbnb"
+  - name: "Brex"
     ats: "greenhouse"
-    board_token: "airbnb"
+    board_token: "brex"
     
-  - name: "Notion"
+  - name: "Adyen"
+    ats: "greenhouse"
+    board_token: "adyen"
+    
+  - name: "Affirm"
+    ats: "greenhouse"
+    board_token: "affirm"
+    
+  - name: "Plaid"
+    ats: "greenhouse"
+    board_token: "plaid"
+    
+  - name: "Instacart"
+    ats: "greenhouse"
+    board_token: "instacart"
+
+  - name: "Coinbase"
+    ats: "greenhouse"
+    board_token: "coinbase"
+
+  - name: "Ripple"
+    ats: "greenhouse"
+    board_token: "ripple"
+    
+  - name: "Chime"
+    ats: "greenhouse"
+    board_token: "chime"
+
+  - name: "SoFi"
+    ats: "greenhouse"
+    board_token: "sofi"
+
+  - name: "Carta"
+    ats: "greenhouse"
+    board_token: "carta"
+    
+  - name: "Rebellion Defense"
+    ats: "greenhouse"
+    board_token: "rebelliondefense"
+
+  - name: "Shift5"
+    ats: "greenhouse"
+    board_token: "shift5"
+
+  - name: "Vannevar Labs"
+    ats: "greenhouse"
+    board_token: "vannevarlabs"
+
+  - name: "Everlane"
+    ats: "greenhouse"
+    board_token: "everlane"
+
+  - name: "Allbirds"
+    ats: "greenhouse"
+    board_token: "allbirds"
+
+  - name: "Glossier"
+    ats: "greenhouse"
+    board_token: "glossier"
+
+  - name: "Peloton"
+    ats: "greenhouse"
+    board_token: "peloton"
+
+  - name: "Sweetgreen"
+    ats: "greenhouse"
+    board_token: "sweetgreen"
+
+  - name: "Gusto"
+    ats: "greenhouse"
+    board_token: "gusto"
+
+  - name: "HubSpot"
+    ats: "greenhouse"
+    board_token: "hubspot"
+
+  # ---------------------------------------------------------
+  # CATEGORY 4: DEFENSE, ROBOTICS & INFRASTRUCTURE (LEVER/Others)
+  # ---------------------------------------------------------
+  - name: "Shield AI"
     ats: "lever"
-    board_url: "https://api.lever.co/v0/postings/notion"
+    board_token: "shieldai"
     
-  - name: "Figma"
+  - name: "Saronic"
+    ats: "lever"
+    board_token: "saronic"
+    
+  - name: "Zoox"
+    ats: "lever"
+    board_token: "zoox"
+    
+  - name: "Binance"
+    ats: "lever"
+    board_token: "binance"
+    
+  - name: "Atlassian"
+    ats: "lever"
+    board_token: "atlassian"
+    
+  - name: "DoorDash"
     ats: "greenhouse"
-    board_token: "figma"
+    board_token: "doordashusa"
     
-  - name: "Scale AI"
-    ats: "ashby"
-    board_url: "https://jobs.ashbyhq.com/scale"
-    
-  - name: "Discord"
+  - name: "Opendoor"
+    ats: "greenhouse" 
+    board_token: "opendoor"
+
+  - name: "Kraken"
+    ats: "lever"
+    board_token: "kraken"
+
+  # ---------------------------------------------------------
+  # CATEGORY 5: NC / REGIONAL GIANTS
+  # ---------------------------------------------------------
+  - name: "Epic Games"
     ats: "greenhouse"
-    board_token: "discord"
-    
-  - name: "Databricks"
+    board_token: "epicgames"
+
+  - name: "Pendo"
     ats: "greenhouse"
-    board_token: "databricks"
-    
-  - name: "Ramp"
-    ats: "ashby"
-    board_url: "https://jobs.ashbyhq.com/ramp"
+    board_token: "pendo"
+
+  - name: "LendingTree"
+    ats: "greenhouse"
+    board_token: "lendingtree"
+
+  - name: "nCino"
+    ats: "greenhouse"
+    board_token: "ncino"
+
+  - name: "Bandwidth"
+    ats: "greenhouse"
+    board_token: "bandwidth"
+
+  - name: "AvidXchange"
+    ats: "greenhouse"
+    board_token: "avidxchange"
+
+  - name: "Red Ventures"
+    ats: "greenhouse"
+    board_token: "redventures"

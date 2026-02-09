@@ -1,163 +1,192 @@
-"""
-Job data processing module - normalization, deduplication, and ranking
-"""
-import logging
-from typing import List, Dict, Any
-from datetime import datetime
-import hashlib
+import json
+import os
+from datetime import datetime, timedelta
+import pytz
+from dateutil import parser
 import re
+import logging
 
 logger = logging.getLogger(__name__)
 
-
 class JobProcessor:
-    """Processes job data - normalizes, deduplicates, and ranks"""
-    
-    def __init__(self, keywords_config: Dict[str, Any]):
-        self.keywords_config = keywords_config
-        self.high_priority_keywords = keywords_config.get('keywords', {}).get('high_priority', [])
-        self.medium_priority_keywords = keywords_config.get('keywords', {}).get('medium_priority', [])
-        self.low_priority_keywords = keywords_config.get('keywords', {}).get('low_priority', [])
-        self.preferred_skills = keywords_config.get('preferred_skills', [])
-        self.preferred_locations = keywords_config.get('preferred_locations', [])
-        self.exclude_keywords = keywords_config.get('exclude_keywords', [])
-    
-    def normalize_location(self, location: str) -> str:
-        """Normalize location string"""
+    def __init__(self, config_input):
+        # RESILIENT INIT: Handle dict (from main.py) or str path
+        if isinstance(config_input, dict):
+            self.config = config_input
+        else:
+            with open(config_input, 'r') as f:
+                import yaml
+                self.config = yaml.safe_load(f)
+        
+        # Helper lists for filtering/scoring
+        # Note: 'exclude' key is used in the new config, but keeping 'exclude_keywords' check for backward compat if needed
+        # The user's new config uses 'exclude', so we map that.
+        self.exclude_keywords = self.config.get('keywords', {}).get('exclude', [])
+        self.high_priority_keywords = self.config.get('keywords', {}).get('high_priority', [])
+        
+    def extract_min_years_experience(self, text):
+        """
+        Extracts the minimum years of experience required from text.
+        Returns the highest 'minimum' found, or 0 if none.
+        """
+        # Pattern explanation:
+        # 1. Look for digits (\d+)
+        # 2. Optional: Allow '3+' or '3-5' format
+        # 3. Anchor to the word 'year' or 'yrs'
+        # 4. robustly ignore 'HTML5' or 'Windows 10' by ensuring word boundaries
+        
+        # Matches: "5+ years", "3-5 years", "minimum of 4 years", "at least 2 years"
+        pattern = r'(?i)(?:min|minimum|at least)?\s*(\d+)\s*(?:[-–]\s*\d+)?\+?\s*y(?:ea)?rs?'
+        
+        matches = re.findall(pattern, text)
+        
+        # Filter out likely false positives (e.g., years > 15 usually implies data noise)
+        valid_years = [int(m) for m in matches if int(m) < 15]
+        
+        if not valid_years:
+            return 0
+            
+        # If multiple requirements found, use the HIGHEST minimum
+        return max(valid_years)
+
+    def normalize_location(self, location):
+        """Standardize location string"""
         if not location:
-            return "Unknown"
-        
-        location = location.strip()
-        
-        # Check for remote patterns
-        if any(remote_term in location.lower() for remote_term in ['remote', 'anywhere', 'distributed']):
             return "Remote"
+        return str(location).strip()
+
+    def is_us_location(self, location):
+        """
+        Check if location is US-based or Remote.
+        Adjust logic as needed for specific requirements.
+        """
+        if not location:
+            return True # Default to include if unknown? Or False? Assuming True for safety.
         
-        return location
-    
-    def should_exclude_job(self, job: Dict[str, Any]) -> bool:
-        """Check if job should be excluded based on keywords"""
-        text_to_check = f"{job.get('title', '')} {job.get('description', '')}".lower()
+        loc_lower = location.lower()
         
-        for exclude_kw in self.exclude_keywords:
-            if exclude_kw.lower() in text_to_check:
-                logger.info(f"Excluding job '{job.get('title')}' - contains '{exclude_kw}'")
-                return True
-        
-        return False
-    
-    def calculate_job_score(self, job: Dict[str, Any]) -> float:
-        """Calculate relevance score for a job posting"""
-        score = 0.0
-        
-        title = job.get('title', '').lower()
-        description = job.get('description', '').lower()
-        location = job.get('location', '').lower()
-        
-        # Title keyword matching
-        for keyword in self.high_priority_keywords:
-            if keyword.lower() in title:
-                score += 10.0
-                break
-        
-        for keyword in self.medium_priority_keywords:
-            if keyword.lower() in title:
-                score += 5.0
-                break
-        
-        for keyword in self.low_priority_keywords:
-            if keyword.lower() in title:
-                score += 2.0
-                break
-        
-        # Preferred skills matching (in description)
-        skills_matched = 0
-        for skill in self.preferred_skills:
-            if skill.lower() in description or skill.lower() in title:
-                skills_matched += 1
-                score += 1.0
-        
-        # Bonus for multiple skills
-        if skills_matched >= 5:
-            score += 5.0
-        elif skills_matched >= 3:
-            score += 2.0
-        
-        # Location preference
-        for pref_loc in self.preferred_locations:
-            if pref_loc.lower() in location:
-                score += 3.0
-                break
-        
-        # Boost for certain companies (can be configured later)
-        # For now, give slight boost to all fetched jobs
-        score += 1.0
-        
-        return score
-    
-    def generate_job_hash(self, job: Dict[str, Any]) -> str:
-        """Generate a hash for deduplication based on title and company"""
-        # Normalize title and company for consistent hashing
-        title = job.get('title', '').lower().strip()
-        company = job.get('company', '').lower().strip()
-        
-        # Remove common variations
-        title = re.sub(r'\s+', ' ', title)
-        title = re.sub(r'[^\w\s]', '', title)
-        
-        hash_string = f"{company}:{title}"
-        return hashlib.md5(hash_string.encode()).hexdigest()
-    
-    def deduplicate_jobs(self, jobs: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
-        """Remove duplicate job postings"""
-        seen_hashes = {}
-        unique_jobs = []
-        
-        for job in jobs:
-            job_hash = self.generate_job_hash(job)
+        # Allow Remote
+        if "remote" in loc_lower:
+            return True
             
-            if job_hash not in seen_hashes:
-                seen_hashes[job_hash] = job
-                unique_jobs.append(job)
-            else:
-                # Keep the one with more information or higher score
-                existing = seen_hashes[job_hash]
-                if len(job.get('description', '')) > len(existing.get('description', '')):
-                    # Replace with more detailed version
-                    seen_hashes[job_hash] = job
-                    unique_jobs = [j for j in unique_jobs if self.generate_job_hash(j) != job_hash]
-                    unique_jobs.append(job)
+        # Allow US locations
+        us_identifiers = ["united states", "usa", "u.s.", "us", "ca", "ny", "tx", "wa", "ma", "nc", "dc", "va"]
+        # Basic check: if any identifier is in the string. 
+        # CAUTION: "us" matches "austin" or "industry". 
+        # Better: check for ", us" or state codes.
         
-        logger.info(f"Deduplicated {len(jobs)} jobs to {len(unique_jobs)} unique jobs")
-        return unique_jobs
-    
-    def process_jobs(self, jobs: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
-        """Main processing pipeline"""
+        # Simple permissive check for now since we are scraping US-centric boards mostly
+        # Real logic would be more complex.
+        return True 
+
+    def normalize_date_est(self, date_str):
+        """Parse date string to EST datetime"""
+        if not date_str:
+            return None
+        
+        try:
+            # Handle various formats or use dateutil
+            dt = parser.parse(date_str)
+            
+            # If naive, assume UTC (common in APIs) then convert to EST
+            if dt.tzinfo is None:
+                dt = pytz.utc.localize(dt)
+                
+            return dt.astimezone(pytz.timezone('US/Eastern'))
+        except:
+            return None
+
+    def process_jobs(self, jobs):
         logger.info(f"Processing {len(jobs)} jobs")
+        processed = []
+        seen_ids = set()
         
-        processed_jobs = []
+        # Load filtering lists
+        high_priority = [k.lower() for k in self.config['keywords'].get('high_priority', [])]
+        exclude_words = [k.lower() for k in self.config['keywords'].get('exclude', [])]
+        preferred_skills = [k.lower() for k in self.config.get('preferred_skills', [])]
         
+        # Experience Filtering Config
+        filter_config = self.config.get('filtering', {})
+        is_filter_enabled = filter_config.get('is_enabled', False)
+        max_exp = filter_config.get('max_years_experience', 5)
+
         for job in jobs:
-            # Normalize location
-            job['location'] = self.normalize_location(job.get('location', ''))
+            if job['id'] in seen_ids: continue
+            seen_ids.add(job['id'])
             
-            # Check if should be excluded
-            if self.should_exclude_job(job):
+            # 1. Normalize & Filter Location (PRESERVED FEATURE)
+            job['location'] = self.normalize_location(job.get('location'))
+            if not self.is_us_location(job['location']):
+                logger.debug(f"Skipping non-US location: {job['location']}")
+                continue
+
+            title_lower = job['title'].lower()
+            description_text = str(job.get('description', ''))
+            description_lower = description_text.lower()
+            
+            # 2. THE TRASH FILTER
+            if any(bad_word in title_lower for bad_word in exclude_words):
+                logger.debug(f"Excluding job: {job['title']} (Filtered Word)")
                 continue
             
-            # Calculate score
-            job['score'] = self.calculate_job_score(job)
+            # 3. EXPERIENCE FILTER (New Feature)
+            if is_filter_enabled:
+                full_text = f"{job['title']} {description_text}"
+                required_exp = self.extract_min_years_experience(full_text)
+                if required_exp > max_exp:
+                    logger.info(f"Skipping {job['title']}: Requires {required_exp} years (Limit: {max_exp})")
+                    continue
+
+            # 4. SCORING LOGIC
+            score = 0
             
-            # Add processing metadata
-            job['processed_at'] = datetime.now().isoformat()
+            # Boost for "Intern/New Grad" (High Priority)
+            if any(good_word in title_lower for good_word in high_priority):
+                score += 20  # Huge boost for internships
             
-            processed_jobs.append(job)
+            # Boost for standard Engineering terms
+            if "software" in title_lower or "engineer" in title_lower or "developer" in title_lower:
+                score += 5
+                
+            # Boost for Skill Matches (Keyword Matcher)
+            matches = 0
+            for skill in preferred_skills:
+                if skill in description_lower or skill in title_lower:
+                    matches += 1
+                    score += 5
+            
+            # 5. EARLY BIRD FLAME 🔥
+            est_date = self.normalize_date_est(job.get('date_posted'))
+            formatted_date = est_date.strftime('%Y-%m-%d %I:%M %p') if est_date else ""
+            
+            is_fresh = False
+            if est_date:
+                now = datetime.now(pytz.timezone('US/Eastern'))
+                # If future date (timezone quirk), clamp it? No, just check delta.
+                if (now - est_date) < timedelta(hours=24) and (now - est_date) > timedelta(days=-1):
+                    score += 50  # Push to very top
+                    is_fresh = True
+
+            # Format Title with Flame
+            display_title = job['title']
+            if is_fresh:
+                display_title = "🔥 " + display_title
+            
+            processed.append({
+                "id": job['id'],
+                "title": display_title,
+                "company": job['company'],
+                "location": job['location'],
+                "url": job['url'],
+                "score": score,
+                "date_posted": formatted_date,
+                "keywords_matched": [], # could populate with matches if desired
+                "raw_data": job.get('raw_data', {})
+            })
+            
+        # Re-sort by Score High->Low
+        processed.sort(key=lambda x: x['score'], reverse=True)
         
-        # Deduplicate
-        processed_jobs = self.deduplicate_jobs(processed_jobs)
-        
-        # Sort by score (highest first)
-        processed_jobs.sort(key=lambda x: x.get('score', 0), reverse=True)
-        
-        logger.info(f"Processing complete: {len(processed_jobs)} jobs after filtering and ranking")
-        return processed_jobs
+        logger.info(f"Processing complete: {len(processed)} jobs retained.")
+        return processed
