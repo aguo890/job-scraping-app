@@ -27,6 +27,12 @@ An advanced job scraping tool that automatically fetches, processes, and analyze
   - Automatic GitHub commits
   - Daily digest GitHub issues
 
+- **Applied Job Tracking**:
+  - Persist jobs you've applied to forever
+  - Mark jobs with `mark_applied.py`
+  - Applied jobs are highlighted with ✅ and kept at the top of reports
+  - "Ghost Jobs" (applied but removed from internet) are preserved
+
 - **GitHub Actions Integration**:
   - Runs daily at 9 AM UTC
   - Manual trigger support

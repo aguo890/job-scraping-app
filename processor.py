@@ -96,11 +96,29 @@ class JobProcessor:
         except:
             return None
 
+    def load_applied_jobs(self):
+        """Load jobs that have been marked as applied"""
+        try:
+            path = os.path.join('data', 'applied_jobs.json')
+            if not os.path.exists(path):
+                return []
+            with open(path, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+                return data if isinstance(data, list) else []
+        except Exception as e:
+            logger.error(f"Error loading applied jobs: {e}")
+            return []
+
     def process_jobs(self, jobs):
         logger.info(f"Processing {len(jobs)} jobs")
         processed = []
         seen_ids = set()
         
+        # Load applied jobs configuration
+        applied_jobs = self.load_applied_jobs()
+        applied_ids = {j['id'] for j in applied_jobs}
+        applied_map = {j['id']: j for j in applied_jobs}
+
         # Load filtering lists
         high_priority = [k.lower() for k in self.config['keywords'].get('high_priority', [])]
         exclude_words = [k.lower() for k in self.config['keywords'].get('exclude', [])]
@@ -112,12 +130,16 @@ class JobProcessor:
         max_exp = filter_config.get('max_years_experience', 5)
 
         for job in jobs:
-            if job['id'] in seen_ids: continue
-            seen_ids.add(job['id'])
+            job_id = job['id']
+            if job_id in seen_ids: continue
+            seen_ids.add(job_id)
+            
+            is_applied = job_id in applied_ids
             
             # 1. Normalize & Filter Location (PRESERVED FEATURE)
             job['location'] = self.normalize_location(job.get('location'))
-            if not self.is_us_location(job['location']):
+            # If applied, bypass location filter
+            if not is_applied and not self.is_us_location(job['location']):
                 logger.debug(f"Skipping non-US location: {job['location']}")
                 continue
 
@@ -126,12 +148,13 @@ class JobProcessor:
             description_lower = description_text.lower()
             
             # 2. THE TRASH FILTER
-            if any(bad_word in title_lower for bad_word in exclude_words):
+            # If applied, bypass keyword filter? Maybe.
+            if not is_applied and any(bad_word in title_lower for bad_word in exclude_words):
                 logger.debug(f"Excluding job: {job['title']} (Filtered Word)")
                 continue
             
             # 3. EXPERIENCE FILTER (New Feature)
-            if is_filter_enabled:
+            if not is_applied and is_filter_enabled:
                 full_text = f"{job['title']} {description_text}"
                 required_exp = self.extract_min_years_experience(full_text)
                 if required_exp > max_exp:
@@ -168,12 +191,15 @@ class JobProcessor:
                     score += 50  # Push to very top
                     is_fresh = True
 
-            # Format Title with Flame
+            # Format Title with Icon
             display_title = job['title']
-            if is_fresh:
+            if is_applied:
+                display_title = "✅ " + display_title.replace("🔥 ", "") # applied overrides fire? or keep both?
+                score += 1000 # Keep at top top
+            elif is_fresh:
                 display_title = "🔥 " + display_title
             
-            processed.append({
+            processed_job = {
                 "id": job['id'],
                 "title": display_title,
                 "company": job['company'],
@@ -182,9 +208,39 @@ class JobProcessor:
                 "score": score,
                 "date_posted": formatted_date,
                 "keywords_matched": [], # could populate with matches if desired
-                "raw_data": job.get('raw_data', {})
-            })
+                "raw_data": job.get('raw_data', {}),
+                "is_applied": is_applied
+            }
+            if is_applied:
+                # Merge any extra metadata from applied file if needed
+                processed_job['applied_at'] = applied_map[job_id].get('applied_at')
             
+            processed.append(processed_job)
+
+        # Restore missing applied jobs (Ghost Jobs)
+        processed_ids = {j['id'] for j in processed}
+        for applied_job in applied_jobs:
+            if applied_job['id'] not in processed_ids:
+                # This job was applied to but is no longer in the scrape
+                # We need to add it back
+                # Ensure title has checkmark
+                title = applied_job['title']
+                if "✅" not in title:
+                    title = "✅ " + title.replace("🔥 ", "")
+                
+                # Mark as ghost/closed?
+                title += " (Post Closed?)"
+                
+                # Add to processed
+                # Use stored score but maybe boost it to keep it visible?
+                ghost_job = applied_job.copy()
+                ghost_job['title'] = title
+                ghost_job['score'] = ghost_job.get('score', 0) + 1000
+                ghost_job['is_applied'] = True
+                ghost_job['status'] = 'closed'
+                
+                processed.append(ghost_job)
+
         # Re-sort by Score High->Low
         processed.sort(key=lambda x: x['score'], reverse=True)
         

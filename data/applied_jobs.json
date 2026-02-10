@@ -1,0 +1,83 @@
+[
+  {
+    "id": "gh_ripple_7467151",
+    "title": "🔥 Software Engineer Intern, Data Engineering (Summer 2026)",
+    "company": "Ripple",
+    "location": "San Francisco, CA, United States",
+    "url": "https://ripple.com/careers/all-jobs/job/7467151?gh_jid=7467151",
+    "score": 95,
+    "date_posted": "2026-02-09 11:12 AM",
+    "keywords_matched": [],
+    "raw_data": {
+      "absolute_url": "https://ripple.com/careers/all-jobs/job/7467151?gh_jid=7467151",
+      "data_compliance": [
+        {
+          "type": "gdpr",
+          "requires_consent": false,
+          "requires_processing_consent": false,
+          "requires_retention_consent": false,
+          "retention_period": null,
+          "demographic_data_consent_applies": false
+        }
+      ],
+      "education": "education_required",
+      "internal_job_id": 3316875,
+      "location": {
+        "name": "San Francisco, CA, United States"
+      },
+      "metadata": [
+        {
+          "id": 6527,
+          "name": "Worker Sub - Type",
+          "value": "Intern (Fixed Term)",
+          "value_type": "single_select"
+        },
+        {
+          "id": 16961716,
+          "name": "Time Type",
+          "value": "Full time",
+          "value_type": "single_select"
+        },
+        {
+          "id": 16961117,
+          "name": "Primary Location",
+          "value": "San Francisco Office",
+          "value_type": "single_select"
+        },
+        {
+          "id": 22682917,
+          "name": "Additional Locations",
+          "value": null,
+          "value_type": "multi_select"
+        }
+      ],
+      "id": 7467151,
+      "updated_at": "2026-02-09T11:12:46-05:00",
+      "requisition_id": "25461",
+      "title": "Software Engineer Intern, Data Engineering (Summer 2026)",
+      "company_name": "Ripple ",
+      "first_published": "2025-12-15T11:09:42-05:00",
+      "language": "en",
+      "content": "&lt;div class=&quot;content-intro&quot;&gt;&lt;p&gt;&lt;span style=&quot;font-weight: 400;&quot;&gt;At Ripple, we’re building a world where value moves like information does today. It’s big, it’s bold, and we’re already doing it. Through our crypto solutions for financial institutions, businesses, governments and developers, we are improving the global financial system and creating greater economic fairness and opportunity for more people, in more places around the world. And we get to do the best work of our career and grow our skills surrounded by colleagues who have our backs.&amp;nbsp;&lt;/span&gt;&lt;/p&gt;\n&lt;p&gt;&lt;span style=&quot;font-weight: 400;&quot;&gt;If you’re ready to see your impact and unlock incredible career growth opportunities, join us, and build real world value.&lt;/span&gt;&lt;/p&gt;&lt;/div&gt;&lt;p&gt;At Ripple, we’re building a world where value moves like information does today. It’s big, it’s bold, and we’re already doing it. Through our crypto solutions for financial institutions, businesses, governments and developers, we are improving the global financial system and creating greater economic fairness and opportunity for more people, in more places around the world. And we get to do the best work of our career and grow our skills surrounded by colleagues who have our backs.&lt;/p&gt;\n&lt;p&gt;If you’re ready to see your impact and unlock incredible career growth opportunities, join us, and build real world value.&lt;/p&gt;\n&lt;h2&gt;THE WORK&lt;/h2&gt;\n&lt;p&gt;As a Ripple intern, you will work on challenges that impact our mission and shape our company. With support from your team, access to learning and development resources, and opportunities for fun along the way, our program will give you the foundation to start your career journey.&lt;/p&gt;\n&lt;p&gt;As a Software Engineer Intern, you will be one of the core builders within Ripple’s central Data Engineering. This team implements the data ingestion and transformation for analytics, machine learning and powering various business functions at Ripple. You are curious about the bottlenecks and failure modes of a system and look for opportunities to continually improve cost/performance characteristics. You are hands-on in driving key technical decisions, ensuring the right tradeoffs are made to deliver high-quality results and deliver high, measurable customer value. You work well across functions and teams, including data science, product, application engineering, compliance, finance and others. Your passion for good engineering is complemented by strong instincts to deliver value.&lt;/p&gt;\n&lt;h2&gt;WHAT YOU&#39;LL DO&lt;/h2&gt;\n&lt;ul&gt;\n&lt;li&gt;Highly efficient in shipping solutions to both large and small projects.&lt;/li&gt;\n&lt;li&gt;Owns the development and release for assigned tasks, proof of concept and new mini projects.&lt;/li&gt;\n&lt;li&gt;Writes clean tech specs and identifies risks before implementation.&lt;/li&gt;\n&lt;li&gt;Recognizes trade-offs and identifies impact/risks between alternative solutions.&lt;/li&gt;\n&lt;li&gt;Improves code structure and participates in architecture discussions in data pipelines.&lt;/li&gt;\n&lt;li&gt;Able to break down work into sprints and tasks.&lt;/li&gt;\n&lt;/ul&gt;\n&lt;h2&gt;WHAT YOU&#39;LL BRING&lt;/h2&gt;\n&lt;ul&gt;\n&lt;li&gt;Currently enrolled in an Undergraduate or Graduate degree preferably in a Computer Science or related field.&lt;/li&gt;\n&lt;li&gt;Available to work for 12 weeks during Summer 2026, beginning in May or June.&lt;/li&gt;\n&lt;li&gt;Intent to return to degree-program after the completion of the internship.&lt;/li&gt;\n&lt;li&gt;Experience in at least one programming language (e.g. Python, Scala) and comfortable working with SQL.&lt;/li&gt;\n&lt;li&gt;Experienced in at least one Data Warehouse or data lake platforms such as Databricks.&lt;/li&gt;\n&lt;li&gt;Ability to write sophisticated code and comfortable with picking up new technologies independently.&lt;/li&gt;\n&lt;li&gt;Enjoy helping teams push the boundaries of analytical insights, creating new product features using data, and powering machine-learning models.&lt;/li&gt;\n&lt;li&gt;Familiar with developing distributed systems with experience in scalable data pipelines&lt;/li&gt;\n&lt;li&gt;Familiar with data technologies like Spark or Flink and comfortable in engineering data pipelines using these technologies on financial datasets.&lt;/li&gt;\n&lt;li&gt;Experience with RESTful APIs and server-side APIs integration.&lt;/li&gt;\n&lt;li&gt;Highly or conceptually familiar with AWS cloud resources (S3, Lambda, API Gateway, Kinesis, Athena, etc.)&lt;/li&gt;\n&lt;li&gt;Experience in orchestrating CI/CD pipelines using GitLab, Helm, and Terraform.&lt;/li&gt;\n&lt;li&gt;Appreciate the importance of excellent documentation and data debugging skills.&lt;/li&gt;\n&lt;li&gt;Excited about operating independently, demonstrating perfection, and learning new technologies and framework.&lt;/li&gt;\n&lt;/ul&gt;&lt;div class=&quot;content-pay-transparency&quot;&gt;&lt;div class=&quot;pay-input&quot;&gt;&lt;div class=&quot;description&quot;&gt;&lt;p&gt;For positions that will be based in CA, the hourly range for this position is below. Actual rates may vary based on numerous factors including, among other things, an individual applicant’s experience and qualifications for the position. This range does not include equity or additional compensation, such as bonuses or commissions.&lt;/p&gt;&lt;/div&gt;&lt;div class=&quot;title&quot;&gt;CA Hourly Rate Range&lt;/div&gt;&lt;div class=&quot;pay-range&quot;&gt;&lt;span&gt;$45&lt;/span&gt;&lt;span class=&quot;divider&quot;&gt;&amp;mdash;&lt;/span&gt;&lt;span&gt;$50.50 USD&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;content-conclusion&quot;&gt;&lt;hr&gt;\n&lt;p&gt;&lt;strong&gt;WHO WE ARE:&lt;/strong&gt;&lt;/p&gt;\n&lt;p&gt;&lt;span style=&quot;font-weight: 400;&quot;&gt;Do Your Best Work&lt;/span&gt;&lt;/p&gt;\n&lt;ul&gt;\n&lt;li style=&quot;font-weight: 400;&quot;&gt;&lt;span style=&quot;font-weight: 400;&quot;&gt;The opportunity to build in a fast-paced start-up environment with experienced industry leaders&lt;/span&gt;&lt;/li&gt;\n&lt;li style=&quot;font-weight: 400;&quot;&gt;&lt;span style=&quot;font-weight: 400;&quot;&gt;A learning environment where you can dive deep into the latest technologies and make an impact.&amp;nbsp; A professional development budget to support other modes of learning.&lt;/span&gt;&lt;/li&gt;\n&lt;li style=&quot;font-weight: 400;&quot;&gt;&lt;span style=&quot;font-weight: 400;&quot;&gt;Thrive in an environment where no matter what race, ethnicity, gender, origin, or culture they identify with, every employee is a respected, valued, and empowered part of the team.&lt;/span&gt;&lt;/li&gt;\n&lt;li style=&quot;font-weight: 400;&quot;&gt;&lt;span style=&quot;font-weight: 400;&quot;&gt;In-office collaboration for moments that matter is important to our culture, and we give managers and teams the flexibility to decide which 10+ days a month they come in.&amp;nbsp;&lt;/span&gt;&lt;/li&gt;\n&lt;li style=&quot;font-weight: 400;&quot;&gt;&lt;span style=&quot;font-weight: 400;&quot;&gt;Bi-weekly all-company meeting - business updates and ask me anything style discussion with our Leadership Team&lt;/span&gt;&lt;/li&gt;\n&lt;li style=&quot;font-weight: 400;&quot;&gt;&lt;span style=&quot;font-weight: 400;&quot;&gt;We come together for moments that matter which include team offsites, team bonding activities, happy hours and more!&lt;/span&gt;&lt;/li&gt;\n&lt;/ul&gt;\n&lt;p&gt;&lt;span style=&quot;font-weight: 400;&quot;&gt;Take Control of Your Finances&lt;/span&gt;&lt;/p&gt;\n&lt;ul&gt;\n&lt;li style=&quot;font-weight: 400;&quot;&gt;&lt;span style=&quot;font-weight: 400;&quot;&gt;Competitive salary, bonuses, and equity&lt;/span&gt;&lt;/li&gt;\n&lt;li style=&quot;font-weight: 400;&quot;&gt;&lt;span style=&quot;font-weight: 400;&quot;&gt;Competitive benefits that cover physical and mental healthcare, retirement, family forming, and family support&lt;/span&gt;&lt;/li&gt;\n&lt;li style=&quot;font-weight: 400;&quot;&gt;&lt;span style=&quot;font-weight: 400;&quot;&gt;Employee giving match&lt;/span&gt;&lt;/li&gt;\n&lt;li style=&quot;font-weight: 400;&quot;&gt;&lt;span style=&quot;font-weight: 400;&quot;&gt;Mobile phone stipend&lt;/span&gt;&lt;/li&gt;\n&lt;/ul&gt;\n&lt;p&gt;&lt;span style=&quot;font-weight: 400;&quot;&gt;Take Care of Yourself&lt;/span&gt;&lt;/p&gt;\n&lt;ul&gt;\n&lt;li style=&quot;font-weight: 400;&quot;&gt;&lt;span style=&quot;font-weight: 400;&quot;&gt;R&amp;amp;R days so you can rest and recharge&lt;/span&gt;&lt;/li&gt;\n&lt;li style=&quot;font-weight: 400;&quot;&gt;&lt;span style=&quot;font-weight: 400;&quot;&gt;Generous wellness reimbursement and weekly onsite &amp;amp; virtual programming&lt;/span&gt;&lt;/li&gt;\n&lt;li style=&quot;font-weight: 400;&quot;&gt;&lt;span style=&quot;font-weight: 400;&quot;&gt;Generous vacation policy - work with your manager to take time off when you need it&lt;/span&gt;&lt;/li&gt;\n&lt;li style=&quot;font-weight: 400;&quot;&gt;&lt;span style=&quot;font-weight: 400;&quot;&gt;Industry-leading parental leave policies. Family planning benefits.&lt;/span&gt;&lt;/li&gt;\n&lt;li style=&quot;font-weight: 400;&quot;&gt;&lt;span style=&quot;font-weight: 400;&quot;&gt;Catered lunches, fully-stocked kitchens with premium snacks/beverages, and plenty of fun events&lt;/span&gt;&lt;/li&gt;\n&lt;/ul&gt;\n&lt;p&gt;&lt;span style=&quot;font-weight: 400;&quot;&gt;&lt;em data-stringify-type=&quot;italic&quot;&gt;Benefits listed above are for full-time employees.&amp;nbsp;&lt;/em&gt;&lt;/span&gt;&lt;/p&gt;\n&lt;hr&gt;\n&lt;div&gt;&lt;em&gt;Ripple is an Equal Opportunity Employer. We’re committed to building a diverse and inclusive team. We do not discriminate against qualified employees or applicants because of race, color, religion, gender identity, sex, sexual identity, pregnancy, national origin, ancestry, citizenship, age, marital status, physical disability, mental disability, medical condition, military status, or any other characteristic protected by local law or ordinance.&lt;/em&gt;&lt;/div&gt;\n&lt;div&gt;&amp;nbsp;&lt;/div&gt;\n&lt;div&gt;&lt;em&gt;Please find our &lt;a href=&quot;https://ripple.com/legal/eu-privacy-notice/&quot; target=&quot;_blank&quot;&gt;UK/EU Applicant Privacy Notice &lt;/a&gt;and our &lt;a href=&quot;https://ripple.com/legal/ca-applicant-privacy-notice/&quot; target=&quot;_blank&quot;&gt;California Applicant Privacy Notice&lt;/a&gt; for reference.&lt;/em&gt;&lt;/div&gt;\n&lt;div&gt;&lt;hr&gt;&lt;/div&gt;&lt;/div&gt;",
+      "departments": [
+        {
+          "id": 1780,
+          "name": "Engineering",
+          "child_ids": [],
+          "parent_id": null
+        }
+      ],
+      "offices": [
+        {
+          "id": 1098,
+          "name": "San Francisco, CA, United States",
+          "location": "San Francisco, CA, United States",
+          "child_ids": [],
+          "parent_id": null
+        }
+      ]
+    },
+    "applied_at": "2026-02-10T11:46:39.670142",
+    "applied": true
+  }
+]
