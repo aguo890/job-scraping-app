@@ -191,11 +191,20 @@ class JobProcessor:
                     score += 50  # Push to very top
                     is_fresh = True
 
-            # Format Title with Icon
+            # Format Title with Icon and Status
+            # Scenario A: Job Found + Applied
             display_title = job['title']
+            
             if is_applied:
-                display_title = "✅ " + display_title.replace("🔥 ", "") # applied overrides fire? or keep both?
-                score += 1000 # Keep at top top
+                # Remove existing fire if present to avoid clutter, or keep it?
+                # User pattern: "✅ " + title
+                clean_title = display_title.replace("🔥 ", "")
+                if "✅" not in clean_title:
+                    display_title = "✅ " + clean_title
+                
+                score += 1000 # Boost to top
+                # Ensure we track the status explicitly
+                job['status'] = 'Applied' 
             elif is_fresh:
                 display_title = "🔥 " + display_title
             
@@ -207,37 +216,48 @@ class JobProcessor:
                 "url": job['url'],
                 "score": score,
                 "date_posted": formatted_date,
-                "keywords_matched": [], # could populate with matches if desired
+                "keywords_matched": [], 
                 "raw_data": job.get('raw_data', {}),
-                "is_applied": is_applied
+                "is_applied": is_applied,
+                "status": "Applied" if is_applied else "Active"
             }
             if is_applied:
-                # Merge any extra metadata from applied file if needed
                 processed_job['applied_at'] = applied_map[job_id].get('applied_at')
             
             processed.append(processed_job)
 
         # Restore missing applied jobs (Ghost Jobs)
+        # Scenario B: Job Missing + Applied
         processed_ids = {j['id'] for j in processed}
         for applied_job in applied_jobs:
             if applied_job['id'] not in processed_ids:
-                # This job was applied to but is no longer in the scrape
-                # We need to add it back
-                # Ensure title has checkmark
-                title = applied_job['title']
+                # The job is missing from the web, but we applied.
+                # We must resurrect it.
+                
+                # Clone it to avoid mutating original cache if we were caching
+                ghost_job = applied_job.copy()
+                
+                # Update Title/Status
+                title = ghost_job['title']
                 if "✅" not in title:
                     title = "✅ " + title.replace("🔥 ", "")
                 
-                # Mark as ghost/closed?
-                title += " (Post Closed?)"
+                # Explicitly set title to indicate closed? 
+                # User asked for status: "✅ Applied (Closed)"
+                # But status is usually a separate field in my json structure.
+                # However, for the title display in markdown, we might want it visible.
                 
-                # Add to processed
-                # Use stored score but maybe boost it to keep it visible?
-                ghost_job = applied_job.copy()
+                # If the title strictly needs to be the name, we handle status in the description or separate field.
+                # But for the report, the title is what's seen.
+                # Let's append (Closed) to the title for visibility in the MD list.
+                if "(Closed)" not in title:
+                    title += " (Closed)"
+                
                 ghost_job['title'] = title
-                ghost_job['score'] = ghost_job.get('score', 0) + 1000
+                ghost_job['score'] = ghost_job.get('score', 0) + 1000 # Keep at top
                 ghost_job['is_applied'] = True
-                ghost_job['status'] = 'closed'
+                ghost_job['status'] = 'Applied (Closed)' # Explicit status
+                ghost_job['is_ghost'] = True
                 
                 processed.append(ghost_job)
 
