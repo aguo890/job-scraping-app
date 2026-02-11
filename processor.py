@@ -123,6 +123,8 @@ class JobProcessor:
         high_priority = [k.lower() for k in self.config['keywords'].get('high_priority', [])]
         exclude_words = [k.lower() for k in self.config['keywords'].get('exclude', [])]
         preferred_skills = [k.lower() for k in self.config.get('preferred_skills', [])]
+        title_blocklist = [k.lower() for k in self.config.get('title_blocklist', [])]
+        penalty_skills = [k.lower() for k in self.config.get('penalty_skills', [])]
         
         # Experience Filtering Config
         filter_config = self.config.get('filtering', {})
@@ -153,6 +155,11 @@ class JobProcessor:
                 logger.debug(f"Excluding job: {job['title']} (Filtered Word)")
                 continue
             
+            # 2b. DEGREE & DOMAIN FILTER (Hard Negative)
+            if not is_applied and any(blocked in title_lower for blocked in title_blocklist):
+                logger.info(f"Excluding job: {job['title']} (Title Blocklist)")
+                continue
+
             # 3. EXPERIENCE FILTER (New Feature)
             if not is_applied and is_filter_enabled:
                 full_text = f"{job['title']} {description_text}"
@@ -179,9 +186,17 @@ class JobProcessor:
                     matches += 1
                     score += 5
             
+            # Penalty for wrong-stack skills (Soft Negative)
+            for penalty in penalty_skills:
+                if penalty in description_lower:
+                    score -= 3
+            
             # 5. EARLY BIRD FLAME 🔥
             est_date = self.normalize_date_est(job.get('date_posted'))
-            formatted_date = est_date.strftime('%Y-%m-%d %I:%M %p') if est_date else ""
+            # If no date_posted, default to current scrape time
+            if not est_date:
+                est_date = datetime.now(pytz.timezone('US/Eastern'))
+            formatted_date = est_date.strftime('%Y-%m-%d %I:%M %p')
             
             is_fresh = False
             if est_date:

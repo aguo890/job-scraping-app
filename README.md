@@ -2,6 +2,20 @@
 
 An advanced job scraping tool that automatically fetches, processes, and analyzes job postings from multiple ATS platforms (Greenhouse, Lever, Ashby).
 
+> ℹ️ **Fork Information:** This is an enhanced fork of [billyweinberger/job-scraping-app](https://github.com/billyweinberger/job-scraping-app). It includes advanced filtering, interactive dashboards, and optimized processing logic.
+
+## ✨ Key Enhancements (New in this Fork)
+
+### 📊 Interactive Dashboard
+- **Smart Sidebar:** Filter by Status (Applied/Rejected), Date Range, Match Score, and Keywords.
+- **Job Actions:** Save jobs, update status (Interviewing, Offer), and "Hide Rejected" toggle.
+- **Visuals:** Status emojis (⭐, 🎤, ✅), score progress bars, and responsive layout.
+
+### 🧠 Improved Processor
+- **"Early Bird" Boost:** Score bonus for jobs posted within the last 24 hours.
+- **Data Reliability:** Auto-fix for missing dates; persistent state tracking via `tracking.json`.
+- **Dockerized:** One-command setup.
+
 ## Features
 
 - **Multi-Platform Fetching**: Scrapes jobs from:
@@ -45,6 +59,17 @@ An advanced job scraping tool that automatically fetches, processes, and analyze
 - Python 3.11+
 - GitHub repository with Actions enabled
 - (Optional) OpenAI API key for AI features
+
+## 🐳 Quick Start (Docker)
+
+The easiest way to run the dashboard is using Docker.
+
+1. **Prerequisites:** Ensure Docker and Make are installed.
+2. **Run:**
+   ```bash
+   make app
+   ```
+   *This builds the image and launches the dashboard on `http://localhost:8501`.*
 
 ### 2. Installation
 

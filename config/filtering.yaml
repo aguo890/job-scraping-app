@@ -130,6 +130,7 @@ locations:
     - "hyderabad"
     - "australia"
     - "sydney"
+    - "pakistan"
 
   include:
     # Strong US Indicators

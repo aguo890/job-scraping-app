@@ -57,7 +57,7 @@ def load_jobs():
     return df
 
 # --- Main App ---
-st.title("🚀 Job Hunter")
+
 
 df_jobs = load_jobs()
 tracking_data = load_tracking()
@@ -87,24 +87,129 @@ def prettify_title(row):
 
 df_jobs['title'] = df_jobs.apply(prettify_title, axis=1)
 
-# --- Filters ---
+# --- Sidebar ---
 with st.sidebar:
+    # --- Quick Stats ---
+    st.header("📊 Overview")
+
+    total_jobs = len(df_jobs)
+    num_companies = df_jobs['company'].nunique()
+    num_saved = int(df_jobs['is_saved'].sum())
+    num_applied = len([v for v in tracking_data.values() if v.get('status') == 'Applied'])
+    num_interviewing = len([v for v in tracking_data.values() if v.get('status') == 'Interviewing'])
+    num_offers = len([v for v in tracking_data.values() if v.get('status') == 'Offer'])
+    num_rejected = len([v for v in tracking_data.values() if v.get('status') == 'Rejected'])
+    num_saved_unapplied = int((df_jobs['is_saved'] & (df_jobs['Status'] != 'Applied')).sum())
+    avg_score = df_jobs['score'].mean()
+
+    col_a, col_b = st.columns(2)
+    col_a.metric("Total Jobs", total_jobs)
+    col_b.metric("Companies", num_companies)
+
+    col_c, col_d = st.columns(2)
+    col_c.metric("⭐ Saved", num_saved)
+    col_d.metric("📝 Applied", num_applied)
+
+    col_e, col_f = st.columns(2)
+    col_e.metric("🎤 Interviewing", num_interviewing)
+    col_f.metric("🎉 Offers", num_offers)
+
+    col_g, col_h = st.columns(2)
+    col_g.metric("📋 TODO", num_saved_unapplied, help="Saved but not yet applied")
+    col_h.metric("❌ Rejected", num_rejected)
+
+    st.metric("Avg Score", f"{avg_score:.1f}")
+
+    if 'date_posted' in df_jobs.columns:
+        dates = pd.to_datetime(df_jobs['date_posted'], errors='coerce').dropna()
+        if not dates.empty:
+            st.caption(f"📅 {dates.min().strftime('%b %d')} – {dates.max().strftime('%b %d, %Y')}")
+
+    st.divider()
+
+    # --- Filters ---
     st.header("Filters")
     if st.button("🔄 Refresh Data", type="primary"):
         st.cache_data.clear()
         st.rerun()
-        
-    show_saved = st.checkbox("⭐ Show Saved Only")
-    companies = ["All"] + sorted(df_jobs['company'].unique().tolist())
-    sel_company = st.selectbox("Company", companies)
-    min_score = st.slider("Min Score", 0, int(df_jobs['score'].max()), 0)
 
-# Apply Filters
-filtered_df = df_jobs[df_jobs['score'] >= min_score]
+    # --- Quick Filter Shortcuts ---
+    st.subheader("Quick Filters", divider="gray")
+    show_saved_unapplied = st.checkbox("⭐ Saved & Unapplied", key="filter_saved_unapplied",
+                                        help="Show saved jobs you haven't applied to yet")
+    show_applied = st.checkbox("📝 Applied Only", key="filter_applied",
+                                help="Show only jobs you've applied to")
+    hide_rejected = st.checkbox("🚫 Hide Rejected", value=True, key="filter_hide_rejected",
+                                 help="Exclude jobs marked as Rejected")
+
+    # --- Standard Filters ---
+    st.subheader("Refine", divider="gray")
+
+    # Status multi-select
+    all_statuses = sorted(df_jobs['Status'].unique().tolist())
+    sel_statuses = st.multiselect("Status", all_statuses, default=[], key="filter_status",
+                                   help="Leave empty to show all statuses")
+
+    show_saved = st.checkbox("⭐ Show Saved Only", key="filter_saved")
+    companies = ["All"] + sorted(df_jobs['company'].unique().tolist())
+    sel_company = st.selectbox("Company", companies, key="filter_company")
+    min_score = st.slider("Min Score", 0, int(df_jobs['score'].max()), 0, key="filter_min_score")
+
+    # Title keyword search
+    search_query = st.text_input("🔍 Search Title", key="filter_search",
+                                  placeholder="e.g. intern, frontend, data...")
+
+    # Date range filter
+    if 'date_posted' in df_jobs.columns:
+        dates = pd.to_datetime(df_jobs['date_posted'], errors='coerce').dropna()
+        if not dates.empty:
+            min_date = dates.min().date()
+            max_date = dates.max().date()
+            date_range = st.date_input("📅 Date Range", value=(min_date, max_date),
+                                        min_value=min_date, max_value=max_date,
+                                        key="filter_date_range")
+
+# --- Apply Filters ---
+filtered_df = df_jobs.copy()
+
+# Score filter
+filtered_df = filtered_df[filtered_df['score'] >= min_score]
+
+# Company filter
 if sel_company != "All":
     filtered_df = filtered_df[filtered_df['company'] == sel_company]
+
+# Saved only
 if show_saved:
     filtered_df = filtered_df[filtered_df['is_saved'] == True]
+
+# Quick filter: Saved & Unapplied
+if show_saved_unapplied:
+    filtered_df = filtered_df[(filtered_df['is_saved'] == True) & (filtered_df['Status'] != 'Applied')]
+
+# Quick filter: Applied Only
+if show_applied:
+    filtered_df = filtered_df[filtered_df['Status'] == 'Applied']
+
+# Hide Rejected
+if hide_rejected:
+    filtered_df = filtered_df[filtered_df['Status'] != 'Rejected']
+
+# Status multi-select
+if sel_statuses:
+    filtered_df = filtered_df[filtered_df['Status'].isin(sel_statuses)]
+
+# Title search
+if search_query:
+    filtered_df = filtered_df[filtered_df['title'].str.contains(search_query, case=False, na=False)]
+
+# Date range filter
+if 'date_posted' in df_jobs.columns and 'date_range' in dir():
+    dates_parsed = pd.to_datetime(filtered_df['date_posted'], errors='coerce')
+    if isinstance(date_range, tuple) and len(date_range) == 2:
+        start_date, end_date = date_range
+        mask = (dates_parsed.dt.date >= start_date) & (dates_parsed.dt.date <= end_date)
+        filtered_df = filtered_df[mask | dates_parsed.isna()]
 
 # Sort: Saved/Special Status first, then Date, then Score
 # We create a simple priority map for sorting
@@ -113,10 +218,11 @@ filtered_df['status_prio'] = filtered_df['Status'].map(status_priority).fillna(1
 filtered_df = filtered_df.sort_values(by=["status_prio", "is_saved", "date_posted", "score"], ascending=[False, False, False, False])
 
 # --- TABLE ---
+st.caption(f"Showing **{len(filtered_df)}** of {len(df_jobs)} jobs")
 display_cols = ['Status', 'score', 'date_posted', 'company', 'title', 'location', 'url', 'id']
 final_cols = [c for c in display_cols if c in filtered_df.columns]
 
-st.caption("💡 **Tip:** Select rows on the left to perform actions.")
+
 
 event = st.dataframe(
     filtered_df[final_cols],

@@ -40,7 +40,7 @@
   },
   "gh_epicgames_5662697004": {
     "saved": true,
-    "status": "Applied"
+    "status": "Rejected"
   },
   "gh_bandwidth_7539143": {
     "saved": false
@@ -108,16 +108,20 @@
     "saved": true
   },
   "gh_ripple_7467151": {
-    "saved": true
+    "saved": true,
+    "status": "Applied"
   },
   "gh_ripple_7469777": {
-    "saved": true
+    "saved": true,
+    "status": "Applied"
   },
   "ashby_notion_23ac2477-0008-4bed-b1c1-81f90a32e9e6": {
-    "saved": true
+    "saved": true,
+    "status": "Applied"
   },
   "ashby_openai_0b24e041-9848-4df3-8289-90efe454d9f5": {
-    "saved": true
+    "saved": true,
+    "status": "Applied"
   },
   "ashby_snowflake_38f79cb1-c366-4bc5-9965-cc679ee730a4": {
     "saved": true
@@ -126,39 +130,133 @@
     "saved": true
   },
   "ashby_snowflake_070f69c6-1fb3-45ec-8099-54d728c7e043": {
-    "saved": true
+    "saved": true,
+    "status": "Applied"
   },
   "ashby_notion_f7399542-9122-481a-bf64-43bf8093748b": {
-    "saved": true
+    "saved": true,
+    "status": "Applied"
   },
   "ashby_deel_5f60b932-e06b-4f11-b5a5-d9b59acebd49": {
     "saved": true
   },
   "ashby_permitflow_7fab96f1-04a1-4c33-81d5-f254271c83b6": {
-    "saved": true
+    "saved": true,
+    "status": "Applied"
   },
   "ashby_whatnot_bc8f8c7f-2c4c-4f43-a238-953568c101b8": {
     "saved": true
   },
   "ashby_replit_12737078-74c7-4e63-98a7-5e8da1e9deb1": {
-    "saved": true
+    "saved": true,
+    "status": "Applied"
   },
   "ashby_notion_2e7b83cd-9210-4492-ad30-7b898b80807b": {
-    "saved": true
+    "saved": true,
+    "status": "Applied"
   },
   "ashby_openai_17e31e56-418a-43bb-a72a-1b935dc71e29": {
     "saved": true
   },
   "ashby_openai_5bde9af5-df78-460e-ae9c-5c49ac778640": {
-    "saved": true
+    "saved": true,
+    "status": "Applied"
   },
   "gh_andurilindustries_4991618007": {
-    "saved": true
+    "saved": true,
+    "status": "Applied"
   },
   "gh_andurilindustries_5036888007": {
-    "saved": true
+    "saved": true,
+    "status": "Applied"
   },
   "gh_andurilindustries_4830197007": {
+    "saved": true,
+    "status": "Applied"
+  },
+  "gh_andurilindustries_5048080007": {
+    "saved": true,
+    "status": "Applied"
+  },
+  "gh_ripple_7472985": {
+    "saved": true,
+    "status": "Applied"
+  },
+  "gh_ripple_7521952": {
+    "saved": true,
+    "status": "Applied"
+  },
+  "gh_andurilindustries_4956205007": {
     "saved": true
+  },
+  "gh_verkada_5026094007": {
+    "saved": true
+  },
+  "gh_verkada_5026066007": {
+    "saved": true
+  },
+  "gh_verkada_5024322007": {
+    "saved": true,
+    "status": "Applied"
+  },
+  "gh_verkada_5026067007": {
+    "saved": true,
+    "status": "Applied"
+  },
+  "gh_verkada_5026072007": {
+    "saved": true
+  },
+  "gh_scaleai_4618065005": {
+    "saved": true
+  },
+  "gh_sofi_7581360003": {
+    "saved": true,
+    "status": "Applied"
+  },
+  "gh_sofi_7583531003": {
+    "saved": true
+  },
+  "gh_scaleai_4637485005": {
+    "saved": true
+  },
+  "gh_andurilindustries_5039332007": {
+    "saved": true,
+    "status": "Applied"
+  },
+  "gh_redventures_7242879": {
+    "status": "Applied",
+    "saved": true
+  },
+  "gh_andurilindustries_5045894007": {
+    "saved": true,
+    "status": "Applied"
+  },
+  "gh_andurilindustries_5022086007": {
+    "saved": true,
+    "status": "Applied"
+  },
+  "gh_andurilindustries_5022088007": {
+    "saved": true,
+    "status": "Applied"
+  },
+  "gh_ripple_7473084": {
+    "saved": true
+  },
+  "gh_andurilindustries_4997234007": {
+    "saved": true,
+    "status": "Applied"
+  },
+  "gh_andurilindustries_4869264007": {
+    "saved": true,
+    "status": "Applied"
+  },
+  "gh_andurilindustries_4836302007": {
+    "saved": true
+  },
+  "gh_andurilindustries_5025619007": {
+    "saved": true
+  },
+  "gh_andurilindustries_4981903007": {
+    "saved": false
   }
 }
