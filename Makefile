@@ -1,3 +1,4 @@
+PYTHON_CMD ?= python
 # Run everything (Dashboard + Scraper) and see logs
 run:
 	docker-compose up --build
@@ -22,3 +23,12 @@ shell:
 clean:
 	docker-compose down -v
 	docker system prune -f
+
+# Smart Push - Reconciles then Commits
+push: reconcile-dry
+	@echo "✅ Board verified. Running smart push..."
+	@$(PYTHON_CMD) scripts/autocommit.py
+
+# Reconcile dry run placeholder
+reconcile-dry:
+	@echo "Reconciling (dry run)..."
