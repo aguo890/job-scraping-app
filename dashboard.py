@@ -23,8 +23,10 @@ except ImportError:
 from datetime import datetime
 
 # --- Configuration ---
-TRACKING_FILE = "data/tracking.json"
-JOB_DATA_FILE = "data/jobs_agg.json"
+# --- Configuration ---
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+TRACKING_FILE = os.path.join(BASE_DIR, "data", "tracking.json")
+JOB_DATA_FILE = os.path.join(BASE_DIR, "data", "jobs_agg.json")
 
 st.set_page_config(page_title="Job Hunter", layout="wide")
 
@@ -43,19 +45,19 @@ st.markdown("""
 # --- Data Loading & Saving ---
 def load_tracking():
     if os.path.exists(TRACKING_FILE):
-        with open(TRACKING_FILE, 'r') as f:
+        with open(TRACKING_FILE, 'r', encoding='utf-8') as f:
             return json.load(f)
     return {}
 
 def save_tracking(data):
-    with open(TRACKING_FILE, 'w') as f:
+    with open(TRACKING_FILE, 'w', encoding='utf-8') as f:
         json.dump(data, f, indent=2)
 
 @st.cache_data
 def load_jobs():
     if not os.path.exists(JOB_DATA_FILE):
         return pd.DataFrame()
-    with open(JOB_DATA_FILE, "r") as f:
+    with open(JOB_DATA_FILE, "r", encoding='utf-8') as f:
         data = json.load(f)
     jobs = data.get("jobs", [])
     if not jobs:
