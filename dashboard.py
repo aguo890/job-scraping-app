@@ -260,7 +260,7 @@ event = st.dataframe(
         "score": st.column_config.ProgressColumn("Score", format="%d", min_value=0, max_value=50),
         "id": None
     },
-    use_container_width=True,
+    width="stretch",
     hide_index=True,
     height=600
 )
@@ -324,7 +324,9 @@ if selected_indices and CVOrchestrator:
         st.divider()
         st.header("📄 CV Generation")
         
-        if st.button("Generate CV for Selected", type="primary", use_container_width=True):
+        use_deepseek = st.checkbox("Enable DeepSeek R1 Tailoring (Slow & Costly)", value=False)
+        
+        if st.button(f"Generate CV{' (DeepSeek)' if use_deepseek else ''} for Selected", type="primary", use_container_width=True):
              # Initialize Orchestrator
              # We assume the script is running from job-scraping-app, so base cv is in ../rendercv
              # But we need to handle the relative path carefully.
@@ -348,10 +350,24 @@ if selected_indices and CVOrchestrator:
                     
                     try:
                         # Call the bridge
-                        pdf_path = orchestrator.generate_tailored_cv(job)
+                        if use_deepseek:
+                             with st.status(f"🤖 DeepSeek is tailoring CV for {company_name}...", expanded=True) as status:
+                                 # We define a callback to update the status
+                                 def update_status(msg):
+                                     st.write(msg)
+                                 
+                                 pdf_path, strategy_report = orchestrator.generate_tailored_cv(
+                                     job, 
+                                     use_ai=True, 
+                                     status_callback=update_status
+                                 )
+                                 status.update(label=f"✅ {company_name} CV Generated!", state="complete", expanded=False)
+                        else:
+                             # Standard generation (fast)
+                             pdf_path, strategy_report = orchestrator.generate_tailored_cv(job, use_ai=False)
                         
                         # Store success
-                        success_files.append((company_name, pdf_path))
+                        success_files.append((company_name, pdf_path, strategy_report))
                         
                     except Exception as e:
                         st.error(f"Failed for {company_name}: {e}")
@@ -363,8 +379,12 @@ if selected_indices and CVOrchestrator:
                 
                 if success_files:
                     st.success(f"✅ Generated {len(success_files)} CVs!")
-                    for company, path in success_files:
+                    for company, path, strategy in success_files:
                         st.write(f"**{company}**: `{os.path.basename(path)}`")
+                        
+                        if strategy and "AI Strategy" in strategy:
+                            with st.expander(f"🧠 Strategy for {company}", expanded=False):
+                                st.markdown(strategy)
                         # Try to offer download if file exists
                         if os.path.exists(path):
                              with open(path, "rb") as f:
