@@ -1,0 +1,19 @@
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "job-scraping-app"
+version = "0.1.0"
+description = "Job scraping and analysis dashboard"
+dependencies = [
+    "requests==2.31.0",
+    "PyYAML==6.0.1",
+    "streamlit",
+    "pandas",
+    "pytz",
+    "aiohttp"
+]
+
+[tool.setuptools.packages.find]
+where = ["."]

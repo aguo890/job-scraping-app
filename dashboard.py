@@ -1,7 +1,25 @@
 import streamlit as st
 import pandas as pd
 import json
+import sys
 import os
+import time
+
+# Add parent directory to path to import cv_bridge (for Monorepo structure)
+current_dir = os.path.dirname(os.path.abspath(__file__))
+parent_dir = os.path.dirname(current_dir)
+if parent_dir not in sys.path:
+    sys.path.append(parent_dir)
+
+try:
+    from cv_bridge import CVOrchestrator
+except ImportError:
+    # Fallback if cv_bridge is in the same directory (during transition)
+    try:
+         from cv_bridge import CVOrchestrator
+    except ImportError:
+         CVOrchestrator = None
+
 from datetime import datetime
 
 # --- Configuration ---
@@ -141,6 +159,8 @@ with st.sidebar:
                                 help="Show only jobs you've applied to")
     hide_rejected = st.checkbox("🚫 Hide Rejected", value=True, key="filter_hide_rejected",
                                  help="Exclude jobs marked as Rejected")
+    hide_applied = st.checkbox("🚫 Hide Applied", value=False, key="filter_hide_applied",
+                                help="Exclude jobs you've already applied to")
 
     # --- Standard Filters ---
     st.subheader("Refine", divider="gray")
@@ -194,6 +214,10 @@ if show_applied:
 # Hide Rejected
 if hide_rejected:
     filtered_df = filtered_df[filtered_df['Status'] != 'Rejected']
+
+# Hide Applied
+if hide_applied:
+    filtered_df = filtered_df[filtered_df['Status'] != 'Applied']
 
 # Status multi-select
 if sel_statuses:
@@ -290,3 +314,64 @@ if selected_indices:
                         tracking_data[job_id]['saved'] = True
                 save_tracking(tracking_data)
                 st.rerun()
+
+# --- CV GENERATION ACTION (Sidebar) ---
+# We place this here to ensure 'event' and selection are defined
+if selected_indices and CVOrchestrator:
+    with st.sidebar:
+        st.divider()
+        st.header("📄 CV Generation")
+        
+        if st.button("Generate CV for Selected", type="primary", use_container_width=True):
+             # Initialize Orchestrator
+             # We assume the script is running from job-scraping-app, so base cv is in ../rendercv
+             # But we need to handle the relative path carefully.
+             # CVOrchestrator defaults to "rendercv/Aaron_Guo_CV.yaml" relative to ITS root.
+             # If cv_bridge is in root, it finds it in rendercv/.
+             
+             try:
+                orchestrator = CVOrchestrator() # Uses default path
+                
+                progress_bar = st.progress(0)
+                status_text = st.empty()
+                
+                # Get the actual job objects from the selection
+                jobs_to_process = filtered_df.iloc[selected_indices].to_dict('records')
+                
+                success_files = []
+                
+                for idx, job in enumerate(jobs_to_process):
+                    company_name = job.get('company', 'Unknown')
+                    status_text.text(f"Generating CV for {company_name}...")
+                    
+                    try:
+                        # Call the bridge
+                        pdf_path = orchestrator.generate_tailored_cv(job)
+                        
+                        # Store success
+                        success_files.append((company_name, pdf_path))
+                        
+                    except Exception as e:
+                        st.error(f"Failed for {company_name}: {e}")
+                        
+                    progress_bar.progress((idx + 1) / len(jobs_to_process))
+                
+                status_text.empty()
+                progress_bar.empty()
+                
+                if success_files:
+                    st.success(f"✅ Generated {len(success_files)} CVs!")
+                    for company, path in success_files:
+                        st.write(f"**{company}**: `{os.path.basename(path)}`")
+                        # Try to offer download if file exists
+                        if os.path.exists(path):
+                             with open(path, "rb") as f:
+                                  st.download_button(
+                                      f"⬇️ Download {company} CV",
+                                      f,
+                                      file_name=os.path.basename(path),
+                                      mime="application/pdf",
+                                      key=f"dl_{company}_{time.time()}"
+                                  )
+             except Exception as e:
+                 st.error(f"Initialization Error: {e}")

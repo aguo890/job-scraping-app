@@ -102,7 +102,8 @@
     "saved": true
   },
   "ashby_replit_b5e81eae-06f9-4798-8988-2d06ca936dbc": {
-    "saved": true
+    "saved": true,
+    "status": "Applied"
   },
   "ashby_ramp_43ac03c8-65f5-4522-ab3d-6d496ae7d925": {
     "saved": true
@@ -145,7 +146,8 @@
     "status": "Applied"
   },
   "ashby_whatnot_bc8f8c7f-2c4c-4f43-a238-953568c101b8": {
-    "saved": true
+    "saved": true,
+    "status": "Applied"
   },
   "ashby_replit_12737078-74c7-4e63-98a7-5e8da1e9deb1": {
     "saved": true,
@@ -258,5 +260,21 @@
   },
   "gh_andurilindustries_4981903007": {
     "saved": false
+  },
+  "gh_redventures_7158892": {
+    "status": "Applied",
+    "saved": true
+  },
+  "lever_saronic_73899cd1-76c8-4653-8be2-d3f70910ae43": {
+    "saved": true,
+    "status": "Applied"
+  },
+  "lever_zoox_b9fb6f1d-31db-4a79-b70b-9396bf01b117": {
+    "saved": true,
+    "status": "Applied"
+  },
+  "lever_zoox_c9cbfeeb-450b-47ac-8336-17ee9ab056d4": {
+    "saved": true,
+    "status": "Applied"
   }
 }
