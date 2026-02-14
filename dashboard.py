@@ -32,6 +32,13 @@ st.set_page_config(page_title="Job Hunter", layout="wide")
 
 st.markdown("""
     <style>
+    /* Reduce main container padding */
+    .stMainBlockContainer {
+        padding-top: 0px !important;
+        padding-left: 40px !important;
+        padding-right: 40px !important;
+        padding-bottom: 40px !important;
+    }
     /* Make the bottom toolbar sticky */
     div[data-testid="stVerticalBlock"] > div:has(div[data-testid="stVerticalBlockBorderWrapper"]) {
         position: sticky;
@@ -89,9 +96,13 @@ if df_jobs.empty:
 # --- Merge Data ---
 saved_map = {k: v.get('saved', False) for k, v in tracking_data.items()}
 status_map = {k: v.get('status', 'New') for k, v in tracking_data.items()}
+cv_status_map = {k: v.get('cv_status', 'Generic') for k, v in tracking_data.items()}
+resume_map = {k: os.path.basename(v['cv_pdf_path']) if v.get('cv_pdf_path') else '' for k, v in tracking_data.items()}
 
 df_jobs['Status'] = df_jobs['id'].map(status_map).fillna('New')
 df_jobs['is_saved'] = df_jobs['id'].map(saved_map).fillna(False)
+df_jobs['cv_status'] = df_jobs['id'].map(cv_status_map).fillna('Generic')
+df_jobs['resume'] = df_jobs['id'].map(resume_map).fillna('')
 
 # --- Prettify Title ---
 def prettify_title(row):
@@ -262,7 +273,7 @@ event = st.dataframe(
     },
     width="stretch",
     hide_index=True,
-    height=600
+    height=530
 )
 
 # --- ACTION TOOLBAR ---
@@ -317,83 +328,21 @@ if selected_indices:
                 save_tracking(tracking_data)
                 st.rerun()
 
-# --- CV GENERATION ACTION (Sidebar) ---
-# We place this here to ensure 'event' and selection are defined
-if selected_indices and CVOrchestrator:
-    with st.sidebar:
-        st.divider()
-        st.header("📄 CV Generation")
-        
-        use_deepseek = st.checkbox("Enable DeepSeek R1 Tailoring (Slow & Costly)", value=False)
-        
-        if st.button(f"Generate CV{' (DeepSeek)' if use_deepseek else ''} for Selected", type="primary", use_container_width=True):
-             # Initialize Orchestrator
-             # We assume the script is running from job-scraping-app, so base cv is in ../rendercv
-             # But we need to handle the relative path carefully.
-             # CVOrchestrator defaults to "rendercv/Aaron_Guo_CV.yaml" relative to ITS root.
-             # If cv_bridge is in root, it finds it in rendercv/.
-             
-             try:
-                orchestrator = CVOrchestrator() # Uses default path
-                
-                progress_bar = st.progress(0)
-                status_text = st.empty()
-                
-                # Get the actual job objects from the selection
-                jobs_to_process = filtered_df.iloc[selected_indices].to_dict('records')
-                
-                success_files = []
-                
-                for idx, job in enumerate(jobs_to_process):
-                    company_name = job.get('company', 'Unknown')
-                    status_text.text(f"Generating CV for {company_name}...")
-                    
-                    try:
-                        # Call the bridge
-                        if use_deepseek:
-                             with st.status(f"🤖 DeepSeek is tailoring CV for {company_name}...", expanded=True) as status:
-                                 # We define a callback to update the status
-                                 def update_status(msg):
-                                     st.write(msg)
-                                 
-                                 pdf_path, strategy_report = orchestrator.generate_tailored_cv(
-                                     job, 
-                                     use_ai=True, 
-                                     status_callback=update_status
-                                 )
-                                 status.update(label=f"✅ {company_name} CV Generated!", state="complete", expanded=False)
-                        else:
-                             # Standard generation (fast)
-                             pdf_path, strategy_report = orchestrator.generate_tailored_cv(job, use_ai=False)
-                        
-                        # Store success
-                        success_files.append((company_name, pdf_path, strategy_report))
-                        
-                    except Exception as e:
-                        st.error(f"Failed for {company_name}: {e}")
-                        
-                    progress_bar.progress((idx + 1) / len(jobs_to_process))
-                
-                status_text.empty()
-                progress_bar.empty()
-                
-                if success_files:
-                    st.success(f"✅ Generated {len(success_files)} CVs!")
-                    for company, path, strategy in success_files:
-                        st.write(f"**{company}**: `{os.path.basename(path)}`")
-                        
-                        if strategy and "AI Strategy" in strategy:
-                            with st.expander(f"🧠 Strategy for {company}", expanded=False):
-                                st.markdown(strategy)
-                        # Try to offer download if file exists
-                        if os.path.exists(path):
-                             with open(path, "rb") as f:
-                                  st.download_button(
-                                      f"⬇️ Download {company} CV",
-                                      f,
-                                      file_name=os.path.basename(path),
-                                      mime="application/pdf",
-                                      key=f"dl_{company}_{time.time()}"
-                                  )
-             except Exception as e:
-                 st.error(f"Initialization Error: {e}")
+    # --- CV Editor / Resume Navigation ---
+    if num_selected == 1:
+        selected_job_row = filtered_df.iloc[selected_indices[0]]
+        resume_file = selected_job_row.get('resume', '')
+        has_resume = bool(resume_file)
+        with st.container(border=True):
+            col_cv1, col_cv2 = st.columns([3, 1], vertical_alignment="center")
+            with col_cv1:
+                if has_resume:
+                    st.markdown(f"📄 **Resume**: `{resume_file}`  |  {selected_job_row.get('company', '')} — {selected_job_row.get('title', '')}")
+                else:
+                    st.markdown(f"📝 **No Resume Yet**  |  {selected_job_row.get('company', '')} — {selected_job_row.get('title', '')}")
+            with col_cv2:
+                btn_label = "📄 View Resume" if has_resume else "📝 Create Resume"
+                if st.button(btn_label, type="primary", use_container_width=True):
+                    st.session_state["active_job"] = selected_job_row.to_dict()
+                    st.switch_page("pages/CV_Editor.py")
+
