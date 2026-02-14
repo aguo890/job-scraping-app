@@ -347,3 +347,25 @@ if selected_indices:
                 if st.button(btn_label, type="primary", use_container_width=True):
                     st.session_state["active_job"] = selected_job_row.to_dict()
                     st.switch_page("pages/CV_Editor.py")
+
+else:
+    # Empty-state: ghost versions of both toolbar rows
+    st.write("")
+    with st.container(border=True):
+        col1, col2, col3, col4 = st.columns([1, 1.5, 2, 1.5], vertical_alignment="center")
+        with col1:
+            st.markdown("<span style='color:#bbb'>**0** Selected</span>", unsafe_allow_html=True)
+        with col2:
+            st.button("⭐ Toggle Save", use_container_width=True, disabled=True, key="ghost_save")
+        with col3:
+            st.selectbox("Status", ["Applied", "Interviewing", "Offer", "Rejected", "New"],
+                         label_visibility="collapsed", disabled=True, key="ghost_status")
+        with col4:
+            st.button("Update Status", type="primary", use_container_width=True, disabled=True, key="ghost_update")
+
+    with st.container(border=True):
+        col_cv1, col_cv2 = st.columns([3, 1], vertical_alignment="center")
+        with col_cv1:
+            st.markdown("<span style='color:#bbb'>📝 Select a job to view or create a resume</span>", unsafe_allow_html=True)
+        with col_cv2:
+            st.button("📝 Create Resume", type="primary", use_container_width=True, disabled=True, key="ghost_cv")
