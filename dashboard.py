@@ -252,52 +252,54 @@ if 'date_posted' in df_jobs.columns and 'date_range' in dir():
 # We create a simple priority map for sorting
 status_priority = {"Offer": 5, "Interviewing": 4, "Applied": 3, "New": 1, "Rejected": 0}
 filtered_df['status_prio'] = filtered_df['Status'].map(status_priority).fillna(1)
-filtered_df = filtered_df.sort_values(by=["status_prio", "is_saved", "date_posted", "score"], ascending=[False, False, False, False])
+filtered_df = filtered_df.sort_values(by=["status_prio", "is_saved", "date_posted", "score"], ascending=[False, False, False, False]).reset_index(drop=True)
 
 # --- TABLE ---
 st.caption(f"Showing **{len(filtered_df)}** of {len(df_jobs)} jobs")
+
 display_cols = ['Status', 'score', 'date_posted', 'company', 'title', 'location', 'url', 'id']
 final_cols = [c for c in display_cols if c in filtered_df.columns]
-
-
 
 event = st.dataframe(
     filtered_df[final_cols],
     on_select="rerun",
-    selection_mode="multi-row",
+    selection_mode=["single-row", "single-cell"],
+    key="job_dashboard_table",
     column_config={
         "Status": st.column_config.TextColumn("Status"),
         "url": st.column_config.LinkColumn("Link", display_text="Open"),
         "score": st.column_config.ProgressColumn("Score", format="%d", min_value=0, max_value=50),
         "id": None
     },
-    width="stretch",
+    use_container_width=True,
     hide_index=True,
     height=530
 )
 
 # --- ACTION TOOLBAR ---
-selected_indices = event.selection.rows
+# Extract selected row from either row selection OR cell click
+selected_indices = []
+if event.selection:
+    if event.selection.rows:
+        selected_indices = event.selection.rows
+    elif event.selection.cells:
+        # Cell click — extract the row index from the cell tuple (row, col)
+        selected_indices = list(set(cell[0] for cell in event.selection.cells))
 
 if selected_indices:
     num_selected = len(selected_indices)
     selected_ids = filtered_df.iloc[selected_indices]['id'].tolist()
-    
+
     # Visual Separator
-    st.write("") 
+    st.write("")
 
     # THE SLEEK TOOLBAR
-    # We use a bordered container to group everything
     with st.container(border=True):
-        
-        # vertical_alignment="center" aligns text/inputs/buttons on the same line
         col1, col2, col3, col4 = st.columns([1, 1.5, 2, 1.5], vertical_alignment="center")
-        
-        # 1. Selection Count
+
         with col1:
             st.markdown(f"**{num_selected}** Selected")
-            
-        # 2. Toggle Save Button
+
         with col2:
             if st.button("⭐ Toggle Save", use_container_width=True):
                 for job_id in selected_ids:
@@ -307,22 +309,19 @@ if selected_indices:
                 save_tracking(tracking_data)
                 st.rerun()
 
-        # 3. Status Dropdown (No Label, clean look)
         with col3:
             new_status = st.selectbox(
-                "Status", 
+                "Status",
                 ["Applied", "Interviewing", "Offer", "Rejected", "New"],
                 label_visibility="collapsed",
                 key="status_selector"
             )
 
-        # 4. Update Button (Primary Color)
         with col4:
             if st.button("Update Status", type="primary", use_container_width=True):
                 for job_id in selected_ids:
                     if job_id not in tracking_data: tracking_data[job_id] = {}
                     tracking_data[job_id]['status'] = new_status
-                    # Logic: If you mark it Applied/Interviewing, auto-save the job
                     if new_status in ["Applied", "Interviewing", "Offer"]:
                         tracking_data[job_id]['saved'] = True
                 save_tracking(tracking_data)
@@ -333,16 +332,18 @@ if selected_indices:
         selected_job_row = filtered_df.iloc[selected_indices[0]]
         resume_file = selected_job_row.get('resume', '')
         has_resume = bool(resume_file)
+
         with st.container(border=True):
             col_cv1, col_cv2 = st.columns([3, 1], vertical_alignment="center")
             with col_cv1:
+                company = selected_job_row.get('company', 'Unknown')
+                title = selected_job_row.get('title', 'Unknown')
                 if has_resume:
-                    st.markdown(f"📄 **Resume**: `{resume_file}`  |  {selected_job_row.get('company', '')} — {selected_job_row.get('title', '')}")
+                    st.markdown(f"📄 **Resume**: `{resume_file}`  |  {company} — {title}")
                 else:
-                    st.markdown(f"📝 **No Resume Yet**  |  {selected_job_row.get('company', '')} — {selected_job_row.get('title', '')}")
+                    st.markdown(f"📝 **No Resume Yet** |  {company} — {title}")
             with col_cv2:
                 btn_label = "📄 View Resume" if has_resume else "📝 Create Resume"
                 if st.button(btn_label, type="primary", use_container_width=True):
                     st.session_state["active_job"] = selected_job_row.to_dict()
                     st.switch_page("pages/CV_Editor.py")
-
