@@ -347,6 +347,13 @@ if selected_indices:
                 if st.button(btn_label, type="primary", width="stretch"):
                     st.session_state["active_job"] = selected_job_row.to_dict()
                     st.switch_page("pages/CV_Editor.py")
+    else:
+        with st.container(border=True):
+            col_cv1, col_cv2 = st.columns([3, 1], vertical_alignment="center")
+            with col_cv1:
+                st.markdown("<span style='color:#bbb'>⚠️ Select only **1** job to view or create a resume</span>", unsafe_allow_html=True)
+            with col_cv2:
+                st.button("📝 Create Resume", type="primary", width="stretch", disabled=True, key="multi_cv")
 
 else:
     # Empty-state: ghost versions of both toolbar rows
