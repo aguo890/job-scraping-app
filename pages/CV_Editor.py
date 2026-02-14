@@ -106,13 +106,13 @@ with st.sidebar:
 
     st.divider()
 
-    if st.button("⬅️ Back to Dashboard", use_container_width=True):
+    if st.button("⬅️ Back to Dashboard", width="stretch"):
         st.switch_page("dashboard.py")
 
     st.divider()
 
     # Render button
-    render_clicked = st.button("🔄 Render PDF", type="primary", use_container_width=True)
+    render_clicked = st.button("🔄 Render PDF", type="primary", width="stretch")
     st.caption("*Or press Ctrl+Enter in the editor*")
 
     # Download button (if PDF exists)
@@ -129,7 +129,7 @@ with st.sidebar:
                 f,
                 file_name=f"{job_id}_CV.pdf",
                 mime="application/pdf",
-                use_container_width=True,
+                width="stretch",
                 key=f"dl_{job_id}_{int(time.time())}"
             )
 
@@ -139,7 +139,7 @@ with st.sidebar:
     st.subheader("🤖 AI Tailoring")
     if ai_tailor:
         st.write("Auto-update CV using DeepSeek R1.")
-        if st.button("Auto-Tailor with AI", type="primary", use_container_width=True):
+        if st.button("Auto-Tailor with AI", type="primary", width="stretch"):
             with st.spinner("🧠 Rewriting CV... (30-60s)"):
                 try:
                     strategy, new_yaml, gap, reasoning = ai_tailor.generate_tailored_resume(

@@ -263,7 +263,7 @@ final_cols = [c for c in display_cols if c in filtered_df.columns]
 event = st.dataframe(
     filtered_df[final_cols],
     on_select="rerun",
-    selection_mode=["single-row", "single-cell"],
+    selection_mode=["multi-row", "single-cell"],
     key="job_dashboard_table",
     column_config={
         "Status": st.column_config.TextColumn("Status"),
@@ -271,7 +271,7 @@ event = st.dataframe(
         "score": st.column_config.ProgressColumn("Score", format="%d", min_value=0, max_value=50),
         "id": None
     },
-    use_container_width=True,
+    width="stretch",
     hide_index=True,
     height=530
 )
@@ -301,7 +301,7 @@ if selected_indices:
             st.markdown(f"**{num_selected}** Selected")
 
         with col2:
-            if st.button("⭐ Toggle Save", use_container_width=True):
+            if st.button("⭐ Toggle Save", width="stretch"):
                 for job_id in selected_ids:
                     if job_id not in tracking_data: tracking_data[job_id] = {}
                     current = tracking_data[job_id].get('saved', False)
@@ -318,7 +318,7 @@ if selected_indices:
             )
 
         with col4:
-            if st.button("Update Status", type="primary", use_container_width=True):
+            if st.button("Update Status", type="primary", width="stretch"):
                 for job_id in selected_ids:
                     if job_id not in tracking_data: tracking_data[job_id] = {}
                     tracking_data[job_id]['status'] = new_status
@@ -344,7 +344,7 @@ if selected_indices:
                     st.markdown(f"📝 **No Resume Yet** |  {company} — {title}")
             with col_cv2:
                 btn_label = "📄 View Resume" if has_resume else "📝 Create Resume"
-                if st.button(btn_label, type="primary", use_container_width=True):
+                if st.button(btn_label, type="primary", width="stretch"):
                     st.session_state["active_job"] = selected_job_row.to_dict()
                     st.switch_page("pages/CV_Editor.py")
 
@@ -356,16 +356,16 @@ else:
         with col1:
             st.markdown("<span style='color:#bbb'>**0** Selected</span>", unsafe_allow_html=True)
         with col2:
-            st.button("⭐ Toggle Save", use_container_width=True, disabled=True, key="ghost_save")
+            st.button("⭐ Toggle Save", width="stretch", disabled=True, key="ghost_save")
         with col3:
             st.selectbox("Status", ["Applied", "Interviewing", "Offer", "Rejected", "New"],
                          label_visibility="collapsed", disabled=True, key="ghost_status")
         with col4:
-            st.button("Update Status", type="primary", use_container_width=True, disabled=True, key="ghost_update")
+            st.button("Update Status", type="primary", width="stretch", disabled=True, key="ghost_update")
 
     with st.container(border=True):
         col_cv1, col_cv2 = st.columns([3, 1], vertical_alignment="center")
         with col_cv1:
             st.markdown("<span style='color:#bbb'>📝 Select a job to view or create a resume</span>", unsafe_allow_html=True)
         with col_cv2:
-            st.button("📝 Create Resume", type="primary", use_container_width=True, disabled=True, key="ghost_cv")
+            st.button("📝 Create Resume", type="primary", width="stretch", disabled=True, key="ghost_cv")
