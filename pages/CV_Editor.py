@@ -90,7 +90,17 @@ elif state_job:
 
 # SCENARIO C: Nothing — no URL, no state
 else:
-    st.warning("No job selected. Please return to the Dashboard.")
+    st.info("👋 No job selected. Choose a job from the Dashboard to tailor your CV.")
+    st.markdown("---")
+    st.write("Or, edit the **Master CV Source** directly. Changes here affect all future CV generations.")
+    if st.button("🛠️ Edit Master CV Source", type="secondary"):
+        st.session_state["active_job"] = {
+            "id": "master_cv",
+            "company": "MASTER RECORD",
+            "title": "Base CV",
+            "is_master": True
+        }
+        st.rerun()
     if st.button("⬅️ Back to Dashboard"):
         st.switch_page("dashboard.py")
     st.stop()
@@ -103,6 +113,7 @@ job = st.session_state["active_job"]
 job_id = job.get("id", "unknown_id")
 company = job.get("company", "Unknown Company")
 title = job.get("title", "N/A")
+is_master = job.get("is_master", False)
 
 # --- 2. Initialize Orchestrator ---
 # Uses default (Aaron_Guo_CV.yaml) which is mounted at root in Docker
@@ -129,13 +140,21 @@ if "editor_yaml" not in st.session_state:
 
 # --- SIDEBAR: Job Info, Navigation, Render, Download, AI Tools ---
 with st.sidebar:
-    st.header(f"📝 {company}")
-    st.caption(f"**Role**: {title}")
+    if is_master:
+        st.header("🛠️ MASTER CV")
+        st.warning("⚠️ You are editing the Master CV source. Changes affect **all** future generations.", icon="⚠️")
+    else:
+        st.header(f"📝 {company}")
+        st.caption(f"**Role**: {title}")
     st.caption(f"**ID**: `{job_id}`")
 
     st.divider()
 
     if st.button("⬅️ Back to Dashboard", width="stretch"):
+        if is_master:
+            # Clear master state on exit
+            st.session_state.pop("active_job", None)
+            st.session_state.pop("current_editing_job_id", None)
         st.switch_page("dashboard.py")
 
     st.divider()
@@ -174,10 +193,11 @@ with st.sidebar:
     # Reset Button
     if st.button("🔄 Reset to Base", help="Discard changes and revert to Master CV"):
         try:
-            # 1. Remove tailored file if it exists
-            tailored_path = os.path.join(orchestrator.output_dir, f"{job_id}.yaml")
-            if os.path.exists(tailored_path):
-                os.remove(tailored_path)
+            # 1. Remove tailored file if it exists (not for master mode)
+            if not is_master:
+                tailored_path = os.path.join(orchestrator.output_dir, f"{job_id}.yaml")
+                if os.path.exists(tailored_path):
+                    os.remove(tailored_path)
             
             # 2. Reload base CV
             if os.path.exists(orchestrator.base_cv_path):
@@ -219,7 +239,10 @@ with st.sidebar:
         with open(tracking_file, "w", encoding="utf-8") as f:
             json.dump(data, f, indent=2)
 
-    if st.button("🚀 Mark as Applied", type="primary", width="stretch", help="Mark as Applied and return to Dashboard"):
+    # Disable "Mark as Applied" in master mode
+    if st.button("🚀 Mark as Applied", type="primary", width="stretch",
+                 help="Cannot mark Master CV as applied." if is_master else "Mark as Applied and return to Dashboard",
+                 disabled=is_master):
         mark_as_applied(job_id)
         st.toast("Application Submitted! Returning to Dashboard...", icon="🚀")
         time.sleep(1.5)
@@ -229,7 +252,9 @@ with st.sidebar:
 
     # AI Tailoring Tools
     st.subheader("🤖 AI Tailoring")
-    if ai_tailor:
+    if is_master:
+        st.info("AI Tailoring is disabled in Master Mode.")
+    elif ai_tailor:
         st.write("Auto-update CV using DeepSeek R1.")
         if st.button("Auto-Tailor with AI", type="primary", width="stretch"):
             with st.spinner("🧠 Rewriting CV... (30-60s)"):
@@ -260,7 +285,12 @@ def trigger_render():
     content = st.session_state.get("yaml_editor", "")
     if content:
         st.session_state["editor_yaml"] = content
-        orchestrator.save_job_cv(job_id, content)
+        # Save first — for master CV this validates YAML
+        save_result = orchestrator.save_job_cv(job_id, content)
+        # If master save returned a dict with an error, surface it
+        if isinstance(save_result, dict) and not save_result.get("success", True):
+            st.session_state["render_status"] = f"fail:{save_result.get('error', 'Save failed')}"
+            return
         pdf_path, status = orchestrator.render_from_content(job_id, content)
         if pdf_path:
             st.session_state["current_pdf"] = pdf_path
@@ -290,12 +320,17 @@ with col_prev:
     if render_clicked:
         with st.spinner("Rendering via RenderCV..."):
             content = st.session_state.get("yaml_editor", st.session_state["editor_yaml"])
-            pdf_path, status = orchestrator.render_from_content(job_id, content)
-            if pdf_path:
-                st.session_state["current_pdf"] = pdf_path
-                st.success("✅ Render Complete!")
+            # Save first — validates YAML for master CV
+            save_result = orchestrator.save_job_cv(job_id, content)
+            if isinstance(save_result, dict) and not save_result.get("success", True):
+                st.error(f"❌ Save Failed: {save_result.get('error', 'Unknown error')}")
             else:
-                st.error(f"❌ Render Failed: {status}")
+                pdf_path, status = orchestrator.render_from_content(job_id, content)
+                if pdf_path:
+                    st.session_state["current_pdf"] = pdf_path
+                    st.success("✅ Render Complete!")
+                else:
+                    st.error(f"❌ Render Failed: {status}")
 
     # Show render status from Ctrl+Enter callback
     if st.session_state.get("render_status") == "success":
