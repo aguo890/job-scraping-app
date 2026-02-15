@@ -217,6 +217,11 @@ with st.sidebar:
         st.session_state._persisted_view = "Feed"
         set_query_param("view", "Feed")
 
+    # --- Session State Init ---
+    if "table_version" not in st.session_state:
+        st.session_state.table_version = 0
+
+
     def update_view_param():
         view = st.session_state.main_view_filter
         st.session_state._persisted_view = view  # Persist to non-widget key
@@ -356,7 +361,7 @@ event = st.dataframe(
     filtered_df[final_cols],
     on_select="rerun",
     selection_mode=["multi-row", "single-cell"],
-    key="job_dashboard_table",
+    key=f"job_dashboard_table_{st.session_state.table_version}",
     column_config={
         "Status": st.column_config.TextColumn("Status"),
         "url": st.column_config.LinkColumn("Link", display_text="Open"),
@@ -410,9 +415,10 @@ if selected_indices:
                     tracking_data[job_id]['saved'] = not current
                 save_tracking(tracking_data)
                 
+                save_tracking(tracking_data)
+                
                 # Clear selection after action
-                if "job_dashboard_table" in st.session_state:
-                    del st.session_state["job_dashboard_table"]
+                st.session_state.table_version += 1
                 st.rerun()
 
         with col3:
@@ -432,9 +438,10 @@ if selected_indices:
                         tracking_data[job_id]['saved'] = True
                 save_tracking(tracking_data)
                 
+                save_tracking(tracking_data)
+                
                 # Clear selection after action
-                if "job_dashboard_table" in st.session_state:
-                    del st.session_state["job_dashboard_table"]
+                st.session_state.table_version += 1
                 st.rerun()
 
     # --- CV Editor / Resume Navigation ---
