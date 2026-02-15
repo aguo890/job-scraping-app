@@ -92,15 +92,30 @@ elif state_job:
 else:
     st.info("👋 No job selected. Choose a job from the Dashboard to tailor your CV.")
     st.markdown("---")
-    st.write("Or, edit the **Master CV Source** directly. Changes here affect all future CV generations.")
-    if st.button("🛠️ Edit Master CV Source", type="secondary"):
-        st.session_state["active_job"] = {
-            "id": "master_cv",
-            "company": "MASTER RECORD",
-            "title": "Base CV",
-            "is_master": True
-        }
-        st.rerun()
+
+    col_master, col_playground = st.columns(2)
+    with col_master:
+        st.write("Edit the **Master CV Source** directly. Changes affect all future CV generations.")
+        if st.button("🛠️ Edit Master CV Source", type="secondary", use_container_width=True):
+            st.session_state["active_job"] = {
+                "id": "master_cv",
+                "company": "MASTER RECORD",
+                "title": "Base CV",
+                "is_master": True
+            }
+            st.rerun()
+    with col_playground:
+        st.write("Open a **Playground** to draft a CV from your template without affecting anything.")
+        if st.button("🧪 Playground", type="secondary", use_container_width=True):
+            st.session_state["active_job"] = {
+                "id": "playground",
+                "company": "PLAYGROUND",
+                "title": "Scratch Pad",
+                "is_playground": True
+            }
+            st.rerun()
+
+    st.markdown("---")
     if st.button("⬅️ Back to Dashboard"):
         st.switch_page("dashboard.py")
     st.stop()
@@ -114,6 +129,7 @@ job_id = job.get("id", "unknown_id")
 company = job.get("company", "Unknown Company")
 title = job.get("title", "N/A")
 is_master = job.get("is_master", False)
+is_playground = job.get("is_playground", False)
 
 # --- 2. Initialize Orchestrator ---
 # Uses default (Aaron_Guo_CV.yaml) which is mounted at root in Docker
@@ -143,6 +159,9 @@ with st.sidebar:
     if is_master:
         st.header("🛠️ MASTER CV")
         st.warning("⚠️ You are editing the Master CV source. Changes affect **all** future generations.", icon="⚠️")
+    elif is_playground:
+        st.header("🧪 PLAYGROUND")
+        st.info("Temporary workspace. Your master CV is safe.", icon="🧪")
     else:
         st.header(f"📝 {company}")
         st.caption(f"**Role**: {title}")
@@ -151,8 +170,8 @@ with st.sidebar:
     st.divider()
 
     if st.button("⬅️ Back to Dashboard", width="stretch"):
-        if is_master:
-            # Clear master state on exit
+        if is_master or is_playground:
+            # Clear special mode state on exit
             st.session_state.pop("active_job", None)
             st.session_state.pop("current_editing_job_id", None)
         st.switch_page("dashboard.py")
@@ -239,10 +258,10 @@ with st.sidebar:
         with open(tracking_file, "w", encoding="utf-8") as f:
             json.dump(data, f, indent=2)
 
-    # Disable "Mark as Applied" in master mode
+    # Disable "Mark as Applied" in master/playground mode
     if st.button("🚀 Mark as Applied", type="primary", width="stretch",
-                 help="Cannot mark Master CV as applied." if is_master else "Mark as Applied and return to Dashboard",
-                 disabled=is_master):
+                 help="Not available in this mode." if (is_master or is_playground) else "Mark as Applied and return to Dashboard",
+                 disabled=(is_master or is_playground)):
         mark_as_applied(job_id)
         st.toast("Application Submitted! Returning to Dashboard...", icon="🚀")
         time.sleep(1.5)
@@ -252,8 +271,8 @@ with st.sidebar:
 
     # AI Tailoring Tools
     st.subheader("🤖 AI Tailoring")
-    if is_master:
-        st.info("AI Tailoring is disabled in Master Mode.")
+    if is_master or is_playground:
+        st.info("AI Tailoring is disabled in this mode (no job context).")
     elif ai_tailor:
         st.write("Auto-update CV using DeepSeek R1.")
         if st.button("Auto-Tailor with AI", type="primary", width="stretch"):
