@@ -320,3 +320,38 @@ companies:
   - name: "Red Ventures"
     ats: "greenhouse"
     board_token: "redventures"
+
+  # ---------------------------------------------------------
+  # CATEGORY 6: NEW DEFENSE & SPACE
+  # ---------------------------------------------------------
+  - name: "Astranis"
+    ats: "greenhouse"
+    board_token: "astranis"
+
+  - name: "Varda Space"
+    ats: "greenhouse"
+    board_token: "vardaspace"
+
+  - name: "Hadrian"
+    ats: "ashby"
+    board_url: "https://jobs.ashbyhq.com/hadrian"
+
+  - name: "Skydio"
+    ats: "greenhouse"
+    board_token: "skydio"
+
+  - name: "Epirus"
+    ats: "greenhouse"
+    board_token: "epirus"
+
+  - name: "Helion Energy"
+    ats: "greenhouse"
+    board_token: "helionenergy"
+
+  - name: "Radiant"
+    ats: "greenhouse"
+    board_token: "radiant"
+
+  - name: "Helsing"
+    ats: "greenhouse"
+    board_token: "helsing"

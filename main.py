@@ -69,12 +69,25 @@ async def main():
     logger.info("=" * 80)
     
     try:
+        # Argument Parsing
+        import argparse
+        parser = argparse.ArgumentParser(description="Job Dashboard Scraper")
+        parser.add_argument("--companies", type=str, help="Comma-separated list of companies to scrape (e.g., 'Astranis,Anduril')")
+        args = parser.parse_args()
+
         # Load configurations
         logger.info("Loading configurations...")
         companies_config = load_config('config/companies.yaml')
         keywords_config = load_config('config/keywords.yaml')
         
         companies = companies_config.get('companies', [])
+        
+        # Filter if argument provided
+        if args.companies:
+            target_names = [name.strip().lower() for name in args.companies.split(",")]
+            companies = [c for c in companies if c['name'].lower() in target_names]
+            logger.info(f"🔧 Filter active: Scraping {len(companies)} companies matching: {args.companies}")
+        
         logger.info(f"Loaded {len(companies)} companies")
         
         # Initialize components
