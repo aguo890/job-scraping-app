@@ -96,66 +96,37 @@ async def main():
             return 0
         
         # Process jobs
+        # NOTE: We keep this active to ensure jobs are Saved and Deduplicated.
+        # This usually doesn't trigger costs unless it calls an LLM internally.
         logger.info("Processing jobs (normalize, deduplicate, rank)...")
         processed_jobs = processor.process_jobs(raw_jobs)
-        logger.info(f"Processed to {len(processed_jobs)} unique, ranked jobs")
+        
+        logger.info(f"Processed to {len(processed_jobs)} unique jobs")
         
         if not processed_jobs:
             logger.warning("No jobs after processing. Exiting.")
             return 0
         
-        # Generate reports
-        logger.info("Generating reports...")
-        report_files = reporter.generate_reports(processed_jobs)
-        logger.info(f"Generated reports: {list(report_files.values())}")
+        # Generate reports (DISABLED)
+        logger.info("Skipping Report Generation...")
+        # report_files = reporter.generate_reports(processed_jobs) 
+        report_files = {} 
         
-        # AI Analysis (DISABLED by user request)
+        # AI Analysis (DISABLED)
         logger.info("Skipping AI analysis (disabled)...")
         ai_results = {'enabled': False}
         # ai_results = ai_assistant.analyze_top_jobs(processed_jobs, top_n=5)
         
-        if ai_results.get('enabled'):
-            logger.info(f"AI analysis completed for {ai_results.get('total_analyzed')} jobs")
-            
-            # Save AI insights to file
-            if ai_results.get('analyses'):
-                insights_file = os.path.join('data', 'ai_insights.json')
-                import json
-                with open(insights_file, 'w', encoding='utf-8') as f:
-                    json.dump(ai_results, f, indent=2)
-                logger.info(f"Saved AI insights to {insights_file}")
-                report_files['ai_insights'] = insights_file
-        else:
-            logger.info("AI analysis skipped (API key not configured)")
+        # GitHub Integration (DISABLED)
+        # logger.info("Committing and pushing reports to GitHub...")
+        # files_to_commit = []
+        # if 'ai_insights' in report_files:
+        #     files_to_commit.append(report_files['ai_insights'])
+        # github.commit_and_push_reports(files_to_commit)
         
-        # GitHub Integration
-        logger.info("Committing and pushing reports to GitHub...")
-        files_to_commit = [
-            report_files.get('json'),
-            report_files.get('markdown')
-        ]
-        
-        if 'ai_insights' in report_files:
-            files_to_commit.append(report_files['ai_insights'])
-        
-        commit_success = github.commit_and_push_reports(files_to_commit)
-        
-        if commit_success:
-            logger.info("Successfully committed and pushed reports")
-        else:
-            logger.warning("Failed to commit and push reports")
-        
-        # Create/Update GitHub Issue
-        logger.info("Creating/updating Daily Roles Digest issue...")
-        issue_success = github.create_daily_digest_issue(
-            processed_jobs, 
-            report_files.get('markdown', '')
-        )
-        
-        if issue_success:
-            logger.info("Successfully created/updated GitHub issue")
-        else:
-            logger.warning("Failed to create/update GitHub issue")
+        # Create/Update GitHub Issue (DISABLED)
+        # logger.info("Creating/updating Daily Roles Digest issue...")
+        # github.create_daily_digest_issue(processed_jobs, report_files.get('markdown', ''))
         
         # Summary
         logger.info("=" * 80)
@@ -164,9 +135,6 @@ async def main():
         logger.info(f"  - Jobs after processing: {len(processed_jobs)}")
         if processed_jobs:
             logger.info(f"  - Top job score: {processed_jobs[0].get('score', 0):.1f}")
-        logger.info(f"  - Reports generated: {len(report_files)}")
-        logger.info(f"  - JSON output: {report_files.get('json')}")
-        logger.info(f"  - Markdown report: {report_files.get('markdown')}")
         logger.info("=" * 80)
         
         return 0
