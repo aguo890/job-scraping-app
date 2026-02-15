@@ -399,6 +399,10 @@ if selected_indices:
                     current = tracking_data[job_id].get('saved', False)
                     tracking_data[job_id]['saved'] = not current
                 save_tracking(tracking_data)
+                
+                # Clear selection after action
+                if "job_dashboard_table" in st.session_state:
+                    del st.session_state["job_dashboard_table"]
                 st.rerun()
 
         with col3:
@@ -417,6 +421,10 @@ if selected_indices:
                     if new_status in ["Applied", "Interviewing", "Offer"]:
                         tracking_data[job_id]['saved'] = True
                 save_tracking(tracking_data)
+                
+                # Clear selection after action
+                if "job_dashboard_table" in st.session_state:
+                    del st.session_state["job_dashboard_table"]
                 st.rerun()
 
     # --- CV Editor / Resume Navigation ---

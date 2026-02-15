@@ -158,7 +158,12 @@
     "status": "Applied"
   },
   "ashby_openai_17e31e56-418a-43bb-a72a-1b935dc71e29": {
-    "saved": true
+    "saved": true,
+    "cv_yaml_path": "C:\\Users\\19803\\Projects\\Job-Automation-Suite\\generated_cvs\\ashby_openai_17e31e56-418a-43bb-a72a-1b935dc71e29.yaml",
+    "cv_pdf_path": "C:\\Users\\19803\\Projects\\Job-Automation-Suite\\generated_cvs\\ashby_openai_17e31e56-418a-43bb-a72a-1b935dc71e29.pdf",
+    "cv_status": "Tailored",
+    "status": "Applied",
+    "date_applied": "2026-02-14T21:11:51.113547"
   },
   "ashby_openai_5bde9af5-df78-460e-ae9c-5c49ac778640": {
     "saved": true,
@@ -209,7 +214,12 @@
     "status": "Applied"
   },
   "gh_verkada_5026072007": {
-    "saved": true
+    "saved": true,
+    "cv_yaml_path": "C:\\Users\\19803\\Projects\\Job-Automation-Suite\\generated_cvs\\gh_verkada_5026072007.yaml",
+    "cv_pdf_path": "C:\\Users\\19803\\Projects\\Job-Automation-Suite\\generated_cvs\\gh_verkada_5026072007.pdf",
+    "cv_status": "Tailored",
+    "status": "Applied",
+    "date_applied": "2026-02-14T21:23:05.603755"
   },
   "gh_scaleai_4618065005": {
     "saved": true
@@ -264,7 +274,12 @@
     "date_applied": "2026-02-14T19:59:43.541253"
   },
   "gh_andurilindustries_5025619007": {
-    "saved": true
+    "saved": true,
+    "cv_yaml_path": "C:\\Users\\19803\\Projects\\Job-Automation-Suite\\generated_cvs\\gh_andurilindustries_5025619007.yaml",
+    "cv_pdf_path": "C:\\Users\\19803\\Projects\\Job-Automation-Suite\\generated_cvs\\gh_andurilindustries_5025619007.pdf",
+    "cv_status": "Tailored",
+    "status": "Applied",
+    "date_applied": "2026-02-14T21:19:06.162822"
   },
   "gh_andurilindustries_4981903007": {
     "saved": false
@@ -324,5 +339,53 @@
     "cv_status": "Tailored",
     "status": "Applied",
     "date_applied": "2026-02-14T20:08:14.685405"
+  },
+  "lever_saronic_fd6beae0-1af2-45d9-ad84-02f48e7ae643": {
+    "saved": true
+  },
+  "ashby_openai_9d11e1d8-af1d-413b-873f-d8fac2bdee99": {
+    "saved": true
+  },
+  "ashby_openai_1b7c5f3f-9fa6-4492-bc47-2cf5aeaade21": {
+    "saved": true
+  },
+  "ashby_posthog_bd597451-e465-46f6-857f-befe28366f20": {
+    "saved": true
+  },
+  "ashby_quora_7f4af6cc-8f7c-4041-90db-928b9c5d4512": {
+    "saved": true
+  },
+  "lever_zoox_f318f39e-c089-4240-b341-ebb021d86b4f": {
+    "saved": true
+  },
+  "ashby_snowflake_c592250a-6041-4c40-aa82-1d947e3494da": {
+    "saved": true
+  },
+  "lever_zoox_db76eba1-18cb-41f1-ab7e-f4ace0085a68": {
+    "saved": true
+  },
+  "lever_zoox_74ef6bb8-ec8a-4c6c-8618-544717f40e2d": {
+    "saved": true
+  },
+  "lever_zoox_499ef1a2-6383-4dd6-b94f-63ce8de6c483": {
+    "saved": true
+  },
+  "ashby_replit_34afefd8-f698-4c46-a517-9ced6695b59b": {
+    "saved": true
+  },
+  "lever_zoox_ab805ec5-1d08-420c-9606-f91825e6a1f9": {
+    "saved": true
+  },
+  "ashby_snowflake_e5ccf06d-f52c-4e4e-bf4e-b2fdb1d076ad": {
+    "saved": true
+  },
+  "ashby_vanta_be94f539-a4e8-48d8-a8b1-1e9290489743": {
+    "saved": true
+  },
+  "ashby_snowflake_f716acae-00fc-48a4-82bb-e4a2642d624f": {
+    "saved": true
+  },
+  "ashby_openai_f4e8a433-ae96-44ac-a7f9-97070335395f": {
+    "saved": true
   }
 }
