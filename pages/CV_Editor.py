@@ -63,24 +63,37 @@ def load_job_by_id(job_id):
         pass
     return None
 
-# Priority 1: session_state (navigated from dashboard)
-# Priority 2: URL query param (page refresh)
-if "active_job" not in st.session_state or not st.session_state["active_job"]:
-    qp_job_id = st.query_params.get("job_id")
-    if qp_job_id:
-        recovered_job = load_job_by_id(qp_job_id)
+# --- Robust Data Loading ---
+# PRECEDENCE: 1. URL (Deep Link/Refresh) -> 2. Session State (Dashboard Nav) -> 3. Error
+url_job_id = st.query_params.get("job_id")
+state_job = st.session_state.get("active_job")
+
+# SCENARIO A: URL present (deep link, refresh, or shared link)
+if url_job_id:
+    # If URL disagrees with state, URL wins — re-fetch from data
+    if not state_job or str(state_job.get("id")) != str(url_job_id):
+        recovered_job = load_job_by_id(url_job_id)
         if recovered_job:
             st.session_state["active_job"] = recovered_job
         else:
-            st.warning(f"Job `{qp_job_id}` not found in data. Return to Dashboard.")
+            st.warning(f"Job `{url_job_id}` not found in data. Return to Dashboard.")
             if st.button("⬅️ Back to Dashboard"):
                 st.switch_page("dashboard.py")
             st.stop()
-    else:
-        st.warning("No job selected. Please return to the Dashboard.")
-        if st.button("⬅️ Back to Dashboard"):
-            st.switch_page("dashboard.py")
-        st.stop()
+    # Ensure URL stays set for refresh consistency
+    st.query_params["job_id"] = url_job_id
+
+# SCENARIO B: No URL, but state exists (navigated from dashboard)
+elif state_job:
+    # Self-Healing: restore URL from state
+    st.query_params["job_id"] = state_job.get("id", "")
+
+# SCENARIO C: Nothing — no URL, no state
+else:
+    st.warning("No job selected. Please return to the Dashboard.")
+    if st.button("⬅️ Back to Dashboard"):
+        st.switch_page("dashboard.py")
+    st.stop()
 
 if not CVOrchestrator:
     st.error("CVOrchestrator could not be imported. Check cv_bridge.py.")
@@ -90,9 +103,6 @@ job = st.session_state["active_job"]
 job_id = job.get("id", "unknown_id")
 company = job.get("company", "Unknown Company")
 title = job.get("title", "N/A")
-
-# Sync job_id to URL so refreshes work
-st.query_params["job_id"] = job_id
 
 # --- 2. Initialize Orchestrator ---
 orchestrator = CVOrchestrator()
@@ -174,6 +184,7 @@ with st.sidebar:
                     base_content = f.read()
                 st.session_state["editor_yaml"] = base_content
                 st.session_state["yaml_editor"] = base_content # Force widget update
+                st.session_state["current_editing_job_id"] = job_id  # Ensure synced
                 st.success("Reverted to Master CV!")
                 time.sleep(1)
                 st.rerun()

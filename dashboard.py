@@ -195,16 +195,32 @@ with st.sidebar:
         elif hasattr(st, "experimental_set_query_params"):
             st.experimental_set_query_params(**{key: value})
 
-    # Initialize from URL if not in session state
-    if "main_view_filter" not in st.session_state:
-        url_view = get_query_param("view", "Feed")
-        if url_view in view_options:
-            st.session_state.main_view_filter = url_view
-        else:
-            st.session_state.main_view_filter = "Feed"
+    # --- Robust View Persistence Logic ---
+    # PRECEDENCE: 1. URL (Deep Link) -> 2. Persisted State (History) -> 3. Default
+    # NOTE: Widget-bound keys (main_view_filter) are cleared by Streamlit when
+    # navigating away. We use _persisted_view (non-widget) to survive page switches.
+    current_url_view = get_query_param("view", None)
+    persisted_view = st.session_state.get("_persisted_view", "Feed")
+
+    if current_url_view and current_url_view in view_options:
+        # Scenario A: URL present & valid (refresh or deep link) → URL is source of truth
+        st.session_state.main_view_filter = current_url_view
+        st.session_state._persisted_view = current_url_view
+    elif persisted_view != "Feed":
+        # Scenario B: URL empty, persisted state saved (navigated "Back") → restore
+        set_query_param("view", persisted_view)
+        st.session_state.main_view_filter = persisted_view
+        st.session_state._persisted_view = persisted_view
+    else:
+        # Scenario C: Fresh start → default to Feed
+        st.session_state.main_view_filter = "Feed"
+        st.session_state._persisted_view = "Feed"
+        set_query_param("view", "Feed")
 
     def update_view_param():
-        set_query_param("view", st.session_state.main_view_filter)
+        view = st.session_state.main_view_filter
+        st.session_state._persisted_view = view  # Persist to non-widget key
+        set_query_param("view", view)
 
     # Use segmented_control if available (Streamlit 1.39+)
     if hasattr(st, "segmented_control"):
