@@ -97,7 +97,22 @@ st.query_params["job_id"] = job_id
 # --- 2. Initialize Orchestrator ---
 orchestrator = CVOrchestrator()
 
-# --- 3. Load State ---
+# --- 3. Load State (with Job Switch Detection) ---
+if "current_editing_job_id" not in st.session_state:
+    st.session_state["current_editing_job_id"] = None
+
+# If we switched jobs, force a reload
+if st.session_state["current_editing_job_id"] != job_id:
+    # Clear old state
+    st.session_state["editor_yaml"] = orchestrator.load_job_cv(job_id)
+    st.session_state["yaml_editor"] = st.session_state["editor_yaml"]
+    st.session_state["current_editing_job_id"] = job_id
+    # Clear PDF state so we don't show wrong PDF
+    st.session_state.pop("current_pdf", None)
+    st.session_state.pop("render_status", None)
+    st.session_state.pop("ai_strategy", None)
+
+# Ensure editor_yaml is loaded if it's missing (e.g. first run)
 if "editor_yaml" not in st.session_state:
     st.session_state["editor_yaml"] = orchestrator.load_job_cv(job_id)
 
@@ -144,6 +159,28 @@ with st.sidebar:
                 width="stretch",
                 key=f"dl_{job_id}_{int(time.time())}"
             )
+
+    # Reset Button
+    if st.button("🔄 Reset to Base", help="Discard changes and revert to Master CV"):
+        try:
+            # 1. Remove tailored file if it exists
+            tailored_path = os.path.join(orchestrator.output_dir, f"{job_id}.yaml")
+            if os.path.exists(tailored_path):
+                os.remove(tailored_path)
+            
+            # 2. Reload base CV
+            if os.path.exists(orchestrator.base_cv_path):
+                with open(orchestrator.base_cv_path, 'r', encoding='utf-8') as f:
+                    base_content = f.read()
+                st.session_state["editor_yaml"] = base_content
+                st.session_state["yaml_editor"] = base_content # Force widget update
+                st.success("Reverted to Master CV!")
+                time.sleep(1)
+                st.rerun()
+            else:
+                st.error("Master CV file not found!")
+        except Exception as e:
+            st.error(f"Error resetting: {e}")
 
     st.divider()
 
@@ -223,9 +260,13 @@ def trigger_render():
 col_edit, col_prev = st.columns([1, 1])
 
 with col_edit:
+    # Initialize widget state if not present (to avoid empty box on first load)
+    if "yaml_editor" not in st.session_state:
+        st.session_state["yaml_editor"] = st.session_state["editor_yaml"]
+
     st.text_area(
         "yaml_editor",
-        value=st.session_state["editor_yaml"],
+        # value is handled by key="yaml_editor" in session_state
         height=None,  # Height controlled by CSS (85vh)
         key="yaml_editor",
         label_visibility="collapsed",

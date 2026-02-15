@@ -105,18 +105,23 @@ df_jobs['cv_status'] = df_jobs['id'].map(cv_status_map).fillna('Generic')
 df_jobs['resume'] = df_jobs['id'].map(resume_map).fillna('')
 
 # --- Prettify Title ---
-def prettify_title(row):
-    title = row['title']
-    if row['is_saved']:
-        title = "⭐ " + title
-    # Add status emoji if it's special
-    if row['Status'] == "Interviewing":
-        title = "🎤 " + title
-    elif row['Status'] == "Offer":
-        title = "🎉 " + title
-    return title
+# --- Prettify Title (Vectorized) ---
+# Initialize with original title
+df_jobs['display_title'] = df_jobs['title']
 
-df_jobs['title'] = df_jobs.apply(prettify_title, axis=1)
+# 1. Prepend star if saved
+saved_mask = df_jobs['is_saved'] == True
+df_jobs.loc[saved_mask, 'display_title'] = "⭐ " + df_jobs.loc[saved_mask, 'display_title']
+
+# 2. Prepend Status Emojis
+interview_mask = df_jobs['Status'] == 'Interviewing'
+offer_mask = df_jobs['Status'] == 'Offer'
+
+df_jobs.loc[interview_mask, 'display_title'] = "🎤 " + df_jobs.loc[interview_mask, 'display_title']
+df_jobs.loc[offer_mask, 'display_title'] = "🎉 " + df_jobs.loc[offer_mask, 'display_title']
+
+# Update the main title column
+df_jobs['title'] = df_jobs['display_title']
 
 # --- Sidebar ---
 with st.sidebar:
@@ -165,17 +170,41 @@ with st.sidebar:
         st.rerun()
 
     # --- Quick Filter Shortcuts ---
-    st.subheader("Quick Filters", divider="gray")
-    show_saved_unapplied = st.checkbox("⭐ Saved & Unapplied", key="filter_saved_unapplied",
-                                        help="Show saved jobs you haven't applied to yet")
-    show_applied = st.checkbox("📝 Applied Only", key="filter_applied",
-                                help="Show only jobs you've applied to")
-    show_unapplied = st.checkbox("🆕 Unapplied Only", key="filter_unapplied",
-                                help="Show only jobs you haven't applied to yet")
-    hide_rejected = st.checkbox("🚫 Hide Rejected", value=True, key="filter_hide_rejected",
-                                 help="Exclude jobs marked as Rejected")
-    hide_applied = st.checkbox("🚫 Hide Applied", value=False, key="filter_hide_applied",
-                                help="Exclude jobs you've already applied to")
+    st.subheader("Main View", divider="gray")
+    
+    view_options = {
+        "Feed": "🆕 Feed",
+        "Shortlist": "⭐ Shortlist",
+        "Tracking": "📝 Tracking",
+        "All": "🗂️ All"
+    }
+    
+    # Use segmented_control if available (Streamlit 1.39+)
+    if hasattr(st, "segmented_control"):
+        selected_view = st.segmented_control(
+            "Main View",
+            options=list(view_options.keys()),
+            format_func=lambda x: view_options[x],
+            default="Feed",
+            label_visibility="collapsed",
+            key="main_view_filter"
+        )
+    else:
+        # Fallback for older Streamlit
+        selected_view = st.radio(
+            "Main View",
+            options=list(view_options.keys()),
+            format_func=lambda x: view_options[x],
+            index=0,
+            horizontal=True,
+            label_visibility="collapsed",
+            key="main_view_filter"
+        )
+
+    # Contextual filters based on view
+    hide_rejected = True
+    if selected_view == "All":
+        hide_rejected = st.checkbox("🚫 Hide Rejected", value=True, key="filter_hide_rejected")
 
     # --- Standard Filters ---
     st.subheader("Refine", divider="gray")
@@ -185,7 +214,7 @@ with st.sidebar:
     sel_statuses = st.multiselect("Status", all_statuses, default=[], key="filter_status",
                                    help="Leave empty to show all statuses")
 
-    show_saved = st.checkbox("⭐ Show Saved Only", key="filter_saved")
+    show_saved = False # implicitly handled by views, but keep valid for logic below if needed
     companies = ["All"] + sorted(df_jobs['company'].unique().tolist())
     sel_company = st.selectbox("Company", companies, key="filter_company")
     min_score = st.slider("Min Score", 0, int(df_jobs['score'].max()), 0, key="filter_min_score")
@@ -207,6 +236,39 @@ with st.sidebar:
 # --- Apply Filters ---
 filtered_df = df_jobs.copy()
 
+# 1. VIEW LOGIC (The Core "Inbox Zero" Flow)
+if selected_view == "Feed":
+    # Feed = New AND Not Saved AND Not Rejected
+    # "Inbox Zero" - as soon as you save or apply, it leaves the feed.
+    filtered_df = filtered_df[
+        (filtered_df['Status'] == 'New') & 
+        (filtered_df['is_saved'] == False) &
+        (filtered_df['Status'] != 'Rejected')
+    ]
+
+elif selected_view == "Shortlist":
+    # Shortlist = Saved AND Not Applied/Interviewing/Offer
+    # We want to see what we saved but haven't acted on yet.
+    # We generaly exclude 'Rejected' here unless explicitly desired, but standard flow implies Shortlist is for "To Apply"
+    active_statuses = ['New', 'Saved'] 
+    filtered_df = filtered_df[
+        (filtered_df['is_saved'] == True) & 
+        (filtered_df['Status'].isin(active_statuses))
+    ]
+
+elif selected_view == "Tracking":
+    # Tracking = Applied, Interviewing, Offer
+    tracking_statuses = ['Applied', 'Interviewing', 'Offer']
+    filtered_df = filtered_df[filtered_df['Status'].isin(tracking_statuses)]
+
+elif selected_view == "All":
+    # All = Everything (optionally hide rejected)
+    if hide_rejected:
+        filtered_df = filtered_df[filtered_df['Status'] != 'Rejected']
+
+
+# 2. Refine Filters (Company, Score, etc. apply on top of the View)
+
 # Score filter
 filtered_df = filtered_df[filtered_df['score'] >= min_score]
 
@@ -214,31 +276,7 @@ filtered_df = filtered_df[filtered_df['score'] >= min_score]
 if sel_company != "All":
     filtered_df = filtered_df[filtered_df['company'] == sel_company]
 
-# Saved only
-if show_saved:
-    filtered_df = filtered_df[filtered_df['is_saved'] == True]
-
-# Quick filter: Saved & Unapplied
-if show_saved_unapplied:
-    filtered_df = filtered_df[(filtered_df['is_saved'] == True) & (filtered_df['Status'] != 'Applied')]
-
-# Quick filter: Applied Only
-if show_applied:
-    filtered_df = filtered_df[filtered_df['Status'] == 'Applied']
-
-# Quick filter: Unapplied Only
-if show_unapplied:
-    filtered_df = filtered_df[filtered_df['Status'] == 'New']
-
-# Hide Rejected
-if hide_rejected:
-    filtered_df = filtered_df[filtered_df['Status'] != 'Rejected']
-
-# Hide Applied
-if hide_applied:
-    filtered_df = filtered_df[filtered_df['Status'] != 'Applied']
-
-# Status multi-select
+# Status multi-select (allows further drilling down within a view)
 if sel_statuses:
     filtered_df = filtered_df[filtered_df['Status'].isin(sel_statuses)]
 
@@ -247,7 +285,7 @@ if search_query:
     filtered_df = filtered_df[filtered_df['title'].str.contains(search_query, case=False, na=False)]
 
 # Date range filter
-if 'date_posted' in df_jobs.columns and 'date_range' in dir():
+if 'date_posted' in df_jobs.columns and 'date_range' in locals():
     dates_parsed = pd.to_datetime(filtered_df['date_posted'], errors='coerce')
     if isinstance(date_range, tuple) and len(date_range) == 2:
         start_date, end_date = date_range

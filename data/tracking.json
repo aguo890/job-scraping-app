@@ -256,7 +256,12 @@
     "status": "Applied"
   },
   "gh_andurilindustries_4836302007": {
-    "saved": true
+    "saved": true,
+    "cv_yaml_path": "C:\\Users\\19803\\Projects\\Job-Automation-Suite\\generated_cvs\\gh_andurilindustries_4836302007.yaml",
+    "cv_pdf_path": "C:\\Users\\19803\\Projects\\Job-Automation-Suite\\generated_cvs\\gh_andurilindustries_4836302007.pdf",
+    "cv_status": "Tailored",
+    "status": "Applied",
+    "date_applied": "2026-02-14T19:59:43.541253"
   },
   "gh_andurilindustries_5025619007": {
     "saved": true
@@ -289,15 +294,35 @@
     "date_applied": "2026-02-14T18:56:17.532408"
   },
   "ashby_openai_282d6a81-412a-4e3a-b588-851ff30ebb50": {
-    "saved": true
+    "saved": true,
+    "cv_yaml_path": "C:\\Users\\19803\\Projects\\Job-Automation-Suite\\generated_cvs\\ashby_openai_282d6a81-412a-4e3a-b588-851ff30ebb50.yaml",
+    "cv_pdf_path": "C:\\Users\\19803\\Projects\\Job-Automation-Suite\\generated_cvs\\ashby_openai_282d6a81-412a-4e3a-b588-851ff30ebb50.pdf",
+    "cv_status": "Tailored",
+    "status": "Applied",
+    "date_applied": "2026-02-14T19:19:32.448646"
   },
   "ashby_snowflake_7bd17281-dea7-4701-a035-4814f45dc32d": {
-    "saved": true
+    "saved": true,
+    "cv_yaml_path": "C:\\Users\\19803\\Projects\\Job-Automation-Suite\\generated_cvs\\ashby_snowflake_7bd17281-dea7-4701-a035-4814f45dc32d.yaml",
+    "cv_pdf_path": "C:\\Users\\19803\\Projects\\Job-Automation-Suite\\generated_cvs\\ashby_snowflake_7bd17281-dea7-4701-a035-4814f45dc32d.pdf",
+    "cv_status": "Tailored",
+    "status": "Applied",
+    "date_applied": "2026-02-14T19:37:54.095913"
   },
   "ashby_quora_cb455a21-e66f-4e21-afdf-4511c6c442d1": {
-    "saved": true
+    "saved": true,
+    "cv_yaml_path": "C:\\Users\\19803\\Projects\\Job-Automation-Suite\\generated_cvs\\ashby_quora_cb455a21-e66f-4e21-afdf-4511c6c442d1.yaml",
+    "cv_pdf_path": "C:\\Users\\19803\\Projects\\Job-Automation-Suite\\generated_cvs\\ashby_quora_cb455a21-e66f-4e21-afdf-4511c6c442d1.pdf",
+    "cv_status": "Tailored",
+    "status": "Applied",
+    "date_applied": "2026-02-14T19:53:42.294061"
   },
   "ashby_posthog_20ab9628-20ff-4ae3-bd6a-46ae7e9dc6b8": {
-    "saved": true
+    "saved": true,
+    "cv_yaml_path": "C:\\Users\\19803\\Projects\\Job-Automation-Suite\\generated_cvs\\ashby_posthog_20ab9628-20ff-4ae3-bd6a-46ae7e9dc6b8.yaml",
+    "cv_pdf_path": "C:\\Users\\19803\\Projects\\Job-Automation-Suite\\generated_cvs\\ashby_posthog_20ab9628-20ff-4ae3-bd6a-46ae7e9dc6b8.pdf",
+    "cv_status": "Tailored",
+    "status": "Applied",
+    "date_applied": "2026-02-14T20:08:14.685405"
   }
 }
