@@ -86,7 +86,8 @@ def load_jobs():
 # --- Main App ---
 
 
-df_jobs = load_jobs()
+# Create a copy to prevent mutating the cached object
+df_jobs = load_jobs().copy()
 tracking_data = load_tracking()
 
 if df_jobs.empty:
@@ -179,26 +180,56 @@ with st.sidebar:
         "All": "🗂️ All"
     }
     
+    # Helper for query params compatibility
+    def get_query_param(key, default):
+        if hasattr(st, "query_params"):
+            return st.query_params.get(key, default)
+        elif hasattr(st, "experimental_get_query_params"):
+            params = st.experimental_get_query_params()
+            return params.get(key, [default])[0]
+        return default
+
+    def set_query_param(key, value):
+        if hasattr(st, "query_params"):
+            st.query_params[key] = value
+        elif hasattr(st, "experimental_set_query_params"):
+            st.experimental_set_query_params(**{key: value})
+
+    # Initialize from URL if not in session state
+    if "main_view_filter" not in st.session_state:
+        url_view = get_query_param("view", "Feed")
+        if url_view in view_options:
+            st.session_state.main_view_filter = url_view
+        else:
+            st.session_state.main_view_filter = "Feed"
+
+    def update_view_param():
+        set_query_param("view", st.session_state.main_view_filter)
+
     # Use segmented_control if available (Streamlit 1.39+)
     if hasattr(st, "segmented_control"):
         selected_view = st.segmented_control(
             "Main View",
             options=list(view_options.keys()),
             format_func=lambda x: view_options[x],
-            default="Feed",
             label_visibility="collapsed",
-            key="main_view_filter"
+            key="main_view_filter",
+            on_change=update_view_param
         )
     else:
         # Fallback for older Streamlit
+        # Map string value to index for radio fallback if needed, 
+        # though st.radio with key handles strings internally usually.
+        # But `index` argument is integer.
+        # However, if `key` is present in session_state, `index` is ignored.
         selected_view = st.radio(
             "Main View",
             options=list(view_options.keys()),
             format_func=lambda x: view_options[x],
-            index=0,
             horizontal=True,
             label_visibility="collapsed",
-            key="main_view_filter"
+            key="main_view_filter",
+            on_change=update_view_param
         )
 
     # Contextual filters based on view
@@ -224,6 +255,7 @@ with st.sidebar:
                                   placeholder="e.g. intern, frontend, data...")
 
     # Date range filter
+    date_range = None  # Initialize safely
     if 'date_posted' in df_jobs.columns:
         dates = pd.to_datetime(df_jobs['date_posted'], errors='coerce').dropna()
         if not dates.empty:
@@ -285,7 +317,7 @@ if search_query:
     filtered_df = filtered_df[filtered_df['title'].str.contains(search_query, case=False, na=False)]
 
 # Date range filter
-if 'date_posted' in df_jobs.columns and 'date_range' in locals():
+if 'date_posted' in df_jobs.columns and date_range is not None:
     dates_parsed = pd.to_datetime(filtered_df['date_posted'], errors='coerce')
     if isinstance(date_range, tuple) and len(date_range) == 2:
         start_date, end_date = date_range
