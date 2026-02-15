@@ -131,6 +131,11 @@ locations:
     - "australia"
     - "sydney"
     - "pakistan"
+    - "brussels"
+    - "seoul"
+    - "mumbai"
+    - "osaka"
+    - "kuala lumpur"
 
   include:
     # Strong US Indicators

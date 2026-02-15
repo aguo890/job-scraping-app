@@ -379,8 +379,18 @@ if event.selection:
         selected_indices = list(set(cell[0] for cell in event.selection.cells))
 
 if selected_indices:
-    num_selected = len(selected_indices)
-    selected_ids = filtered_df.iloc[selected_indices]['id'].tolist()
+    # [FIX] Filter out indices that are no longer valid for the current filtered dataframe
+    valid_indices = [i for i in selected_indices if i < len(filtered_df)]
+    
+    if valid_indices:
+        num_selected = len(valid_indices)
+        selected_ids = filtered_df.iloc[valid_indices]['id'].tolist()
+        # Update selected_indices to only valid ones for downstream use if needed, 
+        # though downstream mostly uses selected_ids.
+        selected_indices = valid_indices 
+    else:
+        num_selected = 0
+        selected_ids = []
 
     # Visual Separator
     st.write("")
