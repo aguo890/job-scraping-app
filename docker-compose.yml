@@ -19,6 +19,10 @@ services:
       - "8501:8501"
     volumes:
       - .:/app
+      - ../cv_bridge.py:/app/cv_bridge.py
+      - ../ai_tailor.py:/app/ai_tailor.py
+      # Mount the entire directory to support relative paths/images in the CV
+      - ../rendercv:/app/rendercv
     env_file:
       - .env
     command: streamlit run dashboard.py --server.address=0.0.0.0 --server.headless=true

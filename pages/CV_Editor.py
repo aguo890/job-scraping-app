@@ -1,19 +1,19 @@
-import streamlit as st
-import base64
-import json
-import os
 import sys
-import time
-import re
-from datetime import datetime
+import os
 
-
-# Add parent directory to path for imports (monorepo structure)
+# Add the parent directory (root) to the Python path so we can find cv_bridge.py
+# CV_Editor is in pages/, so we need to go up TWO levels
 current_dir = os.path.dirname(os.path.abspath(__file__))
 parent_dir = os.path.dirname(current_dir)  # job-scraping-app/
 root_dir = os.path.dirname(parent_dir)     # Job-Automation-Suite/
-if root_dir not in sys.path:
-    sys.path.append(root_dir)
+sys.path.insert(0, root_dir)
+
+import streamlit as st
+import base64
+import json
+import time
+import re
+from datetime import datetime
 
 try:
     from cv_bridge import CVOrchestrator
@@ -105,6 +105,7 @@ company = job.get("company", "Unknown Company")
 title = job.get("title", "N/A")
 
 # --- 2. Initialize Orchestrator ---
+# Uses default (Aaron_Guo_CV.yaml) which is mounted at root in Docker
 orchestrator = CVOrchestrator()
 
 # --- 3. Load State (with Job Switch Detection) ---

@@ -1,24 +1,23 @@
+import sys
+import os
+
+# Add the parent directory (root) to the Python path so we can find cv_bridge.py
+current_dir = os.path.dirname(os.path.abspath(__file__))
+parent_dir = os.path.dirname(current_dir)
+sys.path.insert(0, parent_dir)
+
 import streamlit as st
 import pandas as pd
 import json
-import sys
-import os
 import time
 
-# Add parent directory to path to import cv_bridge (for Monorepo structure)
-current_dir = os.path.dirname(os.path.abspath(__file__))
-parent_dir = os.path.dirname(current_dir)
-if parent_dir not in sys.path:
-    sys.path.append(parent_dir)
+# Silence pandas downcasting warning
+pd.set_option('future.no_silent_downcasting', True)
 
 try:
     from cv_bridge import CVOrchestrator
 except ImportError:
-    # Fallback if cv_bridge is in the same directory (during transition)
-    try:
-         from cv_bridge import CVOrchestrator
-    except ImportError:
-         CVOrchestrator = None
+    CVOrchestrator = None
 
 from datetime import datetime
 
@@ -158,7 +157,7 @@ with st.sidebar:
     st.metric("Avg Score", f"{avg_score:.1f}")
 
     if 'date_posted' in df_jobs.columns:
-        dates = pd.to_datetime(df_jobs['date_posted'], errors='coerce').dropna()
+        dates = pd.to_datetime(df_jobs['date_posted'], errors='coerce', format='ISO8601').dropna()
         if not dates.empty:
             st.caption(f"📅 {dates.min().strftime('%b %d')} – {dates.max().strftime('%b %d, %Y')}")
 
@@ -278,7 +277,7 @@ with st.sidebar:
     # Date range filter
     date_range = None  # Initialize safely
     if 'date_posted' in df_jobs.columns:
-        dates = pd.to_datetime(df_jobs['date_posted'], errors='coerce').dropna()
+        dates = pd.to_datetime(df_jobs['date_posted'], errors='coerce', format='ISO8601').dropna()
         if not dates.empty:
             min_date = dates.min().date()
             max_date = dates.max().date()
@@ -339,7 +338,7 @@ if search_query:
 
 # Date range filter
 if 'date_posted' in df_jobs.columns and date_range is not None:
-    dates_parsed = pd.to_datetime(filtered_df['date_posted'], errors='coerce')
+    dates_parsed = pd.to_datetime(filtered_df['date_posted'], errors='coerce', format='ISO8601')
     if isinstance(date_range, tuple) and len(date_range) == 2:
         start_date, end_date = date_range
         mask = (dates_parsed.dt.date >= start_date) & (dates_parsed.dt.date <= end_date)

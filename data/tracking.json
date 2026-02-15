@@ -341,7 +341,10 @@
     "date_applied": "2026-02-14T20:08:14.685405"
   },
   "lever_saronic_fd6beae0-1af2-45d9-ad84-02f48e7ae643": {
-    "saved": true
+    "saved": true,
+    "cv_yaml_path": "C:\\Users\\19803\\Projects\\Job-Automation-Suite\\generated_cvs\\lever_saronic_fd6beae0-1af2-45d9-ad84-02f48e7ae643.yaml",
+    "cv_pdf_path": "C:\\Users\\19803\\Projects\\Job-Automation-Suite\\generated_cvs\\lever_saronic_fd6beae0-1af2-45d9-ad84-02f48e7ae643.pdf",
+    "cv_status": "Tailored"
   },
   "ashby_openai_9d11e1d8-af1d-413b-873f-d8fac2bdee99": {
     "saved": true
@@ -413,6 +416,21 @@
     "saved": true
   },
   "lever_saronic_b910adcf-2270-4cc6-8b1d-369aa5d19d32": {
+    "saved": true
+  },
+  "ashby_openai_77b815de-b7c5-4b87-8582-e8c752aea849": {
+    "saved": true
+  },
+  "lever_zoox_eb2f10b7-300a-46f1-bd35-41167c9f7c63": {
+    "saved": true
+  },
+  "lever_zoox_977b41dc-c766-472e-bf38-c8a1154ca4eb": {
+    "saved": true
+  },
+  "ashby_openai_c02b35b2-af37-4740-a702-2ed3b5dc3cf1": {
+    "saved": true
+  },
+  "ashby_posthog_3a7e914b-a993-46e6-9029-6a0f54652497": {
     "saved": true
   }
 }

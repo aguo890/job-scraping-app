@@ -7,6 +7,7 @@ import re
 import logging
 
 logger = logging.getLogger(__name__)
+from utils.location_filter import is_us_or_remote
 
 class JobProcessor:
     def __init__(self, config_input):
@@ -57,27 +58,9 @@ class JobProcessor:
 
     def is_us_location(self, location):
         """
-        Check if location is US-based or Remote.
-        Adjust logic as needed for specific requirements.
+        Check if location is US-based or Remote using centralized config.
         """
-        if not location:
-            return True # Default to include if unknown? Or False? Assuming True for safety.
-        
-        loc_lower = location.lower()
-        
-        # Allow Remote
-        if "remote" in loc_lower:
-            return True
-            
-        # Allow US locations
-        us_identifiers = ["united states", "usa", "u.s.", "us", "ca", "ny", "tx", "wa", "ma", "nc", "dc", "va"]
-        # Basic check: if any identifier is in the string. 
-        # CAUTION: "us" matches "austin" or "industry". 
-        # Better: check for ", us" or state codes.
-        
-        # Simple permissive check for now since we are scraping US-centric boards mostly
-        # Real logic would be more complex.
-        return True 
+        return is_us_or_remote(location) 
 
     def normalize_date_est(self, date_str):
         """Parse date string to EST datetime"""

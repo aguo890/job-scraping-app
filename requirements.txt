@@ -4,3 +4,6 @@ streamlit
 pandas
 pytz
 aiohttp
+openai
+python-dotenv
+ruamel.yaml
