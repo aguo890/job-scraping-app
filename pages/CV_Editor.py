@@ -4,6 +4,9 @@ import json
 import os
 import sys
 import time
+import re
+from datetime import datetime
+
 
 # Add parent directory to path for imports (monorepo structure)
 current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -123,15 +126,55 @@ with st.sidebar:
             display_path = potential_path
 
     if display_path and os.path.exists(display_path):
+        # Sanitize for filename
+        clean_company = re.sub(r'[^a-zA-Z0-9]', '_', company)
+        clean_title = re.sub(r'[^a-zA-Z0-9]', '_', title)
+        # Collapse multiple underscores
+        clean_company = re.sub(r'_+', '_', clean_company).strip('_')
+        clean_title = re.sub(r'_+', '_', clean_title).strip('_')
+        
+        nice_filename = f"Aaron_Guo_{clean_title}_{clean_company}.pdf"
+        
         with open(display_path, "rb") as f:
             st.download_button(
                 "⬇️ Download PDF",
                 f,
-                file_name=f"{job_id}_CV.pdf",
+                file_name=nice_filename,
                 mime="application/pdf",
                 width="stretch",
                 key=f"dl_{job_id}_{int(time.time())}"
             )
+
+    st.divider()
+
+    # Application Workflow
+    def mark_as_applied(target_id):
+        """Mark job as applied in tracking.json"""
+        tracking_file = os.path.join(parent_dir, "data", "tracking.json")
+        if os.path.exists(tracking_file):
+            try:
+                with open(tracking_file, "r", encoding="utf-8") as f:
+                    data = json.load(f)
+            except json.JSONDecodeError:
+                data = {}
+        else:
+            data = {}
+            
+        if target_id not in data:
+            data[target_id] = {}
+            
+        data[target_id]["status"] = "Applied"
+        data[target_id]["saved"] = True
+        data[target_id]["date_applied"] = datetime.now().isoformat()
+        
+        with open(tracking_file, "w", encoding="utf-8") as f:
+            json.dump(data, f, indent=2)
+
+    if st.button("🚀 Mark as Applied", type="primary", width="stretch", help="Mark as Applied and return to Dashboard"):
+        mark_as_applied(job_id)
+        st.toast("Application Submitted! Returning to Dashboard...", icon="🚀")
+        time.sleep(1.5)
+        st.switch_page("dashboard.py")
 
     st.divider()
 

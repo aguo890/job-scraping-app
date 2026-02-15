@@ -170,6 +170,8 @@ with st.sidebar:
                                         help="Show saved jobs you haven't applied to yet")
     show_applied = st.checkbox("📝 Applied Only", key="filter_applied",
                                 help="Show only jobs you've applied to")
+    show_unapplied = st.checkbox("🆕 Unapplied Only", key="filter_unapplied",
+                                help="Show only jobs you haven't applied to yet")
     hide_rejected = st.checkbox("🚫 Hide Rejected", value=True, key="filter_hide_rejected",
                                  help="Exclude jobs marked as Rejected")
     hide_applied = st.checkbox("🚫 Hide Applied", value=False, key="filter_hide_applied",
@@ -223,6 +225,10 @@ if show_saved_unapplied:
 # Quick filter: Applied Only
 if show_applied:
     filtered_df = filtered_df[filtered_df['Status'] == 'Applied']
+
+# Quick filter: Unapplied Only
+if show_unapplied:
+    filtered_df = filtered_df[filtered_df['Status'] == 'New']
 
 # Hide Rejected
 if hide_rejected:

@@ -279,5 +279,25 @@
   "lever_zoox_c9cbfeeb-450b-47ac-8336-17ee9ab056d4": {
     "saved": true,
     "status": "Applied"
+  },
+  "ashby_whatnot_1928d988-efe2-4868-89b8-4c3f3e26dc44": {
+    "saved": true,
+    "cv_yaml_path": "C:\\Users\\19803\\Projects\\Job-Automation-Suite\\generated_cvs\\ashby_whatnot_1928d988-efe2-4868-89b8-4c3f3e26dc44.yaml",
+    "cv_pdf_path": "C:\\Users\\19803\\Projects\\Job-Automation-Suite\\generated_cvs\\ashby_whatnot_1928d988-efe2-4868-89b8-4c3f3e26dc44.pdf",
+    "cv_status": "Tailored",
+    "status": "Applied",
+    "date_applied": "2026-02-14T18:56:17.532408"
+  },
+  "ashby_openai_282d6a81-412a-4e3a-b588-851ff30ebb50": {
+    "saved": true
+  },
+  "ashby_snowflake_7bd17281-dea7-4701-a035-4814f45dc32d": {
+    "saved": true
+  },
+  "ashby_quora_cb455a21-e66f-4e21-afdf-4511c6c442d1": {
+    "saved": true
+  },
+  "ashby_posthog_20ab9628-20ff-4ae3-bd6a-46ae7e9dc6b8": {
+    "saved": true
   }
 }
