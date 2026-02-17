@@ -355,3 +355,543 @@ companies:
   - name: "Helsing"
     ats: "greenhouse"
     board_token: "helsing"
+
+  # ---------------------------------------------------------
+  # CATEGORY 7: AI / ML FRONTIER (DeepResearch Feb 2026)
+  # ---------------------------------------------------------
+  - name: "xAI"
+    ats: "greenhouse"
+    board_token: "xai"
+
+  - name: "Glean"
+    ats: "greenhouse"
+    board_token: "gleanwork"
+
+  - name: "Descript"
+    ats: "greenhouse"
+    board_token: "descript"
+
+  - name: "Forethought"
+    ats: "greenhouse"
+    board_token: "forethought"
+
+  - name: "LangChain"
+    ats: "ashby"
+    board_url: "https://jobs.ashbyhq.com/langchain"
+
+  - name: "Cohere"
+    ats: "ashby"
+    board_url: "https://jobs.ashbyhq.com/cohere"
+
+  - name: "Nooks"
+    ats: "ashby"
+    board_url: "https://jobs.ashbyhq.com/nooks"
+
+  - name: "SF Tensor"
+    ats: "ashby"
+    board_url: "https://jobs.ashbyhq.com/sf-tensor"
+
+  - name: "UiPath"
+    ats: "ashby"
+    board_url: "https://jobs.ashbyhq.com/uipath"
+
+  # ---------------------------------------------------------
+  # CATEGORY 8: CYBERSECURITY (DeepResearch Feb 2026)
+  # ---------------------------------------------------------
+  - name: "Abnormal Security"
+    ats: "greenhouse"
+    board_token: "abnormalsecurity"
+
+  - name: "Chainguard"
+    ats: "greenhouse"
+    board_token: "chainguard"
+
+  - name: "Cloudflare"
+    ats: "greenhouse"
+    board_token: "cloudflare"
+
+  - name: "Dashlane"
+    ats: "greenhouse"
+    board_token: "dashlane"
+
+  - name: "Safebase"
+    ats: "greenhouse"
+    board_token: "safebase"
+
+  - name: "HackerOne"
+    ats: "ashby"
+    board_url: "https://jobs.ashbyhq.com/hackerone"
+
+  - name: "Chainalysis"
+    ats: "ashby"
+    board_url: "https://jobs.ashbyhq.com/chainalysis"
+
+  - name: "Flock Safety"
+    ats: "ashby"
+    board_url: "https://jobs.ashbyhq.com/Flock%20Safety"
+
+  # ---------------------------------------------------------
+  # CATEGORY 9: DATA INFRASTRUCTURE (DeepResearch Feb 2026)
+  # ---------------------------------------------------------
+  - name: "Checkr"
+    ats: "greenhouse"
+    board_token: "checkr"
+
+  - name: "Fivetran"
+    ats: "greenhouse"
+    board_token: "fivetran"
+
+  - name: "Mode"
+    ats: "greenhouse"
+    board_token: "mode"
+
+  - name: "mParticle"
+    ats: "greenhouse"
+    board_token: "mparticle"
+
+  - name: "Mixpanel"
+    ats: "greenhouse"
+    board_token: "mixpanel"
+
+  - name: "MotherDuck"
+    ats: "ashby"
+    board_url: "https://jobs.ashbyhq.com/MotherDuck"
+
+  - name: "Pinecone"
+    ats: "ashby"
+    board_url: "https://jobs.ashbyhq.com/pinecone"
+
+  - name: "Sentry"
+    ats: "ashby"
+    board_url: "https://jobs.ashbyhq.com/sentry"
+
+  - name: "Rackspace Technology"
+    ats: "lever"
+    board_token: "rackspace"
+
+  - name: "Dun & Bradstreet"
+    ats: "lever"
+    board_token: "dunandbradstreet"
+
+  # ---------------------------------------------------------
+  # CATEGORY 10: DEVELOPER TOOLS (DeepResearch Feb 2026)
+  # ---------------------------------------------------------
+  - name: "Supabase"
+    ats: "greenhouse"
+    board_token: "supabase"
+
+  - name: "Netlify"
+    ats: "greenhouse"
+    board_token: "netlify"
+
+  - name: "Sourcegraph"
+    ats: "greenhouse"
+    board_token: "sourcegraph"
+
+  - name: "Bubble"
+    ats: "greenhouse"
+    board_token: "bubble"
+
+  - name: "Postman"
+    ats: "greenhouse"
+    board_token: "postman"
+
+  - name: "Mapbox"
+    ats: "greenhouse"
+    board_token: "mapbox"
+
+  - name: "PartnerStack"
+    ats: "greenhouse"
+    board_token: "partnerstack"
+
+  - name: "Tray.io"
+    ats: "greenhouse"
+    board_token: "trayio"
+
+  - name: "Ably"
+    ats: "greenhouse"
+    board_token: "ably"
+
+  - name: "Contentful"
+    ats: "greenhouse"
+    board_token: "contentful"
+
+  - name: "Docker"
+    ats: "ashby"
+    board_url: "https://jobs.ashbyhq.com/docker"
+
+  - name: "OutRival"
+    ats: "ashby"
+    board_url: "https://jobs.ashbyhq.com/outrival"
+
+  - name: "Ci&T"
+    ats: "lever"
+    board_token: "cit"
+
+  # ---------------------------------------------------------
+  # CATEGORY 11: FINTECH & PAYMENTS (DeepResearch Feb 2026)
+  # ---------------------------------------------------------
+  - name: "Mercury"
+    ats: "greenhouse"
+    board_token: "mercury"
+
+  - name: "Wise"
+    ats: "greenhouse"
+    board_token: "wise"
+
+  - name: "Ramp"
+    ats: "ashby"
+    board_url: "https://jobs.ashbyhq.com/ramp"
+
+  - name: "Modern Treasury"
+    ats: "ashby"
+    board_url: "https://jobs.ashbyhq.com/modern-treasury"
+
+  - name: "Mollie"
+    ats: "ashby"
+    board_url: "https://jobs.ashbyhq.com/mollie"
+
+  - name: "EvenUp"
+    ats: "ashby"
+    board_url: "https://jobs.ashbyhq.com/evenup"
+
+  - name: "Elliptic"
+    ats: "ashby"
+    board_url: "https://jobs.ashbyhq.com/elliptic"
+
+  - name: "Jerry"
+    ats: "ashby"
+    board_url: "https://jobs.ashbyhq.com/jerry"
+
+  - name: "Mosaic"
+    ats: "ashby"
+    board_url: "https://jobs.ashbyhq.com/mosaic"
+
+  - name: "Paytm"
+    ats: "lever"
+    board_token: "paytm"
+
+  # ---------------------------------------------------------
+  # CATEGORY 12: DEFENSE & SPACE (DeepResearch Feb 2026)
+  # ---------------------------------------------------------
+  - name: "SpaceX"
+    ats: "greenhouse"
+    board_token: "spacex"
+
+  # ---------------------------------------------------------
+  # CATEGORY 13: AI / ML FRONTIER II (DeepResearch Feb 2026)
+  # ---------------------------------------------------------
+  - name: "Character.ai"
+    ats: "ashby"
+    board_url: "https://jobs.ashbyhq.com/character"
+
+  - name: "ElevenLabs"
+    ats: "ashby"
+    board_url: "https://jobs.ashbyhq.com/elevenlabs"
+
+  - name: "Fundamental Research Labs"
+    ats: "ashby"
+    board_url: "https://jobs.ashbyhq.com/fundamentalresearchlabs"
+
+  - name: "Normal Computing"
+    ats: "ashby"
+    board_url: "https://jobs.ashbyhq.com/Normal%20Computing%20AI"
+
+  - name: "Retell AI"
+    ats: "ashby"
+    board_url: "https://jobs.ashbyhq.com/retell-ai"
+
+  - name: "Wordware"
+    ats: "ashby"
+    board_url: "https://jobs.ashbyhq.com/wordware.ai"
+
+  - name: "Writer"
+    ats: "ashby"
+    board_url: "https://jobs.ashbyhq.com/writer"
+
+  - name: "SambaNova Systems"
+    ats: "greenhouse"
+    board_token: "sambanovarecruiting"
+
+  - name: "World Labs"
+    ats: "greenhouse"
+    board_token: "worldlabs"
+
+  - name: "Mistral AI"
+    ats: "lever"
+    board_token: "mistral"
+
+  # ---------------------------------------------------------
+  # CATEGORY 14: CYBERSECURITY II (DeepResearch Feb 2026)
+  # ---------------------------------------------------------
+  - name: "ConductorAI"
+    ats: "ashby"
+    board_url: "https://jobs.ashbyhq.com/conductorai"
+
+  - name: "Seven AI"
+    ats: "ashby"
+    board_url: "https://jobs.ashbyhq.com/sevenai"
+
+  - name: "Endor Labs"
+    ats: "greenhouse"
+    board_token: "endorlabs"
+
+  - name: "Thoropass"
+    ats: "greenhouse"
+    board_token: "thoropass"
+
+  - name: "Torq"
+    ats: "greenhouse"
+    board_token: "torq"
+
+  # ---------------------------------------------------------
+  # CATEGORY 15: DATA INFRASTRUCTURE II (DeepResearch Feb 2026)
+  # ---------------------------------------------------------
+  - name: "Crusoe"
+    ats: "ashby"
+    board_url: "https://jobs.ashbyhq.com/Crusoe"
+
+  - name: "d-Matrix"
+    ats: "ashby"
+    board_url: "https://jobs.ashbyhq.com/d-Matrix"
+
+  - name: "Eventual"
+    ats: "ashby"
+    board_url: "https://jobs.ashbyhq.com/eventualcomputing"
+
+  - name: "Lambda Labs"
+    ats: "ashby"
+    board_url: "https://jobs.ashbyhq.com/lambda"
+
+  - name: "CoreWeave"
+    ats: "greenhouse"
+    board_token: "coreweave"
+
+  - name: "Together AI"
+    ats: "greenhouse"
+    board_token: "togetherai"
+
+  # ---------------------------------------------------------
+  # CATEGORY 16: DEFENSE & SPACE II (DeepResearch Feb 2026)
+  # ---------------------------------------------------------
+  - name: "Arkenstone"
+    ats: "ashby"
+    board_url: "https://jobs.ashbyhq.com/ArkenstoneDefense"
+
+  - name: "Mach Industries"
+    ats: "ashby"
+    board_url: "https://jobs.ashbyhq.com/mach"
+
+  - name: "REGENT"
+    ats: "ashby"
+    board_url: "https://jobs.ashbyhq.com/regent"
+
+  - name: "Valinor"
+    ats: "ashby"
+    board_url: "https://jobs.ashbyhq.com/valinor"
+
+  - name: "Relativity Space"
+    ats: "greenhouse"
+    board_token: "relativity"
+
+  # ---------------------------------------------------------
+  # CATEGORY 17: DEV TOOLS II (DeepResearch Feb 2026)
+  # ---------------------------------------------------------
+  - name: "E2B"
+    ats: "ashby"
+    board_url: "https://jobs.ashbyhq.com/e2b"
+
+  - name: "Stack AI"
+    ats: "ashby"
+    board_url: "https://jobs.ashbyhq.com/stack-ai"
+
+  - name: "vCluster"
+    ats: "ashby"
+    board_url: "https://jobs.ashbyhq.com/vcluster"
+
+  # ---------------------------------------------------------
+  # CATEGORY 18: FINTECH II (DeepResearch Feb 2026)
+  # ---------------------------------------------------------
+  - name: "Saris AI"
+    ats: "ashby"
+    board_url: "https://jobs.ashbyhq.com/saris-ai"
+
+  - name: "SentiLink"
+    ats: "ashby"
+    board_url: "https://jobs.ashbyhq.com/sentilink"
+
+  - name: "Human Interest"
+    ats: "greenhouse"
+    board_token: "humaninterest"
+
+  # ---------------------------------------------------------
+  # CATEGORY 19: ROBOTICS (DeepResearch Feb 2026)
+  # ---------------------------------------------------------
+  - name: "Charge Robotics"
+    ats: "ashby"
+    board_url: "https://jobs.ashbyhq.com/charge-robotics"
+
+  - name: "Orchard Robotics"
+    ats: "ashby"
+    board_url: "https://jobs.ashbyhq.com/orchard"
+
+  - name: "Reflex Robotics"
+    ats: "ashby"
+    board_url: "https://jobs.ashbyhq.com/reflexrobotics"
+
+  - name: "Sunday Robotics"
+    ats: "ashby"
+    board_url: "https://jobs.ashbyhq.com/sunday"
+
+  - name: "Figure AI"
+    ats: "greenhouse"
+    board_token: "figureai"
+
+  # ---------------------------------------------------------
+  # CATEGORY 20: AI & AUTONOMY III (DeepResearch Feb 2026)
+  # ---------------------------------------------------------
+  - name: "Aurora Innovation"
+    ats: "greenhouse"
+    board_token: "aurorainnovation"
+
+  - name: "Durable"
+    ats: "greenhouse"
+    board_token: "durable"
+
+  - name: "Hebbia"
+    ats: "greenhouse"
+    board_token: "hebbia"
+
+  - name: "Prodigal"
+    ats: "greenhouse"
+    board_token: "prodigal"
+
+  - name: "Astera Institute"
+    ats: "ashby"
+    board_url: "https://jobs.ashbyhq.com/astera"
+
+  - name: "Twelve Labs"
+    ats: "ashby"
+    board_url: "https://jobs.ashbyhq.com/twelve-labs"
+
+  - name: "Invisible Technologies"
+    ats: "lever"
+    board_token: "invisible"
+
+  # ---------------------------------------------------------
+  # CATEGORY 21: CYBERSECURITY III (DeepResearch Feb 2026)
+  # ---------------------------------------------------------
+  - name: "Axonius"
+    ats: "greenhouse"
+    board_token: "axonius"
+
+  - name: "CertiK"
+    ats: "lever"
+    board_token: "certik"
+
+  - name: "Spruce Systems"
+    ats: "lever"
+    board_token: "sprucesystems"
+
+  # ---------------------------------------------------------
+  # CATEGORY 22: DATA INFRASTRUCTURE III (DeepResearch Feb 2026)
+  # ---------------------------------------------------------
+  - name: "Neo4j"
+    ats: "greenhouse"
+    board_token: "neo4j"
+
+  - name: "Pure Storage"
+    ats: "greenhouse"
+    board_token: "purestorage"
+
+  - name: "Sigma Computing"
+    ats: "greenhouse"
+    board_token: "sigmacomputing"
+
+  - name: "Zettabyte"
+    ats: "ashby"
+    board_url: "https://jobs.ashbyhq.com/zettabyte-space"
+
+  # ---------------------------------------------------------
+  # CATEGORY 23: DEFENSE & SPACE III (DeepResearch Feb 2026)
+  # ---------------------------------------------------------
+  - name: "Cape"
+    ats: "ashby"
+    board_url: "https://jobs.ashbyhq.com/Cape"
+
+  - name: "Gallatin"
+    ats: "ashby"
+    board_url: "https://jobs.ashbyhq.com/gallatin"
+
+  # ---------------------------------------------------------
+  # CATEGORY 24: DEV TOOLS & SAAS III (DeepResearch Feb 2026)
+  # ---------------------------------------------------------
+  - name: "Front"
+    ats: "ashby"
+    board_url: "https://jobs.ashbyhq.com/frontcareers"
+
+  - name: "Mural"
+    ats: "ashby"
+    board_url: "https://jobs.ashbyhq.com/mural"
+
+  - name: "The Browser Company"
+    ats: "ashby"
+    board_url: "https://jobs.ashbyhq.com/the%20browser%20company"
+
+  - name: "Miter"
+    ats: "ashby"
+    board_url: "https://jobs.ashbyhq.com/miter"
+
+  - name: "Weave"
+    ats: "ashby"
+    board_url: "https://jobs.ashbyhq.com/weave"
+
+  - name: "Aircall"
+    ats: "lever"
+    board_token: "aircall"
+
+  - name: "Mattermost"
+    ats: "lever"
+    board_token: "mattermost"
+
+  # ---------------------------------------------------------
+  # CATEGORY 25: FINTECH & WEB3 III (DeepResearch Feb 2026)
+  # ---------------------------------------------------------
+  - name: "Daylight"
+    ats: "greenhouse"
+    board_token: "daylight"
+
+  - name: "Credit Karma"
+    ats: "greenhouse"
+    board_token: "creditkarma"
+
+  - name: "Magic.dev"
+    ats: "greenhouse"
+    board_token: "magic"
+
+  - name: "Zora"
+    ats: "greenhouse"
+    board_token: "zora"
+
+  - name: "Cardless"
+    ats: "ashby"
+    board_url: "https://jobs.ashbyhq.com/cardless"
+
+  - name: "Middesk"
+    ats: "ashby"
+    board_url: "https://jobs.ashbyhq.com/middesk"
+
+  - name: "Flybits"
+    ats: "lever"
+    board_token: "flybits"
+
+  # ---------------------------------------------------------
+  # CATEGORY 26: HARDWARE & ROBOTICS II (DeepResearch Feb 2026)
+  # ---------------------------------------------------------
+  - name: "Scout Motors"
+    ats: "greenhouse"
+    board_token: "scoutmotors"
+
+  - name: "Formlabs"
+    ats: "lever"
+    board_token: "formlabs"
