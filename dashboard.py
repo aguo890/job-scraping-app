@@ -96,6 +96,25 @@ raw_data = load_jobs_raw()
 
 # Sideboard: Control & Observability
 with st.sidebar:
+    st.title("Job Hunter")
+    st.markdown("---")
+    
+    # --- System Status ---
+    st.markdown("### 🛰️ System Status")
+    if raw_data:
+        st.markdown("🟢 **Live Connection**")
+        generated_at = raw_data.get("generated_at", "Unknown")
+        # Format the ISO string for better readability if possible
+        try:
+            dt = datetime.fromisoformat(generated_at)
+            display_time = dt.strftime("%b %d, %H:%M")
+        except:
+            display_time = generated_at
+        st.caption(f"Last Scraped: {display_time}")
+    else:
+        st.markdown("🔴 **Offline / No Data**")
+    st.markdown("---")
+
     st.header("⚙️ Controls")
     if st.button("🔄 Force Refresh Data", type="primary", use_container_width=True):
         load_jobs_raw.clear()
@@ -103,9 +122,7 @@ with st.sidebar:
         st.rerun()
     
     if raw_data:
-        generated_at = raw_data.get("generated_at", "Unknown")
         total_count = raw_data.get("total_jobs", 0)
-        st.caption(f"📅 Last Scraped: {generated_at}")
         st.caption(f"🗃️ Total Aggregated: {total_count}")
     st.divider()
 

@@ -21,16 +21,30 @@ class JobReporter:
         os.makedirs(self.output_dir, exist_ok=True)
         os.makedirs(self.report_dir, exist_ok=True)
     
-    def save_jobs_json(self, jobs: List[Dict[str, Any]]) -> str:
-        """Save jobs to JSON file atomically"""
+    def save_jobs_json(self, jobs_list: List[Dict[str, Any]]) -> str:
+        """Save jobs to JSON file atomically after strict validation"""
+        from utils.schemas import JobListing
         output_file = os.path.join(self.output_dir, "jobs_agg.json")
         
+        # Final pre-save validation/sanitization loop
+        validated_jobs = []
+        for job_data in jobs_list:
+             try:
+                 # Instantiate schema from dict
+                 # Using key mapping if necessary, but here our dicts match the schema
+                 job = JobListing(**job_data)
+                 job.sanitize()
+                 if job.is_valid():
+                     validated_jobs.append(job.to_dict())
+             except Exception as e:
+                 logger.warning(f"Skipping malformed job during reporter validation: {e}")
+
         try:
             # Prepare data for JSON serialization
             json_data = {
                 'generated_at': datetime.now().isoformat(),
-                'total_jobs': len(jobs),
-                'jobs': jobs
+                'total_jobs': len(validated_jobs),
+                'jobs': validated_jobs
             }
             
             # Atomic write pattern

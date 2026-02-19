@@ -8,6 +8,7 @@ from typing import List, Dict, Any, Optional
 
 from utils.network import SafeSession
 from utils.smart_filter import job_filter
+from utils.schemas import JobListing
 
 logger = logging.getLogger(__name__)
 
@@ -43,19 +44,24 @@ class GreenhouseFetcher:
             if not is_good:
                 continue
 
-            normalized_jobs.append({
-                'id': f"gh_{board_token}_{job.get('id')}",
-                'title': title,
-                'company': company_name,
-                'location': location,
-                'url': job.get('absolute_url', ''),
-                'description': job.get('content', ''),
-                'date_posted': job.get('updated_at', ''),
-                'source': 'greenhouse',
-                'score': score,
-                'match_reason': reason,
-                'raw_data': job
-            })
+            job_obj = JobListing(
+                id=f"gh_{board_token}_{job.get('id')}",
+                title=title,
+                company=company_name,
+                location=location,
+                url=job.get('absolute_url', ''),
+                description=job.get('content', ''),
+                date_posted=job.get('updated_at', ''),
+                source='greenhouse',
+                score=score,
+                match_reason=reason,
+                raw_data=job
+            )
+            
+            # 3. Sanitize and Validate
+            job_obj.sanitize()
+            if job_obj.is_valid():
+                normalized_jobs.append(job_obj.to_dict())
         
         # Sort by score (descending) so best jobs appear first
         normalized_jobs.sort(key=lambda x: x['score'], reverse=True)
@@ -107,19 +113,24 @@ class LeverFetcher:
             if not is_good:
                 continue
 
-            normalized_jobs.append({
-                'id': f"lever_{board_token}_{job.get('id')}",
-                'title': title,
-                'company': company_name,
-                'location': location,
-                'url': job.get('hostedUrl', ''),
-                'description': job.get('description', ''),
-                'date_posted': job.get('createdAt', ''),
-                'source': 'lever',
-                'score': score,
-                'match_reason': reason,
-                'raw_data': job
-            })
+            job_obj = JobListing(
+                id=f"lever_{board_token}_{job.get('id')}",
+                title=title,
+                company=company_name,
+                location=location,
+                url=job.get('hostedUrl', ''),
+                description=job.get('description', ''),
+                date_posted=job.get('createdAt', ''),
+                source='lever',
+                score=score,
+                match_reason=reason,
+                raw_data=job
+            )
+            
+            # 3. Sanitize & Validate
+            job_obj.sanitize()
+            if job_obj.is_valid():
+                normalized_jobs.append(job_obj.to_dict())
         
         # Sort by score (descending)
         normalized_jobs.sort(key=lambda x: x['score'], reverse=True)
@@ -156,33 +167,38 @@ class AshbyFetcher:
             
         normalized_jobs = []
         for job in jobs:
-             title = job.get('title', '').strip()
-             location = job.get('location', job.get('locationName', ''))
-             if not location:
-                 location = job.get('address', {}).get('placeName', '')
-             
-             # 1. Location Filter
-             if not job_filter.is_valid_location(location):
-                continue
+            title = job.get('title', '').strip()
+            location = job.get('location', job.get('locationName', ''))
+            if not location:
+                location = job.get('address', {}).get('placeName', '')
             
-             # 2. Title Filter & Scoring
-             is_good, score, reason = job_filter.check_eligibility(title)
-             if not is_good:
-                 continue
+            # 1. Location Filter
+            if not job_filter.is_valid_location(location):
+                continue
+           
+            # 2. Title Filter & Scoring
+            is_good, score, reason = job_filter.check_eligibility(title)
+            if not is_good:
+                continue
 
-             normalized_jobs.append({
-                'id': f"ashby_{company_slug}_{job.get('id', job.get('jobId', ''))}",
-                'title': title,
-                'company': company_name,
-                'location': location,
-                'url': job.get('jobUrl', f"{board_url}/{job.get('id', '')}"),
-                'description': job.get('description', job.get('descriptionHtml', '')),
-                'date_posted': job.get('publishedDate', job.get('createdAt', '')),
-                'source': 'ashby',
-                'score': score,
-                'match_reason': reason,
-                'raw_data': job
-            })
+            job_obj = JobListing(
+                id=f"ashby_{company_slug}_{job.get('id', job.get('jobId', ''))}",
+                title=title,
+                company=company_name,
+                location=location,
+                url=job.get('jobUrl', f"{board_url}/{job.get('id', '')}"),
+                description=job.get('description', job.get('descriptionHtml', '')),
+                date_posted=job.get('publishedDate', job.get('createdAt', '')),
+                source='ashby',
+                score=score,
+                match_reason=reason,
+                raw_data=job
+            )
+            
+            # 3. Sanitize & Validate
+            job_obj.sanitize()
+            if job_obj.is_valid():
+                normalized_jobs.append(job_obj.to_dict())
         
         # Sort by score (descending)
         normalized_jobs.sort(key=lambda x: x['score'], reverse=True)
