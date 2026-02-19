@@ -121,9 +121,9 @@ async def main():
             return 0
         
         # Generate reports (DISABLED)
-        logger.info("Skipping Report Generation...")
-        # report_files = reporter.generate_reports(processed_jobs) 
-        report_files = {} 
+        logger.info("Generating reports...")
+        report_files = reporter.generate_reports(processed_jobs) 
+        # report_files = {} 
         
         # AI Analysis (DISABLED)
         logger.info("Skipping AI analysis (disabled)...")
@@ -157,10 +157,20 @@ async def main():
         return 1
 
 
-if __name__ == "__main__":
+def run_scraper():
+    """Wrapper for the main async execution"""
     if sys.platform == 'win32':
         asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
     try:
-        sys.exit(asyncio.run(main()))
+        # Use asyncio.run handling for the main entry point
+        return asyncio.run(main())
     except KeyboardInterrupt:
         pass
+    except Exception as e:
+        # Log any top-level errors not caught inside main()
+        logging.getLogger().error(f"Top-level error in scraper: {e}", exc_info=True)
+        return 1
+    return 0
+
+if __name__ == "__main__":
+    sys.exit(run_scraper())

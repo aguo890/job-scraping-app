@@ -22,7 +22,7 @@ class JobReporter:
         os.makedirs(self.report_dir, exist_ok=True)
     
     def save_jobs_json(self, jobs: List[Dict[str, Any]]) -> str:
-        """Save jobs to JSON file"""
+        """Save jobs to JSON file atomically"""
         output_file = os.path.join(self.output_dir, "jobs_agg.json")
         
         try:
@@ -33,14 +33,27 @@ class JobReporter:
                 'jobs': jobs
             }
             
-            with open(output_file, 'w', encoding='utf-8') as f:
-                json.dump(json_data, f, indent=2, ensure_ascii=False)
+            # Atomic write pattern
+            import tempfile
+            temp_dir = os.path.dirname(output_file)
+            os.makedirs(temp_dir, exist_ok=True)
+            
+            with tempfile.NamedTemporaryFile('w', dir=temp_dir, delete=False, encoding='utf-8') as tf:
+                json.dump(json_data, tf, indent=2, ensure_ascii=False)
+                temp_name = tf.name
+                tf.flush()
+                os.fsync(tf.fileno())
+                
+            # Atomic replace
+            os.replace(temp_name, output_file)
             
             logger.info(f"Saved {len(jobs)} jobs to {output_file}")
             return output_file
         
         except Exception as e:
             logger.error(f"Error saving jobs to JSON: {e}")
+            if 'temp_name' in locals() and os.path.exists(temp_name):
+                os.remove(temp_name)
             raise
     
     def generate_markdown_report(self, jobs: List[Dict[str, Any]]) -> str:

@@ -1,0 +1,10 @@
+# Lightweight requirements for background scraper
+requests==2.31.0
+PyYAML==6.0.1
+pytz
+aiohttp
+openai
+python-dotenv
+ruamel.yaml
+schedule==1.2.1
+python-dateutil
