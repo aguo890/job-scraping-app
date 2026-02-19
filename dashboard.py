@@ -59,12 +59,19 @@ def save_tracking(data):
     with open(TRACKING_FILE, 'w', encoding='utf-8') as f:
         json.dump(data, f, indent=2)
 
-@st.cache_data
-def load_jobs():
+@st.cache_data(ttl=900)
+def load_jobs_raw():
     if not os.path.exists(JOB_DATA_FILE):
+        return None
+    try:
+        with open(JOB_DATA_FILE, "r", encoding='utf-8') as f:
+            return json.load(f)
+    except (json.JSONDecodeError, FileNotFoundError):
+        return None
+
+def load_jobs_df(data):
+    if not data:
         return pd.DataFrame()
-    with open(JOB_DATA_FILE, "r", encoding='utf-8') as f:
-        data = json.load(f)
     jobs = data.get("jobs", [])
     if not jobs:
         return pd.DataFrame()
@@ -84,13 +91,35 @@ def load_jobs():
 
 # --- Main App ---
 
+# Load Raw Data (Cached with TTL)
+raw_data = load_jobs_raw()
+
+# Sideboard: Control & Observability
+with st.sidebar:
+    st.header("⚙️ Controls")
+    if st.button("🔄 Force Refresh Data", type="primary", use_container_width=True):
+        load_jobs_raw.clear()
+        st.cache_data.clear()
+        st.rerun()
+    
+    if raw_data:
+        generated_at = raw_data.get("generated_at", "Unknown")
+        total_count = raw_data.get("total_jobs", 0)
+        st.caption(f"📅 Last Scraped: {generated_at}")
+        st.caption(f"🗃️ Total Aggregated: {total_count}")
+    st.divider()
+
+if not raw_data:
+    st.warning("⚠️ Waiting for the background scraper to complete its first run. Please check back in a few minutes.")
+    st.info("💡 You can check the logs for progress.")
+    st.stop()
 
 # Create a copy to prevent mutating the cached object
-df_jobs = load_jobs().copy()
+df_jobs = load_jobs_df(raw_data).copy()
 tracking_data = load_tracking()
 
 if df_jobs.empty:
-    st.warning("No jobs found yet. Run the scraper!")
+    st.warning("No jobs found in the aggregation file. Run the scraper!")
     st.stop()
 
 # --- Merge Data ---
@@ -165,9 +194,6 @@ with st.sidebar:
 
     # --- Filters ---
     st.header("Filters")
-    if st.button("🔄 Refresh Data", type="primary"):
-        st.cache_data.clear()
-        st.rerun()
 
     # --- Quick Filter Shortcuts ---
     st.subheader("Main View", divider="gray")
