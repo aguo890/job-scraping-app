@@ -1,4 +1,4 @@
-from dataclasses import dataclass, asdict
+from dataclasses import dataclass, asdict, field
 import logging
 import re
 from typing import Optional, Dict, Any
@@ -17,7 +17,16 @@ class JobListing:
     source: Optional[str] = "Unknown"
     score: float = 0.0
     match_reason: Optional[str] = ""
-    raw_data: Optional[Dict[str, Any]] = None
+    raw_data: Dict[str, Any] = field(default_factory=dict)
+    
+    @classmethod
+    def from_dict(cls, data: Dict[str, Any]) -> "JobListing":
+        """Factory method to create a JobListing while ignoring extra/unexpected fields."""
+        # Get all defined field names in the dataclass
+        valid_fields = {f.name for f in cls.__dataclass_fields__.values()}
+        # Filter the input data
+        filtered_data = {k: v for k, v in data.items() if k in valid_fields}
+        return cls(**filtered_data)
 
     def is_valid(self) -> bool:
         """Check for required fields and log if missing to prevent silent data loss."""

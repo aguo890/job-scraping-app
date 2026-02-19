@@ -8,3 +8,4 @@ python-dotenv
 ruamel.yaml
 schedule==1.2.1
 python-dateutil
+pytest

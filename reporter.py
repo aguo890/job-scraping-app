@@ -32,7 +32,7 @@ class JobReporter:
              try:
                  # Instantiate schema from dict
                  # Using key mapping if necessary, but here our dicts match the schema
-                 job = JobListing(**job_data)
+                 job = JobListing.from_dict(job_data)
                  job.sanitize()
                  if job.is_valid():
                      validated_jobs.append(job.to_dict())
@@ -61,7 +61,7 @@ class JobReporter:
             # Atomic replace
             os.replace(temp_name, output_file)
             
-            logger.info(f"Saved {len(jobs)} jobs to {output_file}")
+            logger.info(f"Saved {len(validated_jobs)} jobs to {output_file}")
             return output_file
         
         except Exception as e:

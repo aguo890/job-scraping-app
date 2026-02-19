@@ -67,7 +67,7 @@ preferred_skills:
 # 4. Global Filtering Settings
 filtering:
   is_enabled: true
-  max_years_experience: 2  # Jobs requiring more than 3 years will be skipped
+  max_years_experience: 3  # Jobs requiring more than 3 years will be skipped
 
 # 5. HARD NEGATIVE FILTERS — Title-based instant reject
 title_blocklist:

@@ -44,19 +44,19 @@ class GreenhouseFetcher:
             if not is_good:
                 continue
 
-            job_obj = JobListing(
-                id=f"gh_{board_token}_{job.get('id')}",
-                title=title,
-                company=company_name,
-                location=location,
-                url=job.get('absolute_url', ''),
-                description=job.get('content', ''),
-                date_posted=job.get('updated_at', ''),
-                source='greenhouse',
-                score=score,
-                match_reason=reason,
-                raw_data=job
-            )
+            job_obj = JobListing.from_dict({
+                'id': f"gh_{board_token}_{job.get('id')}",
+                'title': title,
+                'company': company_name,
+                'location': location,
+                'url': job.get('absolute_url', ''),
+                'description': job.get('content', ''),
+                'date_posted': job.get('updated_at', ''),
+                'source': 'greenhouse',
+                'score': score,
+                'match_reason': reason,
+                'raw_data': job
+            })
             
             # 3. Sanitize and Validate
             job_obj.sanitize()
@@ -113,19 +113,19 @@ class LeverFetcher:
             if not is_good:
                 continue
 
-            job_obj = JobListing(
-                id=f"lever_{board_token}_{job.get('id')}",
-                title=title,
-                company=company_name,
-                location=location,
-                url=job.get('hostedUrl', ''),
-                description=job.get('description', ''),
-                date_posted=job.get('createdAt', ''),
-                source='lever',
-                score=score,
-                match_reason=reason,
-                raw_data=job
-            )
+            job_obj = JobListing.from_dict({
+                'id': f"lever_{board_token}_{job.get('id')}",
+                'title': title,
+                'company': company_name,
+                'location': location,
+                'url': job.get('hostedUrl', ''),
+                'description': job.get('description', ''),
+                'date_posted': job.get('createdAt', ''),
+                'source': 'lever',
+                'score': score,
+                'match_reason': reason,
+                'raw_data': job
+            })
             
             # 3. Sanitize & Validate
             job_obj.sanitize()
@@ -181,19 +181,19 @@ class AshbyFetcher:
             if not is_good:
                 continue
 
-            job_obj = JobListing(
-                id=f"ashby_{company_slug}_{job.get('id', job.get('jobId', ''))}",
-                title=title,
-                company=company_name,
-                location=location,
-                url=job.get('jobUrl', f"{board_url}/{job.get('id', '')}"),
-                description=job.get('description', job.get('descriptionHtml', '')),
-                date_posted=job.get('publishedDate', job.get('createdAt', '')),
-                source='ashby',
-                score=score,
-                match_reason=reason,
-                raw_data=job
-            )
+            job_obj = JobListing.from_dict({
+                'id': f"ashby_{company_slug}_{job.get('id', job.get('jobId', ''))}",
+                'title': title,
+                'company': company_name,
+                'location': location,
+                'url': job.get('jobUrl', f"{board_url}/{job.get('id', '')}"),
+                'description': job.get('description', job.get('descriptionHtml', '')),
+                'date_posted': job.get('publishedDate', job.get('createdAt', '')),
+                'source': 'ashby',
+                'score': score,
+                'match_reason': reason,
+                'raw_data': job
+            })
             
             # 3. Sanitize & Validate
             job_obj.sanitize()
