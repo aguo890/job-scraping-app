@@ -19,6 +19,17 @@ titles:
     - "Associate"
     - "2026"
     - "Early Career"
+    - "Linesight"
+    - "ERP"
+    - "PLC"
+    - "MES"
+    - "Manufacturing"
+    - "Industry 4.0"
+    - "IIoT"
+    - "SCADA"
+    - "Automation"
+    - "Digital Twin"
+    - "Supply Chain"
 
   # Score: Instant Reject
   exclude:
@@ -59,7 +70,6 @@ titles:
     - "Technician"
     - "Mechanical"
     - "Electrical"
-    - "Manufacturing"
 
 # --- LOCATION LOGIC ---
 locations:
@@ -174,3 +184,12 @@ preferred_skills:
   - "FastAPI"
   - "PostgreSQL"
   - "Data Engineering"
+  - "Linesight"
+  - "ERP"
+  - "PLC"
+  - "MES"
+  - "Manufacturing"
+  - "SCADA"
+  - "Industry 4.0"
+  - "IIoT"
+  - "Smart Factory"

@@ -10,6 +10,17 @@ keywords:
     - "Associate"
     - "2026"
     - "Early Career"
+    - "Linesight"
+    - "ERP"
+    - "PLC"
+    - "MES"
+    - "Manufacturing"
+    - "Industry 4.0"
+    - "IIoT"
+    - "SCADA"
+    - "Automation"
+    - "Digital Twin"
+    - "Supply Chain"
 
   # 2. BAN these words (Remove from list entirely)
   exclude:
@@ -63,11 +74,20 @@ preferred_skills:
   - "Next.js"
   - "Node.js"
   - "Vite"
+  - "Linesight"
+  - "ERP"
+  - "PLC"
+  - "MES"
+  - "Manufacturing"
+  - "SCADA"
+  - "Industry 4.0"
+  - "IIoT"
+  - "Smart Factory"
 
 # 4. Global Filtering Settings
 filtering:
   is_enabled: true
-  max_years_experience: 3  # Jobs requiring more than 3 years will be skipped
+  max_years_experience: 2  # Jobs requiring more than 3 years will be skipped
 
 # 5. HARD NEGATIVE FILTERS — Title-based instant reject
 title_blocklist:
@@ -81,16 +101,13 @@ title_blocklist:
   - "Master's"
 
   # Domain Mismatch (You are Python/React/SQL, not hardware/mobile/research)
-  - "Hardware"
-  - "Firmware"
-  - "Embedded"
+  - "Hardware Engineering"
+  - "Mechanical"
+  - "Electrical Engineer"
   - "iOS"
   - "Android"
   - "FPGA"
   - "ASIC"
-  - "Perception"
-  - "Robotics"
-  - "Computer Vision"
 
 # 6. SOFT NEGATIVE FILTERS — Penalty when description screams wrong stack
 # Score: -3 points each
@@ -103,9 +120,6 @@ penalty_skills:
   - "Assembly"
   - "ROS"
   - "CUDA"
-  - "C++"
   - "Ruby on Rails"
   - "Golang"
-  - "C#"
-  - "C"
   - "Rust"

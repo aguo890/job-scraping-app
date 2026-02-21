@@ -29,25 +29,22 @@ class JobProcessor:
         """
         Extracts the minimum years of experience required from text.
         Returns the highest 'minimum' found, or 0 if none.
+        Uses a restrictive regex to avoid false positives (e.g. years like 2026).
         """
-        # Pattern explanation:
-        # 1. Look for digits (\d+)
-        # 2. Optional: Allow '3+' or '3-5' format
-        # 3. Anchor to the word 'year' or 'yrs'
-        # 4. robustly ignore 'HTML5' or 'Windows 10' by ensuring word boundaries
-        
-        # Matches: "5+ years", "3-5 years", "minimum of 4 years", "at least 2 years"
-        pattern = r'(?i)(?:min|minimum|at least)?\s*(\d+)\s*(?:[-–]\s*\d+)?\+?\s*y(?:ea)?rs?'
-        
-        matches = re.findall(pattern, text)
-        
-        # Filter out likely false positives (e.g., years > 15 usually implies data noise)
-        valid_years = [int(m) for m in matches if int(m) < 15]
-        
-        if not valid_years:
+        if not text:
             return 0
             
-        # If multiple requirements found, use the HIGHEST minimum
+        # Restrictive pattern: matches 1-15 years/yrs followed by experience/work context
+        pattern = r'\b([1-9]|1[0-5])\+?\s*(?:-\s*[1-9]\d*\s*)?(?:years?|yrs?)(?:\s+of\s+)?(?:experience|work)\b'
+        
+        matches = re.findall(pattern, text, re.IGNORECASE)
+        
+        if not matches:
+            return 0
+            
+        # Extract the numbers from matches
+        valid_years = [int(m) for m in matches]
+        
         return max(valid_years)
 
     def normalize_location(self, location):
@@ -143,31 +140,58 @@ class JobProcessor:
                 logger.info(f"Excluding job: {job['title']} (Title Blocklist)")
                 continue
 
-            # 3. EXPERIENCE FILTER (New Feature)
+            # 3. EXPERIENCE FILTER (Improved)
             if not is_applied and is_filter_enabled:
-                full_text = f"{job['title']} {description_text}"
-                required_exp = self.extract_min_years_experience(full_text)
+                # 3a. Title-Strict Bypass (Priority Acceptance)
+                # Check title for keywords that imply entry-level, regardless of description text
+                bypass_keywords = ['intern', 'new grad', 'entry level', 'university grad', 'junior']
+                if any(kw in title_lower for kw in bypass_keywords):
+                    logger.info(f"Priority Accepted: {job['title']} bypassed YOE check (Title match).")
+                    required_exp = 0
+                else:
+                    # 3b. Structured data check (Future/Resilience)
+                    # For now, we fall back to regex on description
+                    required_exp = self.extract_min_years_experience(description_text)
+                
                 if required_exp > max_exp:
                     logger.info(f"Skipping {job['title']}: Requires {required_exp} years (Limit: {max_exp})")
                     continue
 
             # 4. SCORING LOGIC
-            score = 0
+            base_score = 0
             
             # Boost for "Intern/New Grad" (High Priority)
             if any(good_word in title_lower for good_word in high_priority):
-                score += 20  # Huge boost for internships
+                base_score += 20  # Huge boost for internships
             
             # Boost for standard Engineering terms
             if "software" in title_lower or "engineer" in title_lower or "developer" in title_lower:
-                score += 5
+                base_score += 5
                 
-            # Boost for Skill Matches (Keyword Matcher)
-            matches = 0
+            # Boost for Skill Matches & Domain Intersection
+            tech_hits = 0
+            domain_hits = 0
+            domain_keywords = {
+                "linesight", "erp", "plc", "mes", "manufacturing", "scada", 
+                "industry 4.0", "iiot", "smart factory", "automation", 
+                "digital twin", "supply chain"
+            }
+            
             for skill in preferred_skills:
                 if skill in description_lower or skill in title_lower:
-                    matches += 1
-                    score += 5
+                    if skill in domain_keywords:
+                        domain_hits += 1
+                        base_score += 15
+                    else:
+                        tech_hits += 1
+                        base_score += 10
+            
+            # Apply the Intersection Multiplier (The "Linesight" Boost)
+            if tech_hits > 0 and domain_hits > 0:
+                multiplier = 1.5 + (0.1 * min(tech_hits, domain_hits))
+                score = int(base_score * multiplier)
+            else:
+                score = base_score
             
             # Penalty for wrong-stack skills (Soft Negative)
             for penalty in penalty_skills:

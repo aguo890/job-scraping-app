@@ -48,8 +48,26 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # --- 1. Navigation Guard (with URL persistence) ---
+SPECIAL_ROUTING_JOBS = {
+    "master_cv": {
+        "id": "master_cv",
+        "company": "[SYSTEM] MASTER RECORD",
+        "title": "Base CV",
+        "is_master": True
+    },
+    "playground": {
+        "id": "playground",
+        "company": "[SYSTEM] PLAYGROUND",
+        "title": "Scratch Pad",
+        "is_playground": True
+    }
+}
+
 def load_job_by_id(job_id):
     """Look up a job from jobs_agg.json by its id."""
+    if job_id in SPECIAL_ROUTING_JOBS:
+        return SPECIAL_ROUTING_JOBS[job_id]
+
     jobs_file = os.path.join(parent_dir, "data", "jobs_agg.json")
     if not os.path.exists(jobs_file):
         return None
@@ -97,22 +115,12 @@ else:
     with col_master:
         st.write("Edit the **Master CV Source** directly. Changes affect all future CV generations.")
         if st.button("🛠️ Edit Master CV Source", type="secondary", use_container_width=True):
-            st.session_state["active_job"] = {
-                "id": "master_cv",
-                "company": "MASTER RECORD",
-                "title": "Base CV",
-                "is_master": True
-            }
+            st.session_state["active_job"] = SPECIAL_ROUTING_JOBS["master_cv"]
             st.rerun()
     with col_playground:
         st.write("Open a **Playground** to draft a CV from your template without affecting anything.")
         if st.button("🧪 Playground", type="secondary", use_container_width=True):
-            st.session_state["active_job"] = {
-                "id": "playground",
-                "company": "PLAYGROUND",
-                "title": "Scratch Pad",
-                "is_playground": True
-            }
+            st.session_state["active_job"] = SPECIAL_ROUTING_JOBS["playground"]
             st.rerun()
 
     st.markdown("---")
