@@ -43,7 +43,12 @@
     "status": "Rejected"
   },
   "gh_bandwidth_7539143": {
-    "saved": false
+    "saved": true,
+    "cv_yaml_path": "/app/generated_cvs/gh_bandwidth_7539143.yaml",
+    "cv_pdf_path": "/app/generated_cvs/gh_bandwidth_7539143.pdf",
+    "cv_status": "Tailored",
+    "status": "Applied",
+    "date_applied": "2026-02-22T00:39:03.797635"
   },
   "gh_bandwidth_7455377": {
     "saved": false
@@ -378,7 +383,12 @@
     "saved": true
   },
   "ashby_snowflake_c592250a-6041-4c40-aa82-1d947e3494da": {
-    "saved": true
+    "saved": true,
+    "cv_yaml_path": "/app/generated_cvs/ashby_snowflake_c592250a-6041-4c40-aa82-1d947e3494da.yaml",
+    "cv_pdf_path": "/app/generated_cvs/ashby_snowflake_c592250a-6041-4c40-aa82-1d947e3494da.pdf",
+    "cv_status": "Tailored",
+    "status": "Applied",
+    "date_applied": "2026-02-22T00:27:43.754875"
   },
   "lever_zoox_db76eba1-18cb-41f1-ab7e-f4ace0085a68": {
     "saved": true
@@ -495,7 +505,12 @@
     "date_applied": "2026-02-15T02:09:23.888444"
   },
   "lever_sprucesystems_c683a712-7a5a-4bed-b580-f899998f044a": {
-    "saved": true
+    "saved": true,
+    "cv_yaml_path": "/app/generated_cvs/lever_sprucesystems_c683a712-7a5a-4bed-b580-f899998f044a.yaml",
+    "cv_pdf_path": "/app/generated_cvs/lever_sprucesystems_c683a712-7a5a-4bed-b580-f899998f044a.pdf",
+    "cv_status": "Tailored",
+    "status": "Applied",
+    "date_applied": "2026-02-22T00:24:28.696516"
   },
   "gh_checkr_7575425": {
     "saved": true
@@ -507,7 +522,12 @@
     "saved": true
   },
   "ashby_Flock%20Safety_88a80dbf-1627-420a-a087-1bc8edc894e0": {
-    "saved": true
+    "saved": true,
+    "cv_yaml_path": "/app/generated_cvs/ashby_Flock%20Safety_88a80dbf-1627-420a-a087-1bc8edc894e0.yaml",
+    "cv_pdf_path": "/app/generated_cvs/ashby_Flock%20Safety_88a80dbf-1627-420a-a087-1bc8edc894e0.pdf",
+    "cv_status": "Tailored",
+    "status": "Applied",
+    "date_applied": "2026-02-22T00:32:19.149055"
   },
   "ashby_zapier_15a66155-32c2-466a-a6cb-7cf554727d11": {
     "status": "Applied",
@@ -515,6 +535,21 @@
     "date_applied": "2026-02-21T22:48:42.833515"
   },
   "ashby_uipath_f20f998f-c3af-4ec3-a755-3edffa82c3c7": {
-    "saved": true
+    "saved": true,
+    "cv_yaml_path": "/app/generated_cvs/ashby_uipath_f20f998f-c3af-4ec3-a755-3edffa82c3c7.yaml",
+    "cv_pdf_path": "/app/generated_cvs/ashby_uipath_f20f998f-c3af-4ec3-a755-3edffa82c3c7.pdf",
+    "cv_status": "Tailored",
+    "status": "Applied",
+    "date_applied": "2026-02-22T00:14:28.652507"
+  },
+  "gh_scoutmotors_5050098007": {
+    "status": "Applied",
+    "saved": true,
+    "date_applied": "2026-02-22T00:36:57.699299"
+  },
+  "gh_scoutmotors_4952338007": {
+    "status": "Applied",
+    "saved": true,
+    "date_applied": "2026-02-22T00:42:40.807104"
   }
 }

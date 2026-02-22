@@ -162,11 +162,17 @@ if st.session_state["current_editing_job_id"] != job_id:
 if "editor_yaml" not in st.session_state:
     st.session_state["editor_yaml"] = orchestrator.load_job_cv(job_id)
 
+if "is_rendering" not in st.session_state:
+    st.session_state["is_rendering"] = False
+
+if st.session_state.pop("render_success_toast", False):
+    st.toast("✅ Render Complete! 📄")
+
 # --- SIDEBAR: Job Info, Navigation, Render, Download, AI Tools ---
 with st.sidebar:
     if is_master:
         st.header("🛠️ MASTER CV")
-        st.warning("⚠️ You are editing the Master CV source. Changes affect **all** future generations.", icon="⚠️")
+        st.warning("You are editing the Master CV source. Changes affect **all** future generations.", icon="⚠️")
     elif is_playground:
         st.header("🧪 PLAYGROUND")
         st.info("Temporary workspace. Your master CV is safe.", icon="🧪")
@@ -187,7 +193,7 @@ with st.sidebar:
     st.divider()
 
     # Render button
-    render_clicked = st.button("🔄 Render PDF", type="primary", width="stretch")
+    render_clicked = st.button("🔄 Render PDF", type="primary", width="stretch", disabled=st.session_state["is_rendering"])
     st.caption("*Or press Ctrl+Enter in the editor*")
 
     # Download button (if PDF exists)
@@ -206,15 +212,18 @@ with st.sidebar:
         clean_title = re.sub(r'_+', '_', clean_title).strip('_')
         
         nice_filename = f"Aaron_Guo_{clean_title}_{clean_company}.pdf"
+        mtime = int(os.path.getmtime(display_path))
         
         with open(display_path, "rb") as f:
+            pdf_data = f.read()
             st.download_button(
-                "⬇️ Download PDF",
-                f,
+                "⏳ Rendering..." if st.session_state["is_rendering"] else "⬇️ Download PDF",
+                data=pdf_data,
                 file_name=nice_filename,
                 mime="application/pdf",
                 width="stretch",
-                key=f"dl_{job_id}_{int(time.time())}"
+                key=f"dl_{job_id}_{mtime}",
+                disabled=st.session_state["is_rendering"]
             )
 
     # Reset Button
@@ -233,7 +242,7 @@ with st.sidebar:
                 st.session_state["editor_yaml"] = base_content
                 st.session_state["yaml_editor"] = base_content # Force widget update
                 st.session_state["current_editing_job_id"] = job_id  # Ensure synced
-                st.success("Reverted to Master CV!")
+                st.toast("Reverted to Master CV! 🔄")
                 time.sleep(1)
                 st.rerun()
             else:
@@ -296,7 +305,7 @@ with st.sidebar:
                     st.session_state["ai_strategy"] = strategy
                     st.session_state["ai_reasoning"] = reasoning
                     orchestrator.save_job_cv(job_id, new_yaml)
-                    st.success("AI updates applied!")
+                    st.toast("AI updates applied! ✨")
                     st.rerun()
                 except Exception as e:
                     st.error(f"Failed: {e}")
@@ -307,23 +316,7 @@ with st.sidebar:
     else:
         st.warning("AI module not available.")
 
-# --- Render callback (triggered by Ctrl+Enter via on_change) ---
-def trigger_render():
-    content = st.session_state.get("yaml_editor", "")
-    if content:
-        st.session_state["editor_yaml"] = content
-        # Save first — for master CV this validates YAML
-        save_result = orchestrator.save_job_cv(job_id, content)
-        # If master save returned a dict with an error, surface it
-        if isinstance(save_result, dict) and not save_result.get("success", True):
-            st.session_state["render_status"] = f"fail:{save_result.get('error', 'Save failed')}"
-            return
-        pdf_path, status = orchestrator.render_from_content(job_id, content)
-        if pdf_path:
-            st.session_state["current_pdf"] = pdf_path
-            st.session_state["render_status"] = "success"
-        else:
-            st.session_state["render_status"] = f"fail:{status}"
+
 
 # --- MAIN CONTENT: Editor | Preview ---
 col_edit, col_prev = st.columns([1, 1])
@@ -338,13 +331,16 @@ with col_edit:
         # value is handled by key="yaml_editor" in session_state
         height=None,  # Height controlled by CSS (85vh)
         key="yaml_editor",
-        label_visibility="collapsed",
-        on_change=trigger_render  # Fires on Ctrl+Enter
+        label_visibility="collapsed"
     )
 
 with col_prev:
     # Handle render (from sidebar button)
     if render_clicked:
+        st.session_state["is_rendering"] = True
+        st.rerun() # Immediately re-run to update UI state (disable buttons)
+
+    if st.session_state.get("is_rendering", False):
         with st.spinner("Rendering via RenderCV..."):
             content = st.session_state.get("yaml_editor", st.session_state["editor_yaml"])
             # Save first — validates YAML for master CV
@@ -355,17 +351,15 @@ with col_prev:
                 pdf_path, status = orchestrator.render_from_content(job_id, content)
                 if pdf_path:
                     st.session_state["current_pdf"] = pdf_path
-                    st.success("✅ Render Complete!")
+                    st.session_state["render_success_toast"] = True
                 else:
                     st.error(f"❌ Render Failed: {status}")
+            
+            # Rendering finished, reset flag and re-run to re-enable buttons
+            st.session_state["is_rendering"] = False
+            st.rerun()
 
-    # Show render status from Ctrl+Enter callback
-    if st.session_state.get("render_status") == "success":
-        st.toast("✅ Auto-rendered!", icon="✅")
-        st.session_state.pop("render_status", None)
-    elif st.session_state.get("render_status", "").startswith("fail:"):
-        st.error(st.session_state["render_status"][5:])
-        st.session_state.pop("render_status", None)
+
 
     # Determine which PDF to display
     pdf_display_path = st.session_state.get("current_pdf")
@@ -383,3 +377,39 @@ with col_prev:
         st.markdown(pdf_iframe, unsafe_allow_html=True)
     else:
         st.info("No PDF yet. Click **Render PDF** in the sidebar or press **Ctrl+Enter**.")
+
+# Inject Keyboard Listener for Ctrl+Enter / Cmd+Enter
+import streamlit.components.v1 as components
+
+components.html(
+    """
+    <script>
+    const doc = window.parent.document;
+    doc.addEventListener('keydown', function(e) {
+        if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+            e.preventDefault();
+            
+            // 1. Blur the active element to force Streamlit to flush text changes to backend
+            if (doc.activeElement) {
+                doc.activeElement.blur();
+            }
+            
+            // 2. Add a slight delay to ensure Streamlit registers the blur/state update
+            setTimeout(() => {
+                // 3. Find the button reliably by its inner text using XPath
+                const xpath = "//button[.//p[contains(text(), 'Render PDF')]]";
+                const matchingElement = doc.evaluate(xpath, doc, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
+                
+                if (matchingElement) {
+                    matchingElement.click();
+                } else {
+                    console.error("Render PDF button not found by keyboard shortcut script.");
+                }
+            }, 150);
+        }
+    });
+    </script>
+    """,
+    height=0,
+    width=0,
+)
