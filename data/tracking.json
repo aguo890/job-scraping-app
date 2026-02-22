@@ -232,7 +232,12 @@
     "date_applied": "2026-02-14T21:23:05.603755"
   },
   "gh_scaleai_4618065005": {
-    "saved": true
+    "saved": true,
+    "cv_yaml_path": "/app/generated_cvs/gh_scaleai_4618065005.yaml",
+    "cv_pdf_path": "/app/generated_cvs/gh_scaleai_4618065005.pdf",
+    "cv_status": "Tailored",
+    "status": "Applied",
+    "date_applied": "2026-02-22T00:55:11.046188"
   },
   "gh_sofi_7581360003": {
     "saved": true,
@@ -369,7 +374,12 @@
     "saved": true
   },
   "ashby_posthog_bd597451-e465-46f6-857f-befe28366f20": {
-    "saved": true
+    "saved": true,
+    "cv_yaml_path": "/app/generated_cvs/ashby_posthog_bd597451-e465-46f6-857f-befe28366f20.yaml",
+    "cv_pdf_path": "/app/generated_cvs/ashby_posthog_bd597451-e465-46f6-857f-befe28366f20.pdf",
+    "cv_status": "Tailored",
+    "status": "Applied",
+    "date_applied": "2026-02-22T01:13:43.704772"
   },
   "ashby_quora_7f4af6cc-8f7c-4041-90db-928b9c5d4512": {
     "saved": true,
@@ -516,7 +526,12 @@
     "saved": true
   },
   "gh_coinbase_7268895": {
-    "saved": true
+    "saved": true,
+    "cv_yaml_path": "/app/generated_cvs/gh_coinbase_7268895.yaml",
+    "cv_pdf_path": "/app/generated_cvs/gh_coinbase_7268895.pdf",
+    "cv_status": "Tailored",
+    "status": "Applied",
+    "date_applied": "2026-02-22T01:04:00.151383"
   },
   "ashby_conductorai_7ced6847-cd04-4a51-ae6e-b9a0a602d44e": {
     "saved": true
@@ -551,5 +566,10 @@
     "status": "Applied",
     "saved": true,
     "date_applied": "2026-02-22T00:42:40.807104"
+  },
+  "ashby_gallatin_ad7b41c6-1942-4841-8a2e-eacc2b21d7b0": {
+    "status": "Applied",
+    "saved": true,
+    "date_applied": "2026-02-22T00:51:14.269483"
   }
 }
