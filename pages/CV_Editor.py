@@ -149,6 +149,10 @@ if "current_editing_job_id" not in st.session_state:
 
 # If we switched jobs, force a reload
 if st.session_state["current_editing_job_id"] != job_id:
+    # --- Reset Playground if entering it ---
+    if is_playground:
+        orchestrator.reset_playground()
+        
     # Clear old state
     st.session_state["editor_yaml"] = orchestrator.load_job_cv(job_id)
     st.session_state["yaml_editor"] = st.session_state["editor_yaml"]

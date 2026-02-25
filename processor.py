@@ -29,21 +29,28 @@ class JobProcessor:
         """
         Extracts the minimum years of experience required from text.
         Returns the highest 'minimum' found, or 0 if none.
-        Uses a restrictive regex to avoid false positives (e.g. years like 2026).
+        Uses multiple patterns to catch common YOE phrasing.
         """
         if not text:
             return 0
-            
-        # Restrictive pattern: matches 1-15 years/yrs followed by experience/work context
-        pattern = r'\b([1-9]|1[0-5])\+?\s*(?:-\s*[1-9]\d*\s*)?(?:years?|yrs?)(?:\s+of\s+)?(?:experience|work)\b'
         
-        matches = re.findall(pattern, text, re.IGNORECASE)
+        # Pattern 1: "5+ years of [adjective] experience/work"
+        #   Handles: "5 years of experience", "5+ years of professional experience",
+        #            "7-10 years of relevant work experience", "3 years experience"
+        pattern1 = r'\b([1-9]|1[0-5])\+?\s*(?:-\s*[1-9]\d*\s*)?(?:years?|yrs?)(?:\s+of\s+)?(?:\w+\s+){0,3}(?:experience|work)\b'
         
-        if not matches:
+        # Pattern 2: "5 years' experience" (apostrophe form)
+        pattern2 = r"\b([1-9]|1[0-5])\+?\s*(?:years?|yrs?)['']\s*(?:\w+\s+){0,2}(?:experience|work)\b"
+        
+        all_matches = []
+        all_matches.extend(re.findall(pattern1, text, re.IGNORECASE))
+        all_matches.extend(re.findall(pattern2, text, re.IGNORECASE))
+        
+        if not all_matches:
             return 0
             
         # Extract the numbers from matches
-        valid_years = [int(m) for m in matches]
+        valid_years = [int(m) for m in all_matches]
         
         return max(valid_years)
 

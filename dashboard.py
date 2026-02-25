@@ -297,8 +297,13 @@ with st.sidebar:
 
     # Contextual filters based on view
     hide_rejected = True
+    hide_hidden = True
     if selected_view == "All":
-        hide_rejected = st.checkbox("🚫 Hide Rejected", value=True, key="filter_hide_rejected")
+        col_f1, col_f2 = st.columns(2)
+        with col_f1:
+            hide_rejected = st.checkbox("🚫 Hide Rejected", value=True, key="filter_hide_rejected")
+        with col_f2:
+            hide_hidden = st.checkbox("👻 Hide Hidden", value=True, key="filter_hide_hidden")
 
     # --- Standard Filters ---
     st.subheader("Refine", divider="gray")
@@ -333,12 +338,13 @@ filtered_df = df_jobs.copy()
 
 # 1. VIEW LOGIC (The Core "Inbox Zero" Flow)
 if selected_view == "Feed":
-    # Feed = New AND Not Saved AND Not Rejected
+    # Feed = New AND Not Saved AND Not Rejected AND Not Hidden
     # "Inbox Zero" - as soon as you save or apply, it leaves the feed.
     filtered_df = filtered_df[
         (filtered_df['Status'] == 'New') & 
         (filtered_df['is_saved'] == False) &
-        (filtered_df['Status'] != 'Rejected')
+        (filtered_df['Status'] != 'Rejected') &
+        (filtered_df['Status'] != 'Hidden')
     ]
 
 elif selected_view == "Shortlist":
@@ -354,12 +360,14 @@ elif selected_view == "Shortlist":
 elif selected_view == "Tracking":
     # Tracking = Applied, Interviewing, Offer
     tracking_statuses = ['Applied', 'Interviewing', 'Offer']
-    filtered_df = filtered_df[filtered_df['Status'].isin(tracking_statuses)]
+    filtered_df = filtered_df[filtered_df['Status'].isin(tracking_statuses) & (filtered_df['Status'] != 'Hidden')]
 
 elif selected_view == "All":
-    # All = Everything (optionally hide rejected)
+    # All = Everything (optionally hide rejected/hidden)
     if hide_rejected:
         filtered_df = filtered_df[filtered_df['Status'] != 'Rejected']
+    if hide_hidden:
+        filtered_df = filtered_df[filtered_df['Status'] != 'Hidden']
 
 
 # 2. Refine Filters (Company, Score, etc. apply on top of the View)
@@ -389,7 +397,7 @@ if 'date_posted' in df_jobs.columns and date_range is not None:
 
 # Sort: Saved/Special Status first, then Date, then Score
 # We create a simple priority map for sorting
-status_priority = {"Offer": 5, "Interviewing": 4, "Applied": 3, "New": 1, "Rejected": 0}
+status_priority = {"Offer": 5, "Interviewing": 4, "Applied": 3, "New": 1, "Rejected": 0, "Hidden": -1}
 filtered_df['status_prio'] = filtered_df['Status'].map(status_priority).fillna(1)
 filtered_df = filtered_df.sort_values(by=["status_prio", "is_saved", "date_posted", "score"], ascending=[False, False, False, False]).reset_index(drop=True)
 
@@ -444,29 +452,35 @@ if selected_indices:
 
     # THE SLEEK TOOLBAR
     with st.container(border=True):
-        col1, col2, col3, col4 = st.columns([1, 1.5, 2, 1.5], vertical_alignment="center")
+        col1, col_save, col_hide, col3, col4 = st.columns([1, 1.2, 1.2, 1.5, 1.2], vertical_alignment="center")
 
         with col1:
             st.markdown(f"**{num_selected}** Selected")
 
-        with col2:
-            if st.button("⭐ Toggle Save", width="stretch"):
+        with col_save:
+            if st.button("⭐ Save", width="stretch", help="Toggle Save"):
                 for job_id in selected_ids:
                     if job_id not in tracking_data: tracking_data[job_id] = {}
                     current = tracking_data[job_id].get('saved', False)
                     tracking_data[job_id]['saved'] = not current
                 save_tracking(tracking_data)
-                
+                st.session_state.table_version += 1
+                st.rerun()
+
+        with col_hide:
+            if st.button("🚫 Hide", width="stretch", help="Hide from Feed"):
+                for job_id in selected_ids:
+                    if job_id not in tracking_data: tracking_data[job_id] = {}
+                    tracking_data[job_id]['status'] = 'Hidden'
+                    tracking_data[job_id]['saved'] = False # Usually if hiding, we don't want it saved
                 save_tracking(tracking_data)
-                
-                # Clear selection after action
                 st.session_state.table_version += 1
                 st.rerun()
 
         with col3:
             new_status = st.selectbox(
                 "Status",
-                ["Applied", "Interviewing", "Offer", "Rejected", "New"],
+                ["Applied", "Interviewing", "Offer", "Rejected", "New", "Hidden"],
                 label_visibility="collapsed",
                 key="status_selector"
             )
@@ -518,13 +532,15 @@ else:
     # Empty-state: ghost versions of both toolbar rows
     st.write("")
     with st.container(border=True):
-        col1, col2, col3, col4 = st.columns([1, 1.5, 2, 1.5], vertical_alignment="center")
+        col1, col_save, col_hide, col3, col4 = st.columns([1, 1.2, 1.2, 1.5, 1.2], vertical_alignment="center")
         with col1:
             st.markdown("<span style='color:#bbb'>**0** Selected</span>", unsafe_allow_html=True)
-        with col2:
-            st.button("⭐ Toggle Save", width="stretch", disabled=True, key="ghost_save")
+        with col_save:
+            st.button("⭐ Save", width="stretch", disabled=True, key="ghost_save")
+        with col_hide:
+            st.button("🚫 Hide", width="stretch", disabled=True, key="ghost_hide")
         with col3:
-            st.selectbox("Status", ["Applied", "Interviewing", "Offer", "Rejected", "New"],
+            st.selectbox("Status", ["Applied", "Interviewing", "Offer", "Rejected", "New", "Hidden"],
                          label_visibility="collapsed", disabled=True, key="ghost_status")
         with col4:
             st.button("Update Status", type="primary", width="stretch", disabled=True, key="ghost_update")

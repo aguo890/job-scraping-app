@@ -244,7 +244,12 @@
     "status": "Applied"
   },
   "gh_sofi_7583531003": {
-    "saved": true
+    "saved": true,
+    "cv_yaml_path": "/app/generated_cvs/gh_sofi_7583531003.yaml",
+    "cv_pdf_path": "/app/generated_cvs/gh_sofi_7583531003.pdf",
+    "cv_status": "Tailored",
+    "status": "Applied",
+    "date_applied": "2026-02-22T19:44:00.506590"
   },
   "gh_scaleai_4637485005": {
     "saved": true
@@ -523,7 +528,12 @@
     "date_applied": "2026-02-22T00:24:28.696516"
   },
   "gh_checkr_7575425": {
-    "saved": true
+    "saved": true,
+    "cv_yaml_path": "/app/generated_cvs/gh_checkr_7575425.yaml",
+    "cv_pdf_path": "/app/generated_cvs/gh_checkr_7575425.pdf",
+    "cv_status": "Tailored",
+    "status": "Applied",
+    "date_applied": "2026-02-22T19:48:45.422175"
   },
   "gh_coinbase_7268895": {
     "saved": true,
@@ -571,5 +581,71 @@
     "status": "Applied",
     "saved": true,
     "date_applied": "2026-02-22T00:51:14.269483"
+  },
+  "ashby_writer_1330ba60-697e-498b-b3f4-b0c7c5390305": {
+    "status": "Applied",
+    "saved": true,
+    "date_applied": "2026-02-23T06:16:32.506643"
+  },
+  "gh_cloudflare_7374706": {
+    "status": "Applied",
+    "saved": true,
+    "date_applied": "2026-02-24T04:16:08.520996"
+  },
+  "gh_xai_4780365007": {
+    "status": "Hidden",
+    "saved": false
+  },
+  "gh_xai_4779590007": {
+    "status": "Hidden",
+    "saved": false
+  },
+  "ashby_notion_91156750-4050-4621-aa45-0fb068308d2c": {
+    "status": "Hidden",
+    "saved": false
+  },
+  "ashby_bedrock-robotics_8c3e8fb1-9b7b-4ef1-aba4-7c4c39a6e745": {
+    "status": "Hidden",
+    "saved": false
+  },
+  "gh_scaleai_4665557005": {
+    "status": "Hidden",
+    "saved": false
+  },
+  "ashby_openai_04ef9318-32fc-47df-a163-452569e13b58": {
+    "status": "Hidden",
+    "saved": false
+  },
+  "ashby_langchain_38a3523d-b474-4db6-b9c5-9e6be00a3291": {
+    "status": "Hidden",
+    "saved": false
+  },
+  "gh_andurilindustries_5058262007": {
+    "status": "Hidden",
+    "saved": false
+  },
+  "gh_andurilindustries_5058273007": {
+    "status": "Hidden",
+    "saved": false
+  },
+  "gh_andurilindustries_5058269007": {
+    "status": "Hidden",
+    "saved": false
+  },
+  "gh_andurilindustries_5058266007": {
+    "status": "Hidden",
+    "saved": false
+  },
+  "gh_andurilindustries_5055686007": {
+    "status": "Hidden",
+    "saved": false
+  },
+  "gh_coreweave_4442021006": {
+    "status": "Hidden",
+    "saved": false
+  },
+  "ashby_character_b063d44b-e1fd-4777-8079-573706a589a0": {
+    "status": "Hidden",
+    "saved": false
   }
 }

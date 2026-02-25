@@ -146,6 +146,11 @@ locations:
     - "mumbai"
     - "osaka"
     - "kuala lumpur"
+    - "bucharest"
+    - "cluj"
+    - "czech republic"
+    - "prague"
+    - "czech"
 
   include:
     # Strong US Indicators
