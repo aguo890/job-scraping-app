@@ -1,252 +1,227 @@
-# config/filtering.yaml
-
-# --- SCALAR CONFIGURATIONS ---
 system:
   concurrency_limit: 5
   request_timeout: 15
-  user_agent: "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36"
-
+  user_agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML,
+    like Gecko) Chrome/122.0.0.0 Safari/537.36
 filtering:
   is_enabled: true
-  max_days_old: 14        # ONLY show jobs from the last 14 days
-  max_years_experience: 2 # Skip jobs requiring > 2 years
-
-# --- ARRAY CONFIGURATIONS ---
-
-# --- JOB TITLE LOGIC ---
+  max_days_old: 14
+  max_years_experience: 2
 titles:
-  # Score: +10 points
   high_priority:
-    - "Intern"
-    - "Internship"
-    - "New Grad"
-    - "University Grad"
-    - "Entry Level"
-    - "Junior"
-    - "Associate"
-    - "2026"
-    - "Early Career"
-    - "Linesight"
-    - "ERP"
-    - "PLC"
-    - "MES"
-    - "Manufacturing"
-    - "Industry 4.0"
-    - "IIoT"
-    - "SCADA"
-    - "Automation"
-    - "Digital Twin"
-    - "Supply Chain"
-
-  # Score: Instant Reject
+  - Intern
+  - Internship
+  - New Grad
+  - University Grad
+  - Entry Level
+  - Junior
+  - Associate
+  - '2026'
+  - Early Career
+  - Linesight
+  - ERP
+  - PLC
+  - MES
+  - Manufacturing
+  - Industry 4.0
+  - IIoT
+  - SCADA
+  - Automation
+  - Digital Twin
+  - Supply Chain
+  - Controls
+  - Controls Engineering
+  - Controls Engineer
   exclude:
-    # Seniority
-    - "Senior"
-    - "Sr."
-    - "Staff"
-    - "Principal"
-    - "Lead"
-    - "Director"
-    - "Manager"
-    - "VP"
-    - "Head of"
-    - "Founding"
-    - "II"
-    - "III"
-    
-    # Non-Tech / Irrelevant
-    - "Account Executive"
-    - "Sales"
-    - "Recruiter"
-    - "Sourcer"
-    - "Talent"
-    - "HR"
-    - "People"
-    - "Legal"
-    - "Counsel"
-    - "Policy"
-    - "Finance"
-    - "Accounting"
-    - "Marketing"
-    - "Producer"
-    - "Creative"
-    - "Support"
-    - "Success"
-    - "Operations"
-    - "Executive Assistant"
-    - "Technician"
-    - "Mechanical"
-    - "Electrical"
-
-# --- LOCATION LOGIC ---
+  - Senior
+  - Sr.
+  - Staff
+  - Principal
+  - Lead
+  - Director
+  - Manager
+  - VP
+  - Head of
+  - Founding
+  - II
+  - III
+  - Account Executive
+  - Sales
+  - Recruiter
+  - Sourcer
+  - Talent
+  - HR
+  - People
+  - Legal
+  - Counsel
+  - Policy
+  - Finance
+  - Accounting
+  - Marketing
+  - Producer
+  - Creative
+  - Support
+  - Success
+  - Operations
+  - Executive Assistant
+  - Mechanical
+  
 locations:
   exclude:
-    # Continents & Regions
-    - "asia"
-    - "europe"
-    - "africa"
-    - "latin america"
-    - "latam"
-    - "apac"
-    - "emea"
-    - "middle east"
-    - "oceania"
-    - "global"
-    - "worldwide"
-    - "international"
-    - "jaipur"
-    
-    # Specific Hubs
-    - "taiwan"
-    - "taipei"
-    - "hong kong"
-    - "china"
-    - "beijing"
-    - "shanghai"
-    - "kazakhstan"
-    - "almaty"
-    - "south africa"
-    - "singapore"
-    - "korea"
-    - "japan"
-    - "tokyo"
-    - "canada"
-    - "ontario"
-    - "toronto"
-    - "vancouver"
-    - "montreal"
-    - "quebec"
-    - "mexico"
-    - "brazil"
-    - "argentina"
-    - "colombia"
-    - "united kingdom"
-    - "uk"
-    - "london"
-    - "england"
-    - "ireland"
-    - "dublin"
-    - "germany"
-    - "berlin"
-    - "munich"
-    - "france"
-    - "paris"
-    - "spain"
-    - "barcelona"
-    - "madrid"
-    - "italy"
-    - "poland"
-    - "warsaw"
-    - "romania"
-    - "netherlands"
-    - "amsterdam"
-    - "sweden"
-    - "switzerland"
-    - "india"
-    - "bengaluru"
-    - "bangalore"
-    - "hyderabad"
-    - "australia"
-    - "sydney"
-    - "pakistan"
-    - "brussels"
-    - "seoul"
-    - "mumbai"
-    - "osaka"
-    - "kuala lumpur"
-    - "bucharest"
-    - "cluj"
-    - "czech republic"
-    - "prague"
-    - "czech"
-
+  - asia
+  - europe
+  - africa
+  - latin america
+  - latam
+  - apac
+  - emea
+  - middle east
+  - oceania
+  - global
+  - worldwide
+  - international
+  - jaipur
+  - taiwan
+  - taipei
+  - hong kong
+  - china
+  - beijing
+  - shanghai
+  - kazakhstan
+  - almaty
+  - south africa
+  - singapore
+  - korea
+  - japan
+  - tokyo
+  - canada
+  - ontario
+  - toronto
+  - vancouver
+  - montreal
+  - quebec
+  - mexico
+  - brazil
+  - argentina
+  - colombia
+  - united kingdom
+  - uk
+  - london
+  - england
+  - ireland
+  - dublin
+  - germany
+  - berlin
+  - munich
+  - france
+  - paris
+  - spain
+  - barcelona
+  - madrid
+  - italy
+  - poland
+  - warsaw
+  - romania
+  - netherlands
+  - amsterdam
+  - sweden
+  - switzerland
+  - india
+  - bengaluru
+  - bangalore
+  - hyderabad
+  - australia
+  - sydney
+  - pakistan
+  - brussels
+  - seoul
+  - mumbai
+  - osaka
+  - kuala lumpur
+  - bucharest
+  - cluj
+  - czech republic
+  - prague
+  - czech
   include:
-    # Strong US Indicators
-    - "united states"
-    - "usa"
-    - "u.s."
-    - "us remote"
-    - "remote - us"
-    - "california"
-    - "san francisco"
-    - "bay area"
-    - "los angeles"
-    - "new york"
-    - "nyc"
-    - "washington"
-    - "seattle"
-    - "texas"
-    - "austin"
-    - "boston"
-    - "chicago"
-    - "colorado"
-    - "denver"
-    - "foster city"
-    - "mountain view"
-    - "sunnyvale"
-    - "santa clara"
-
-# --- SKILL SCORING ---
+  - united states
+  - usa
+  - u.s.
+  - us remote
+  - remote - us
+  - california
+  - san francisco
+  - bay area
+  - los angeles
+  - new york
+  - nyc
+  - washington
+  - seattle
+  - texas
+  - austin
+  - boston
+  - chicago
+  - colorado
+  - denver
+  - foster city
+  - mountain view
+  - sunnyvale
+  - santa clara
 preferred_skills:
-  - "Python"
-  - "React"
-  - "SQL"
-  - "AWS"
-  - "Docker"
-  - "FastAPI"
-  - "PostgreSQL"
-  - "Data Engineering"
-  - "Kotlin"
-  - "Java"
-  - "Typescript"
-  - "React Native"
-  - "Flutter"
-  - "Next.js"
-  - "Node.js"
-  - "Vite"
-  - "Linesight"
-  - "ERP"
-  - "PLC"
-  - "MES"
-  - "Manufacturing"
-  - "SCADA"
-  - "Industry 4.0"
-  - "IIoT"
-  - "Smart Factory"
-
-# --- NEGATIVE FILTERS ---
+- Python
+- React
+- SQL
+- AWS
+- Docker
+- FastAPI
+- PostgreSQL
+- Data Engineering
+- Kotlin
+- Java
+- Typescript
+- React Native
+- Flutter
+- Next.js
+- Node.js
+- Vite
+- Linesight
+- ERP
+- PLC
+- MES
+- Manufacturing
+- SCADA
+- Industry 4.0
+- IIoT
+- Smart Factory
+- Controls
+- Controls Engineering
 title_blocklist:
-  # Degree Mismatch
-  - "PhD"
-  - "Ph.D"
-  - "Doctorate"
-  - "MBA"
-  - "Postdoc"
-  - "Masters"
-  - "Master's"
-
-  # Domain Mismatch
-  - "Hardware"
-  - "Firmware"
-  - "Robotics"
-  - "Perception"
-  - "Mechanical"
-  - "Electrical"
-  - "iOS"
-  - "Android"
-  - "FPGA"
-  - "ASIC"
-
-# Score: -3 points each
+- PhD
+- Ph.D
+- Doctorate
+- MBA
+- Postdoc
+- Masters
+- Master's
+- Hardware
+- Firmware
+- Robotics
+- Perception
+- Mechanical
+- Electrical
+- iOS
+- Android
+- FPGA
+- ASIC
 penalty_skills:
-  - "Swift"
-  - "Objective-C"
-  - "MATLAB"
-  - "Verilog"
-  - "VHDL"
-  - "Assembly"
-  - "ROS"
-  - "CUDA"
-  - "Ruby on Rails"
-  - "Golang"
-  - "Rust"
+- Swift
+- Objective-C
+- MATLAB
+- Verilog
+- VHDL
+- Assembly
+- ROS
+- CUDA
+- Ruby on Rails
+- Golang
+- Rust
