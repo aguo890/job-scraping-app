@@ -75,42 +75,49 @@ class SmartFilter:
 
         return True
 
-    def check_eligibility(self, title: str) -> tuple[bool, int, str]:
-        """Analyzes Job Title. Returns (is_eligible, score, reason)."""
-        if not title:
-            return False, 0, "No Title"
+    def passes_hard_filters(self, job_data: dict) -> bool:
+        """
+        Gatekeeper: Determines if a job should be ingested at all.
+        Strictly Boolean (True/False).
+        Handles: Date, Location, and Banned Titles.
+        """
+        title = job_data.get('title', '')
+        location = job_data.get('location', '')
+        date_str = job_data.get('date_posted', '')
 
+        if not title:
+            return False
+
+        # 1. Date Check
+        if not self.is_recent(date_str):
+            logging.debug(f"Dropped (Old): {title}")
+            return False
+
+        # 2. Location Check
+        if not self.is_valid_location(location):
+            logging.debug(f"Dropped (Location): {title} @ {location}")
+            return False
+
+        # 3. Title Check (Hard Exclusions)
         title_lower = title.lower()
         title_rules = self.config.get("titles", {})
-        skills = self.config.get("preferred_skills", [])
-
-        # 1. Exclude
-        for bad_word in title_rules.get("exclude", []):
+        blocklist = self.config.get("title_blocklist", [])
+        
+        # Combined check for all hard-excluded keywords
+        banned_keywords = title_rules.get("exclude", []) + blocklist
+        
+        for bad_word in banned_keywords:
             if bad_word.lower() in title_lower:
-                return False, 0, f"Banned: {bad_word}"
+                logging.debug(f"Dropped (Banned Title): {title} due to '{bad_word}'")
+                return False
 
-        # 2. Base Relevance (Safeguard)
+        # 3b. Base Relevance (Safeguard)
         tech_indicators = ["engineer", "developer", "data", "scientist", "analyst", "intern", "researcher", "technical", "software", "machine learning"]
         if not any(tech in title_lower for tech in tech_indicators):
-             return False, 0, "Not a tech role"
+             logging.debug(f"Dropped (Not Tech): {title}")
+             return False
 
-        # 3. Scoring
-        score = 0
-        reasons = []
-
-        # Priority Keywords
-        for word in title_rules.get("high_priority", []):
-            if word.lower() in title_lower:
-                score += 10
-                reasons.append(f"Priority: {word}")
-
-        # Skills
-        for skill in skills:
-            if skill.lower() in title_lower:
-                score += 5
-                reasons.append(f"Skill: {skill}")
-
-        return True, score, ", ".join(reasons)
+        return True
 
 # Singleton Export
 job_filter = SmartFilter()

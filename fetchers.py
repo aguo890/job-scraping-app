@@ -6,6 +6,8 @@ import asyncio
 import aiohttp
 from typing import List, Dict, Any, Optional
 
+import json
+import os
 from utils.network import SafeSession
 from utils.smart_filter import job_filter
 from utils.schemas import JobListing
@@ -20,7 +22,7 @@ class GreenhouseFetcher:
     def __init__(self, client: SafeSession):
         self.client = client
     
-    async def fetch_jobs(self, board_token: str, company_name: str) -> List[Dict[str, Any]]:
+    async def fetch_jobs(self, board_token: str, company_name: str, applied_ids: set) -> List[Dict[str, Any]]:
         """Fetch jobs from Greenhouse board asynchronously"""
         url = f"{self.BASE_URL}/{board_token}/jobs?content=true"
         jobs_data = await self.client.fetch_json(url)
@@ -34,24 +36,23 @@ class GreenhouseFetcher:
         for job in jobs:
             title = job.get('title', '').strip()
             location = job.get('location', {}).get('name', '')
+            job_id = f"gh_{board_token}_{job.get('id')}"
             
-            # 1. Location Filter
-            if not job_filter.is_valid_location(location):
-                continue
+            # Order of Operations: Applied Check FIRST
+            is_applied = job_id in applied_ids
             
-            # 2. Title Filter & Scoring
-            is_good, score, reason = job_filter.check_eligibility(title)
-            if not is_good:
-                continue
-
-            # 3. Date Filter (Predicate Pushdown)
-            updated_at = job.get('updated_at')
-            if not job_filter.is_recent(updated_at):
-                logger.debug(f"Skipped job (Too Old): {title} updated at {updated_at}")
-                continue
+            if not is_applied:
+                # Gatekeeper: Structural Quality
+                job_payload = {
+                    'title': title,
+                    'location': location,
+                    'date_posted': job.get('updated_at', '')
+                }
+                if not job_filter.passes_hard_filters(job_payload):
+                    continue
 
             job_obj = JobListing.from_dict({
-                'id': f"gh_{board_token}_{job.get('id')}",
+                'id': job_id,
                 'title': title,
                 'company': company_name,
                 'location': location,
@@ -59,18 +60,12 @@ class GreenhouseFetcher:
                 'description': job.get('content', ''),
                 'date_posted': job.get('updated_at', ''),
                 'source': 'greenhouse',
-                'score': score,
-                'match_reason': reason,
                 'raw_data': job
             })
             
-            # 3. Sanitize and Validate
             job_obj.sanitize()
             if job_obj.is_valid():
                 normalized_jobs.append(job_obj.to_dict())
-        
-        # Sort by score (descending) so best jobs appear first
-        normalized_jobs.sort(key=lambda x: x['score'], reverse=True)
         
         logger.info(f"Fetched {len(normalized_jobs)} jobs from Greenhouse for {company_name}")
         return normalized_jobs
@@ -82,7 +77,7 @@ class LeverFetcher:
     def __init__(self, client: SafeSession):
         self.client = client
     
-    async def fetch_jobs(self, board_token: str, company_name: str) -> List[Dict[str, Any]]:
+    async def fetch_jobs(self, board_token: str, company_name: str, applied_ids: set) -> List[Dict[str, Any]]:
         """Fetch jobs from Lever API asynchronously"""
         api_url = f"https://api.lever.co/v0/postings/{board_token}"
         jobs = await self.client.fetch_json(api_url)
@@ -93,6 +88,7 @@ class LeverFetcher:
         normalized_jobs = []
         for job in jobs:
             title = job.get('text', '').strip()
+            job_id = f"lever_{board_token}_{job.get('id')}"
             
             # Robust location parsing
             location = ''
@@ -110,23 +106,21 @@ class LeverFetcher:
                             parts.append(item)
                     location = ', '.join(p for p in parts if p)
             
-            # 1. Location Filter
-            if not job_filter.is_valid_location(location):
-                continue
+            # Order of Operations: Applied Check FIRST
+            is_applied = job_id in applied_ids
             
-            # 2. Title Filter & Scoring
-            is_good, score, reason = job_filter.check_eligibility(title)
-            if not is_good:
-                continue
-
-            # 3. Date Filter (Predicate Pushdown)
-            created_at = job.get('createdAt')
-            if not job_filter.is_recent(created_at):
-                logger.debug(f"Skipped job (Too Old): {title} created at {created_at}")
-                continue
+            if not is_applied:
+                # Gatekeeper: Structural Quality
+                job_payload = {
+                    'title': title,
+                    'location': location,
+                    'date_posted': job.get('createdAt', '')
+                }
+                if not job_filter.passes_hard_filters(job_payload):
+                    continue
 
             job_obj = JobListing.from_dict({
-                'id': f"lever_{board_token}_{job.get('id')}",
+                'id': job_id,
                 'title': title,
                 'company': company_name,
                 'location': location,
@@ -134,18 +128,12 @@ class LeverFetcher:
                 'description': job.get('description', ''),
                 'date_posted': job.get('createdAt', ''),
                 'source': 'lever',
-                'score': score,
-                'match_reason': reason,
                 'raw_data': job
             })
             
-            # 3. Sanitize & Validate
             job_obj.sanitize()
             if job_obj.is_valid():
                 normalized_jobs.append(job_obj.to_dict())
-        
-        # Sort by score (descending)
-        normalized_jobs.sort(key=lambda x: x['score'], reverse=True)
         
         logger.info(f"Fetched {len(normalized_jobs)} jobs from Lever for {company_name}")
         return normalized_jobs
@@ -157,7 +145,7 @@ class AshbyFetcher:
     def __init__(self, client: SafeSession):
         self.client = client
     
-    async def fetch_jobs(self, board_url: str, company_name: str) -> List[Dict[str, Any]]:
+    async def fetch_jobs(self, board_url: str, company_name: str, applied_ids: set) -> List[Dict[str, Any]]:
         """Fetch jobs from Ashby GraphQL API asynchronously"""
         if "ashbyhq.com" in board_url:
              company_slug = board_url.rstrip('/').split('/')[-1]
@@ -184,23 +172,23 @@ class AshbyFetcher:
             if not location:
                 location = job.get('address', {}).get('placeName', '')
             
-            # 1. Location Filter
-            if not job_filter.is_valid_location(location):
-                continue
-           
-            # 2. Title Filter & Scoring
-            is_good, score, reason = job_filter.check_eligibility(title)
-            if not is_good:
-                continue
+            job_id = f"ashby_{company_slug}_{job.get('id', job.get('jobId', ''))}"
 
-            # 3. Date Filter (Predicate Pushdown)
-            published_at = job.get('publishedDate') or job.get('createdAt')
-            if not job_filter.is_recent(published_at):
-                logger.debug(f"Skipped job (Too Old): {title} published/created at {published_at}")
-                continue
+            # Order of Operations: Applied Check FIRST
+            is_applied = job_id in applied_ids
+            
+            if not is_applied:
+                # Gatekeeper: Structural Quality
+                job_payload = {
+                    'title': title,
+                    'location': location,
+                    'date_posted': job.get('publishedDate', job.get('createdAt', ''))
+                }
+                if not job_filter.passes_hard_filters(job_payload):
+                    continue
 
             job_obj = JobListing.from_dict({
-                'id': f"ashby_{company_slug}_{job.get('id', job.get('jobId', ''))}",
+                'id': job_id,
                 'title': title,
                 'company': company_name,
                 'location': location,
@@ -208,18 +196,12 @@ class AshbyFetcher:
                 'description': job.get('description', job.get('descriptionHtml', '')),
                 'date_posted': job.get('publishedDate', job.get('createdAt', '')),
                 'source': 'ashby',
-                'score': score,
-                'match_reason': reason,
                 'raw_data': job
             })
             
-            # 3. Sanitize & Validate
             job_obj.sanitize()
             if job_obj.is_valid():
                 normalized_jobs.append(job_obj.to_dict())
-        
-        # Sort by score (descending)
-        normalized_jobs.sort(key=lambda x: x['score'], reverse=True)
         
         logger.info(f"Fetched {len(normalized_jobs)} jobs from Ashby for {company_name}")
         return normalized_jobs
@@ -247,6 +229,17 @@ class JobFetcherManager:
     async def fetch_all_jobs(self, companies_config: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
         """Fetch jobs from all configured companies concurrently"""
         
+        # Load applied IDs once to pass down to fetchers
+        applied_ids = set()
+        applied_path = os.path.join('data', 'applied_jobs.json')
+        if os.path.exists(applied_path):
+            try:
+                with open(applied_path, 'r', encoding='utf-8') as f:
+                    applied_data = json.load(f)
+                    applied_ids = {j['id'] for j in applied_data if 'id' in j}
+            except Exception as e:
+                logger.error(f"Error loading applied IDs for fetcher: {e}")
+
         async with aiohttp.ClientSession() as session:
             safe_client = SafeSession(session)
             
@@ -259,7 +252,8 @@ class JobFetcherManager:
             for company in companies_config:
                 tasks.append(self._bounded_fetch(
                     company, 
-                    greenhouse, lever, ashby
+                    greenhouse, lever, ashby,
+                    applied_ids
                 ))
             
             # Run all fetch tasks
@@ -274,10 +268,10 @@ class JobFetcherManager:
                 elif isinstance(res, Exception):
                     logger.error(f"Task failed with exception: {res}")
             
-            logger.info(f"Total jobs fetched: {len(all_jobs)}")
+            logger.info(f"Total jobs ingested: {len(all_jobs)}")
             return all_jobs
 
-    async def _bounded_fetch(self, company: Dict[str, Any], gh, lev, ash) -> List[Dict[str, Any]]:
+    async def _bounded_fetch(self, company: Dict[str, Any], gh, lev, ash, applied_ids: set) -> List[Dict[str, Any]]:
         """
         Acquires a semaphore lock before making the network request.
         """
@@ -289,17 +283,17 @@ class JobFetcherManager:
                 if ats_type == 'greenhouse':
                     board_token = company.get('board_token')
                     if board_token:
-                        return await gh.fetch_jobs(board_token, company_name)
+                        return await gh.fetch_jobs(board_token, company_name, applied_ids)
                 
                 elif ats_type == 'lever':
                     board_token = company.get('board_token')
                     if board_token:
-                        return await lev.fetch_jobs(board_token, company_name)
+                        return await lev.fetch_jobs(board_token, company_name, applied_ids)
                 
                 elif ats_type == 'ashby':
                     board_url = company.get('board_url')
                     if board_url:
-                        return await ash.fetch_jobs(board_url, company_name)
+                        return await ash.fetch_jobs(board_url, company_name, applied_ids)
                 
                 else:
                     logger.warning(f"Unknown ATS type '{ats_type}' for {company_name}")

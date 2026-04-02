@@ -226,9 +226,12 @@ title_blocklist:
   - "Master's"
 
   # Domain Mismatch
-  - "Hardware Engineering"
+  - "Hardware"
+  - "Firmware"
+  - "Robotics"
+  - "Perception"
   - "Mechanical"
-  - "Electrical Engineer"
+  - "Electrical"
   - "iOS"
   - "Android"
   - "FPGA"

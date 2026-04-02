@@ -27,31 +27,33 @@ class JobProcessor:
     def extract_min_years_experience(self, text):
         """
         Extracts the minimum years of experience required from text.
-        Returns the highest 'minimum' found, or 0 if none.
-        Uses multiple patterns to catch common YOE phrasing.
+        Returns the MINIMUM found in a range (e.g., '3-5 years' -> 3).
+        Capped at 15 to avoid false positives.
         """
         if not text:
             return 0
         
-        # Pattern 1: "5+ years of [adjective] experience/work"
-        #   Handles: "5 years of experience", "5+ years of professional experience",
-        #            "7-10 years of relevant work experience", "3 years experience"
-        pattern1 = r'\b([1-9]|1[0-5])\+?\s*(?:-\s*[1-9]\d*\s*)?(?:years?|yrs?)(?:\s+of\s+)?(?:\w+\s+){0,3}(?:experience|work)\b'
+        # Pattern 1: "3-5 years of experience" or "5+ years"
+        pattern1 = r'\b([1-9]|1[0-5])\+?\s*(?:-\s*([1-9]\d*)\s*)?(?:years?|yrs?)(?:\s+of\s+)?(?:\w+\s+){0,3}(?:experience|work)\b'
         
-        # Pattern 2: "5 years' experience" (apostrophe form)
+        # Pattern 2: "5 years' experience" (possessive form)
         pattern2 = r"\b([1-9]|1[0-5])\+?\s*(?:years?|yrs?)['']\s*(?:\w+\s+){0,2}(?:experience|work)\b"
         
-        all_matches = []
-        all_matches.extend(re.findall(pattern1, text, re.IGNORECASE))
-        all_matches.extend(re.findall(pattern2, text, re.IGNORECASE))
+        matches1 = re.findall(pattern1, text, re.IGNORECASE)
+        matches2 = re.findall(pattern2, text, re.IGNORECASE)
         
-        if not all_matches:
+        valid_years = []
+        for m in matches1:
+            # group 0 in pattern1 is the first number (min)
+            valid_years.append(int(m[0]))
+        for m in matches2:
+            valid_years.append(int(m))
+        
+        if not valid_years:
             return 0
             
-        # Extract the numbers from matches
-        valid_years = [int(m) for m in all_matches]
-        
-        return max(valid_years)
+        # Return the MINIMUM found in the text (Architectural Direction)
+        return min(valid_years)
 
     def normalize_location(self, location):
         """Standardize location string"""
@@ -96,26 +98,34 @@ class JobProcessor:
             return []
 
     def process_jobs(self, jobs):
-        logger.info(f"Processing {len(jobs)} jobs")
+        """
+        Evaluator: Applies Soft Filters and Scoring.
+        Note: Hard filters (Banned titles, old dates) already handled by Gatekeeper.
+        """
+        logger.info(f"Evaluating {len(jobs)} jobs...")
         processed = []
         seen_ids = set()
         
-        # Load applied jobs configuration
+        # Load context
         applied_jobs = self.load_applied_jobs()
         applied_ids = {j['id'] for j in applied_jobs}
         applied_map = {j['id']: j for j in applied_jobs}
 
-        # Load filtering lists
+        # Scoring Weights from Config
         high_priority = [k.lower() for k in self.config.get('titles', {}).get('high_priority', [])]
-        exclude_words = [k.lower() for k in self.config.get('titles', {}).get('exclude', [])]
         preferred_skills = [k.lower() for k in self.config.get('preferred_skills', [])]
-        title_blocklist = [k.lower() for k in self.config.get('title_blocklist', [])]
         penalty_skills = [k.lower() for k in self.config.get('penalty_skills', [])]
         
-        # Experience Filtering Config
+        # Domain Intersection Targets
+        domain_keywords = {
+            "linesight", "erp", "plc", "mes", "manufacturing", "scada", 
+            "industry 4.0", "iiot", "smart factory", "automation", 
+            "digital twin", "supply chain"
+        }
+        
+        # Experience Config
         filter_config = self.config.get('filtering', {})
-        is_filter_enabled = filter_config.get('is_enabled', False)
-        max_exp = filter_config.get('max_years_experience', 5)
+        max_exp_limit = filter_config.get('max_years_experience', 5)
 
         for job in jobs:
             job_id = job['id']
@@ -123,118 +133,76 @@ class JobProcessor:
             seen_ids.add(job_id)
             
             is_applied = job_id in applied_ids
-            
-            # 1. Normalize & Filter Location (PRESERVED FEATURE)
-            job['location'] = self.normalize_location(job.get('location'))
-            # If applied, bypass location filter
-            if not is_applied and not self.is_us_location(job['location']):
-                logger.debug(f"Skipping non-US location: {job['location']}")
-                continue
-
             title_lower = job['title'].lower()
             description_text = str(job.get('description', ''))
             description_lower = description_text.lower()
             
-            # 2. THE TRASH FILTER
-            # If applied, bypass keyword filter? Maybe.
-            if not is_applied and any(bad_word in title_lower for bad_word in exclude_words):
-                logger.debug(f"Excluding job: {job['title']} (Filtered Word)")
-                continue
+            # 1. BASE SCORE
+            score = 0
             
-            # 2b. DEGREE & DOMAIN FILTER (Hard Negative)
-            if not is_applied and any(blocked in title_lower for blocked in title_blocklist):
-                logger.info(f"Excluding job: {job['title']} (Title Blocklist)")
-                continue
-
-            # 3. EXPERIENCE FILTER (Improved)
-            if not is_applied and is_filter_enabled:
-                # 3a. Title-Strict Bypass (Priority Acceptance)
-                # Check title for keywords that imply entry-level, regardless of description text
-                bypass_keywords = ['intern', 'new grad', 'entry level', 'university grad', 'junior']
-                if any(kw in title_lower for kw in bypass_keywords):
-                    logger.info(f"Priority Accepted: {job['title']} bypassed YOE check (Title match).")
-                    required_exp = 0
-                else:
-                    # 3b. Structured data check (Future/Resilience)
-                    # For now, we fall back to regex on description
-                    required_exp = self.extract_min_years_experience(description_text)
-                
-                if required_exp > max_exp:
-                    logger.info(f"Skipping {job['title']}: Requires {required_exp} years (Limit: {max_exp})")
-                    continue
-
-            # 4. SCORING LOGIC
-            base_score = 0
+            # 1a. Applied Boost (Ultra Priority)
+            if is_applied:
+                score += 1000
             
-            # Boost for "Intern/New Grad" (High Priority)
+            # 1b. Title Boosts (High Priority)
             if any(good_word in title_lower for good_word in high_priority):
-                base_score += 20  # Huge boost for internships
+                score += 50
             
-            # Boost for standard Engineering terms
-            if "software" in title_lower or "engineer" in title_lower or "developer" in title_lower:
-                base_score += 5
-                
-            # Boost for Skill Matches & Domain Intersection
+            # 1c. Standard Engineering Boost
+            if any(term in title_lower for term in ["software", "engineer", "developer", "data"]):
+                score += 10
+
+            # 2. SOFT FILTERS: YOE Penalty
+            # Architecture: Penalty = (extracted_min - limit) * -10
+            # Skips for Applied or "Entry-level" Titles
+            bypass_keywords = ['intern', 'new grad', 'entry level', 'university grad', 'junior']
+            if not is_applied and not any(kw in title_lower for kw in bypass_keywords):
+                min_yoe = self.extract_min_years_experience(description_text)
+                if min_yoe > max_exp_limit:
+                    penalty = (min_yoe - max_exp_limit) * -10
+                    score += penalty
+                    logger.debug(f"YOE Penalty for {job['title']}: {penalty} ({min_yoe} yrs > {max_exp_limit})")
+
+            # 3. INTERSECTION MULTIPLIER (The "Holy Grail" Boost)
             tech_hits = 0
             domain_hits = 0
-            domain_keywords = {
-                "linesight", "erp", "plc", "mes", "manufacturing", "scada", 
-                "industry 4.0", "iiot", "smart factory", "automation", 
-                "digital twin", "supply chain"
-            }
-            
             for skill in preferred_skills:
                 if skill in description_lower or skill in title_lower:
                     if skill in domain_keywords:
                         domain_hits += 1
-                        base_score += 15
+                        score += 15
                     else:
                         tech_hits += 1
-                        base_score += 10
+                        score += 10
             
-            # Apply the Intersection Multiplier (The "Linesight" Boost)
+            # Linesight Multiplier (1.5x)
             if tech_hits > 0 and domain_hits > 0:
                 multiplier = 1.5 + (0.1 * min(tech_hits, domain_hits))
-                score = int(base_score * multiplier)
-            else:
-                score = base_score
+                score = int(score * multiplier)
             
-            # Penalty for wrong-stack skills (Soft Negative)
-            for penalty in penalty_skills:
-                if penalty in description_lower:
-                    score -= 3
-            
-            # 5. EARLY BIRD FLAME 🔥
+            # 3a. Penalty for wrong-stack skills (Soft Negative)
+            for penalty_skill in penalty_skills:
+                if penalty_skill in description_lower:
+                    score -= 5
+
+            # 4. RECENCY BOOST (Early Bird Flame 🔥)
             est_date = self.normalize_date_est(job.get('date_posted'))
-            # If no date_posted, default to current scrape time
             if not est_date:
                 est_date = datetime.now(pytz.timezone('US/Eastern'))
-            formatted_date = est_date.strftime('%Y-%m-%d %I:%M %p')
             
-            is_fresh = False
-            if est_date:
-                now = datetime.now(pytz.timezone('US/Eastern'))
-                # If future date (timezone quirk), clamp it? No, just check delta.
-                if (now - est_date) < timedelta(hours=24) and (now - est_date) > timedelta(days=-1):
-                    score += 50  # Push to very top
-                    is_fresh = True
+            now = datetime.now(pytz.timezone('US/Eastern'))
+            is_fresh = (now - est_date) < timedelta(hours=24) and (now - est_date) > timedelta(days=-1)
+            if is_fresh:
+                score += 50
 
-            # Format Title with Icon and Status
-            # Scenario A: Job Found + Applied
+            # 5. DISPLAY FORMATTING
             display_title = job['title']
-            
             if is_applied:
-                # Remove existing fire if present to avoid clutter, or keep it?
-                # User pattern: "✅ " + title
-                clean_title = display_title.replace("🔥 ", "")
-                if "✅" not in clean_title:
-                    display_title = "✅ " + clean_title
-                
-                score += 1000 # Boost to top
-                # Ensure we track the status explicitly
-                job['status'] = 'Applied' 
+                clean_title = display_title.replace("🔥 ", "").replace("✅ ", "")
+                display_title = "✅ " + clean_title
             elif is_fresh:
-                display_title = "🔥 " + display_title
+                if "🔥" not in display_title:
+                    display_title = "🔥 " + display_title
             
             processed_job = {
                 "id": job['id'],
@@ -243,11 +211,10 @@ class JobProcessor:
                 "location": job['location'],
                 "url": job['url'],
                 "score": score,
-                "date_posted": formatted_date,
-                "keywords_matched": [], 
-                "raw_data": job.get('raw_data', {}),
+                "date_posted": est_date.strftime('%Y-%m-%d %I:%M %p'),
                 "is_applied": is_applied,
-                "status": "Applied" if is_applied else "Active"
+                "status": "Applied" if is_applied else "Active",
+                "raw_data": job.get('raw_data', {})
             }
             if is_applied:
                 processed_job['applied_at'] = applied_map[job_id].get('applied_at')
