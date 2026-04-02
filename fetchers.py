@@ -44,6 +44,12 @@ class GreenhouseFetcher:
             if not is_good:
                 continue
 
+            # 3. Date Filter (Predicate Pushdown)
+            updated_at = job.get('updated_at')
+            if not job_filter.is_recent(updated_at):
+                logger.debug(f"Skipped job (Too Old): {title} updated at {updated_at}")
+                continue
+
             job_obj = JobListing.from_dict({
                 'id': f"gh_{board_token}_{job.get('id')}",
                 'title': title,
@@ -113,6 +119,12 @@ class LeverFetcher:
             if not is_good:
                 continue
 
+            # 3. Date Filter (Predicate Pushdown)
+            created_at = job.get('createdAt')
+            if not job_filter.is_recent(created_at):
+                logger.debug(f"Skipped job (Too Old): {title} created at {created_at}")
+                continue
+
             job_obj = JobListing.from_dict({
                 'id': f"lever_{board_token}_{job.get('id')}",
                 'title': title,
@@ -179,6 +191,12 @@ class AshbyFetcher:
             # 2. Title Filter & Scoring
             is_good, score, reason = job_filter.check_eligibility(title)
             if not is_good:
+                continue
+
+            # 3. Date Filter (Predicate Pushdown)
+            published_at = job.get('publishedDate') or job.get('createdAt')
+            if not job_filter.is_recent(published_at):
+                logger.debug(f"Skipped job (Too Old): {title} published/created at {published_at}")
                 continue
 
             job_obj = JobListing.from_dict({

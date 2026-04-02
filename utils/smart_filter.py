@@ -14,9 +14,42 @@ class SmartFilter:
         try:
             with open("config/filtering.yaml", "r") as f:
                 self.config = yaml.safe_load(f)
+            # Scalar configuration: Separate from arrays
+            self.max_days_old = self.config.get('filtering', {}).get('max_days_old', 14)
         except Exception as e:
             logging.error(f"Failed to load filtering config: {e}")
             self.config = {}
+            self.max_days_old = 14
+
+    def is_recent(self, date_str: str) -> bool:
+        """
+        Determines if a job is within the max_days_old threshold.
+        Fails open (returns True) if the date is missing or unparseable.
+        """
+        from datetime import datetime, timezone
+        
+        if not date_str:
+            logging.warning("Missing date field from ATS API. Defaulting to current scrape time (Keep Job).")
+            return True
+
+        try:
+            # Handle standard ISO 8601 with Z for UTC
+            clean_date_str = date_str.replace("Z", "+00:00")
+            job_date = datetime.fromisoformat(clean_date_str)
+            
+            # Ensure job_date is timezone aware for accurate comparison
+            if job_date.tzinfo is None:
+                 job_date = job_date.replace(tzinfo=timezone.utc)
+
+            now = datetime.now(timezone.utc)
+            # age_days will be 0 if today, 1 if yesterday, etc.
+            age_days = (now - job_date).days
+
+            return age_days <= self.max_days_old
+
+        except ValueError as e:
+            logging.warning(f"Unparseable date '{date_str}': {e}. Failsafe triggered: keeping job.")
+            return True
 
     def is_valid_location(self, location: str) -> bool:
         """Checks if location is allowed based on config."""

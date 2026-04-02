@@ -1,10 +1,17 @@
 # config/filtering.yaml
 
-# --- SYSTEM PERFORMANCE ---
+# --- SCALAR CONFIGURATIONS ---
 system:
   concurrency_limit: 5
   request_timeout: 15
   user_agent: "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36"
+
+filtering:
+  is_enabled: true
+  max_days_old: 14        # ONLY show jobs from the last 14 days
+  max_years_experience: 2 # Skip jobs requiring > 2 years
+
+# --- ARRAY CONFIGURATIONS ---
 
 # --- JOB TITLE LOGIC ---
 titles:
@@ -87,6 +94,7 @@ locations:
     - "global"
     - "worldwide"
     - "international"
+    - "jaipur"
     
     # Specific Hubs
     - "taiwan"
@@ -179,7 +187,6 @@ locations:
     - "santa clara"
 
 # --- SKILL SCORING ---
-# Score: +5 points
 preferred_skills:
   - "Python"
   - "React"
@@ -189,6 +196,14 @@ preferred_skills:
   - "FastAPI"
   - "PostgreSQL"
   - "Data Engineering"
+  - "Kotlin"
+  - "Java"
+  - "Typescript"
+  - "React Native"
+  - "Flutter"
+  - "Next.js"
+  - "Node.js"
+  - "Vite"
   - "Linesight"
   - "ERP"
   - "PLC"
@@ -198,3 +213,37 @@ preferred_skills:
   - "Industry 4.0"
   - "IIoT"
   - "Smart Factory"
+
+# --- NEGATIVE FILTERS ---
+title_blocklist:
+  # Degree Mismatch
+  - "PhD"
+  - "Ph.D"
+  - "Doctorate"
+  - "MBA"
+  - "Postdoc"
+  - "Masters"
+  - "Master's"
+
+  # Domain Mismatch
+  - "Hardware Engineering"
+  - "Mechanical"
+  - "Electrical Engineer"
+  - "iOS"
+  - "Android"
+  - "FPGA"
+  - "ASIC"
+
+# Score: -3 points each
+penalty_skills:
+  - "Swift"
+  - "Objective-C"
+  - "MATLAB"
+  - "Verilog"
+  - "VHDL"
+  - "Assembly"
+  - "ROS"
+  - "CUDA"
+  - "Ruby on Rails"
+  - "Golang"
+  - "Rust"

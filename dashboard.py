@@ -10,6 +10,7 @@ import streamlit as st
 import pandas as pd
 import json
 import time
+import yaml
 
 # Silence pandas downcasting warning
 pd.set_option('future.no_silent_downcasting', True)
@@ -49,6 +50,18 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # --- Data Loading & Saving ---
+@st.cache_data(ttl=3600)
+def load_config():
+    config_path = os.path.join(BASE_DIR, "config", "filtering.yaml")
+    if not os.path.exists(config_path):
+        return {}
+    try:
+        with open(config_path, "r", encoding='utf-8') as f:
+            return yaml.safe_load(f)
+    except Exception as e:
+        st.error(f"Error loading config: {e}")
+        return {}
+
 def load_tracking():
     if os.path.exists(TRACKING_FILE):
         with open(TRACKING_FILE, 'r', encoding='utf-8') as f:
@@ -400,6 +413,64 @@ if 'date_posted' in df_jobs.columns and date_range is not None:
 status_priority = {"Offer": 5, "Interviewing": 4, "Applied": 3, "New": 1, "Rejected": 0, "Hidden": -1}
 filtered_df['status_prio'] = filtered_df['Status'].map(status_priority).fillna(1)
 filtered_df = filtered_df.sort_values(by=["status_prio", "is_saved", "date_posted", "score"], ascending=[False, False, False, False]).reset_index(drop=True)
+
+# --- Filter Engine Configuration ---
+with st.expander("⚙️ Filter Engine Rules", expanded=False):
+    config = load_config()
+    if config:
+        tabs = st.tabs(["🎯 General", "📝 Titles", "📍 Locations", "🛠️ Skills"])
+        
+        with tabs[0]: # General
+            col1, col2, col3 = st.columns(3)
+            with col1:
+                st.metric("Filtering", "ENABLED" if config.get('filtering', {}).get('is_enabled') else "DISABLED")
+            with col2:
+                st.metric("Max Age", f"{config.get('filtering', {}).get('max_days_old')}d")
+            with col3:
+                st.metric("Max Exp", f"{config.get('filtering', {}).get('max_years_experience')}y")
+            
+            with st.expander("System Specs"):
+                st.json(config.get('system', {}))
+
+        with tabs[1]: # Titles
+            col1, col2 = st.columns(2)
+            with col1:
+                st.markdown("### 🌟 High Priority")
+                hp_titles = config.get('titles', {}).get('high_priority', [])
+                st.dataframe(pd.DataFrame(hp_titles, columns=["Keyword"]), use_container_width=True, hide_index=True)
+            with col2:
+                st.markdown("### 🚫 Skip Titles")
+                ex_titles = config.get('titles', {}).get('exclude', [])
+                st.dataframe(pd.DataFrame(ex_titles, columns=["Keyword"]), use_container_width=True, hide_index=True)
+                
+            st.divider()
+            st.markdown("### 🛑 Degree & Domain Blocklist")
+            bl_titles = config.get('title_blocklist', [])
+            st.dataframe(pd.DataFrame(bl_titles, columns=["Restricted Match"]), use_container_width=True, hide_index=True)
+
+        with tabs[2]: # Locations
+            col1, col2 = st.columns(2)
+            with col1:
+                st.markdown("### ✅ Include")
+                inc_locs = config.get('locations', {}).get('include', [])
+                st.dataframe(pd.DataFrame(inc_locs, columns=["Region"]), use_container_width=True, hide_index=True)
+            with col2:
+                st.markdown("### 🚫 Exclude")
+                ex_locs = config.get('locations', {}).get('exclude', [])
+                st.dataframe(pd.DataFrame(ex_locs, columns=["Region"]), use_container_width=True, hide_index=True)
+
+        with tabs[3]: # Skills
+            col1, col2 = st.columns(2)
+            with col1:
+                st.markdown("### 💎 Preferred")
+                pref_skills = config.get('preferred_skills', [])
+                st.dataframe(pd.DataFrame(pref_skills, columns=["Skill"]), use_container_width=True, hide_index=True)
+            with col2:
+                st.markdown("### ⚠️ Penalty")
+                pen_skills = config.get('penalty_skills', [])
+                st.dataframe(pd.DataFrame(pen_skills, columns=["Skill"]), use_container_width=True, hide_index=True)
+    else:
+        st.warning("Could not find or parse `config/filtering.yaml`.")
 
 # --- TABLE ---
 st.caption(f"Showing **{len(filtered_df)}** of {len(df_jobs)} jobs")

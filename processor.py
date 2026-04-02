@@ -20,10 +20,9 @@ class JobProcessor:
                 self.config = yaml.safe_load(f)
         
         # Helper lists for filtering/scoring
-        # Note: 'exclude' key is used in the new config, but keeping 'exclude_keywords' check for backward compat if needed
-        # The user's new config uses 'exclude', so we map that.
-        self.exclude_keywords = self.config.get('keywords', {}).get('exclude', [])
-        self.high_priority_keywords = self.config.get('keywords', {}).get('high_priority', [])
+        # Unified config uses 'titles' section for keywords
+        self.exclude_keywords = self.config.get('titles', {}).get('exclude', [])
+        self.high_priority_keywords = self.config.get('titles', {}).get('high_priority', [])
         
     def extract_min_years_experience(self, text):
         """
@@ -107,8 +106,8 @@ class JobProcessor:
         applied_map = {j['id']: j for j in applied_jobs}
 
         # Load filtering lists
-        high_priority = [k.lower() for k in self.config['keywords'].get('high_priority', [])]
-        exclude_words = [k.lower() for k in self.config['keywords'].get('exclude', [])]
+        high_priority = [k.lower() for k in self.config.get('titles', {}).get('high_priority', [])]
+        exclude_words = [k.lower() for k in self.config.get('titles', {}).get('exclude', [])]
         preferred_skills = [k.lower() for k in self.config.get('preferred_skills', [])]
         title_blocklist = [k.lower() for k in self.config.get('title_blocklist', [])]
         penalty_skills = [k.lower() for k in self.config.get('penalty_skills', [])]

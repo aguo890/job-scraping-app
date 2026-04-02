@@ -78,7 +78,9 @@ async def main():
         # Load configurations
         logger.info("Loading configurations...")
         companies_config = load_config('config/companies.yaml')
-        keywords_config = load_config('config/keywords.yaml')
+        
+        # Unifying configuration to a single source of truth
+        app_config = load_config('config/filtering.yaml')
         
         companies = companies_config.get('companies', [])
         
@@ -93,7 +95,7 @@ async def main():
         # Initialize components
         logger.info("Initializing components...")
         fetcher_manager = JobFetcherManager()
-        processor = JobProcessor(keywords_config)
+        processor = JobProcessor(app_config)
         reporter = JobReporter()
         github = GitHubIntegration()
         ai_assistant = AIAssistant()
