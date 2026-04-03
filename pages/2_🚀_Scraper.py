@@ -80,6 +80,63 @@ with st.container(border=True):
     else:
         st.info("No historical runs found. Trigger a scrape to see results here.")
 
+st.divider()
+
+# --- DISCOVERY PREVIEW ---
+st.subheader("🛂 Latest High-Signal Discoveries")
+st.caption("Immediate mobility preview of the most recently ingested roles.")
+
+# Add parent directory to path to ensure config_utils and other modules are found
+import os
+import sys
+current_dir = os.path.dirname(os.path.abspath(__file__))
+parent_dir = os.path.dirname(current_dir)
+if parent_dir not in sys.path:
+    sys.path.insert(0, parent_dir)
+
+from config_utils import load_config
+config = load_config()
+mobility_enabled = config.get('restrictions', {}).get('enabled', False)
+
+payload = JobDataService.fetch_dashboard_payload()
+df_recent = payload.get("data", None)
+
+if df_recent is not None and not df_recent.empty:
+    # 1. Inject Mobility Icons for Preview (Conditional)
+    display_cols = ['company', 'title', 'location', 'score']
+    
+    if mobility_enabled and 'restriction_data' in df_recent.columns:
+        def get_mobility_icon(res):
+            if not isinstance(res, dict): return "🟡"
+            status = res.get('mobility_status', 'NEUTRAL')
+            if status == 'FRIENDLY': return "🟢"
+            if status == 'RESTRICTED': return "🔴"
+            return "🟡"
+        
+        df_recent['🛂'] = df_recent['restriction_data'].apply(get_mobility_icon)
+        display_cols.insert(0, '🛂')
+    
+    # 2. Sort by date_posted (newest first)
+    if 'date_posted' in df_recent.columns:
+        df_recent = df_recent.sort_values(by="date_posted", ascending=False)
+    
+    # 3. Filter for Top 15
+    df_preview = df_recent.head(15).copy()
+    final_cols = [c for c in display_cols if c in df_preview.columns]
+    
+    st.dataframe(
+        df_preview[final_cols],
+        width="stretch",
+        hide_index=True,
+        column_config={
+            "🛂": st.column_config.TextColumn("🛂", width="small", help="🟢 Friendly | 🟡 Neutral | 🔴 Restricted"),
+            "score": st.column_config.NumberColumn("Score", format="%d")
+        }
+    )
+    st.caption("💡 Full details and filtering controls are available on the main [Dashboard](Dashboard).")
+else:
+    st.info("Ingest some jobs to see the discovery preview.")
+
 # --- NAVIGATION FOOTER ---
 st.write("")
 st.info("💡 Once finished, head back to the [Dashboard](Dashboard) to view your updated job feed.")

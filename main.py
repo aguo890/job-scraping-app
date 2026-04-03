@@ -109,10 +109,18 @@ async def async_main(companies_filter: str = None):
         processed_jobs = processor.process_jobs(raw_jobs)
         logger.info(f"Processed to {len(processed_jobs)} unique jobs")
         
-        if not processed_jobs:
-            logger.warning("No jobs after processing.")
-            return {"ingested_count": (len(raw_jobs) if 'raw_jobs' in locals() else 0), "processed_count": 0}
-        
+        # 4. ATOMIC SAVE & REPORTING
+        if processed_jobs:
+            restricted_count = sum(1 for j in processed_jobs if j.get('restriction_data', {}).get('restricted'))
+            logger.info(f"📊 Scrape Summary: {len(processed_jobs)} total, {restricted_count} restricted (Visa/Clearance).")
+            
+            # ATOMIC PERSISTENCE: Save to jobs_agg.json
+            reporter.save_jobs_json(processed_jobs)
+            # Optional: Daily markdown report
+            reporter.generate_markdown_report(processed_jobs)
+        else:
+            logger.error("❌ No jobs were successfully processed. Aborting save.")
+
         # Return both counts for transparency
         return {
             "ingested_count": len(raw_jobs),

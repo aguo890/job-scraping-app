@@ -66,7 +66,6 @@ titles:
   - Operations
   - Executive Assistant
   - Mechanical
-
 locations:
   exclude:
   - asia
@@ -226,3 +225,9 @@ penalty_skills:
 - Ruby on Rails
 - Golang
 - Rust
+restrictions:
+  enabled: false
+  needs_sponsorship: false
+  no_clearance: false
+  keywords: []
+  mobility_friendly: []

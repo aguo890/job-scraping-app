@@ -17,6 +17,7 @@ class JobListing:
     source: Optional[str] = "Unknown"
     score: float = 0.0
     match_reason: Optional[str] = ""
+    restriction_data: Optional[Dict[str, Any]] = field(default_factory=lambda: {"restricted": False, "reason": None})
     raw_data: Dict[str, Any] = field(default_factory=dict)
     
     @classmethod
@@ -42,8 +43,8 @@ class JobListing:
         """Clean up whitespace and remove HTML tags from critical fields."""
         def clean_html(text: str) -> str:
             if not text: return ""
-            # Basic HTML stripping
-            clean = re.sub('<[^<]+?>', '', text)
+            # Smart HTML stripping: Removes tags but preserves Unicode/Emojis
+            clean = re.sub(r'<[^>]*>', '', text)
             return str(clean).replace('\n', ' ').strip()
 
         self.title = clean_html(self.title)

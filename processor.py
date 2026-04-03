@@ -11,6 +11,7 @@ logger = logging.getLogger(__name__)
 # Base directory for absolute path resolution
 BASE_DIR = Path(__file__).resolve().parent
 from utils.location_filter import is_us_or_remote
+from utils.smart_filter import RestrictionEngine
 
 class JobProcessor:
     def __init__(self, config_input):
@@ -26,6 +27,10 @@ class JobProcessor:
         # Unified config uses 'titles' section for keywords
         self.exclude_keywords = self.config.get('titles', {}).get('exclude', [])
         self.high_priority_keywords = self.config.get('titles', {}).get('high_priority', [])
+        
+        # Initialize Restriction Engine (Visa/Clearance Filter)
+        restriction_config = self.config.get('restrictions', {})
+        self.restriction_engine = RestrictionEngine(restriction_config)
         
     def extract_min_years_experience(self, text):
         """
@@ -207,6 +212,18 @@ class JobProcessor:
                 if "🔥" not in display_title:
                     display_title = "🔥 " + display_title
             
+            # 5b. Restriction Analysis (Defensive & Performance Optimized)
+            restriction_data = {"restricted": False, "reason": None, "mobility_status": "NEUTRAL"}
+            drop_enabled = self.config.get('restrictions', {}).get('drop_restricted', False)
+            
+            if self.config.get('restrictions', {}).get('enabled', False):
+                restriction_data = self.restriction_engine.analyze(description_text)
+            
+            # --- HARD DROP: Silently discard restricted roles if configured ---
+            if drop_enabled and restriction_data.get('restricted') and not is_applied:
+                logger.info(f"🗑️ Hard Drop: Skipping restricted role '{job['title']}' at {job['company']}")
+                continue
+
             processed_job = {
                 "id": job['id'],
                 "title": display_title,
@@ -217,6 +234,7 @@ class JobProcessor:
                 "date_posted": est_date.strftime('%Y-%m-%d %I:%M %p'),
                 "is_applied": is_applied,
                 "status": "Applied" if is_applied else "Active",
+                "restriction_data": restriction_data,
                 "raw_data": job.get('raw_data', {})
             }
             if is_applied:

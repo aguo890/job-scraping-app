@@ -180,6 +180,15 @@ with st.sidebar:
         if not dates.empty:
             st.caption(f"📅 {dates.min().strftime('%b %d')} – {dates.max().strftime('%b %d, %Y')}")
 
+    # --- System Status (Hard Drop Indicator) ---
+    st.sidebar.subheader("⚙️ System Status")
+    app_config = load_config()
+    drop_enabled = app_config.get('restrictions', {}).get('drop_restricted', False)
+    if drop_enabled:
+        st.sidebar.info("🗑️ **Hard Drop Active:** Restricted jobs are permanently dropped during ingestion. Your database only contains viable leads.")
+    else:
+        st.sidebar.caption("🗄️ **Full Retention:** All jobs are saved. Use the Mobility Filter above to hide restricted leads.")
+
     st.divider()
 
     # --- Filters ---
@@ -306,6 +315,27 @@ with st.sidebar:
                                         min_value=min_date, max_value=max_date,
                                         key="filter_date_range")
 
+    # --- Mobility Filtering (Granular Control) ---
+    config = load_config()
+    mobility_enabled = config.get('restrictions', {}).get('enabled', False)
+    
+    selected_mobility = [] # Initialize fallback
+    if mobility_enabled:
+        st.subheader("🛂 Mobility Filter", divider="gray")
+        mobility_options = {
+            "🟢 Friendly": "FRIENDLY",
+            "🟡 Neutral": "NEUTRAL", 
+            "🔴 Restricted": "RESTRICTED"
+        }
+        selected_labels = st.multiselect(
+            "Include Statuses:",
+            options=list(mobility_options.keys()),
+            default=["🟢 Friendly", "🟡 Neutral"],
+            help="🟢 Friendly: Mentioned sponsorship | 🟡 Neutral: No mention | 🔴 Restricted: ITAR/Clearance required",
+            key="filter_mobility_multiselect"
+        )
+        selected_mobility = [mobility_options[label] for label in selected_labels]
+
 # --- Main Dashboard Area ---
 # PURPOSELY HIDDEN (Architectural Decision) - Moving Scraper to a separate page. 
 # DO NOT RE-ENABLE WITHOUT EXPLICIT USER CONSENT.
@@ -326,6 +356,28 @@ st.divider()
 
 # --- Apply Filters ---
 filtered_df = df_jobs.copy()
+
+# 0. Mobility Column Injection (Defensive & Conditional)
+if mobility_enabled and 'restriction_data' in filtered_df.columns:
+    def get_mobility_display(x):
+        if not isinstance(x, dict):
+            return "🟡 Neutral"
+        if x.get('restricted', False):
+            return "🔴 Restricted"
+        if x.get('friendly', False):
+            return "🟢 Friendly"
+        return "🟡 Neutral"
+    
+    filtered_df['Mobility'] = filtered_df['restriction_data'].apply(get_mobility_display)
+    
+    # Apply Filtering Logic (Stable Mapping)
+    if selected_mobility:
+        # Check against the raw enum in restriction_data for stability
+        filtered_df = filtered_df[filtered_df['restriction_data'].apply(
+            lambda x: x.get('mobility_status', 'NEUTRAL') if isinstance(x, dict) else 'NEUTRAL'
+        ).isin(selected_mobility)]
+elif 'Mobility' in filtered_df.columns:
+    filtered_df = filtered_df.drop(columns=['Mobility'])
 
 # 1. VIEW LOGIC (The Core "Inbox Zero" Flow)
 if selected_view == "Feed":
@@ -396,7 +448,7 @@ filtered_df = filtered_df.sort_values(by=["status_prio", "is_saved", "date_poste
 # --- TABLE ---
 st.caption(f"Showing **{len(filtered_df)}** of {len(df_jobs)} jobs")
 
-display_cols = ['Status_Display', 'score', 'date_posted', 'company', 'title', 'location', 'url', 'id']
+display_cols = ['Mobility', 'score', 'date_posted', 'company', 'title', 'location', 'url', 'id']
 final_cols = [c for c in display_cols if c in filtered_df.columns]
 
 event = st.dataframe(
@@ -405,7 +457,7 @@ event = st.dataframe(
     selection_mode=["multi-row", "single-cell"],
     key=f"job_dashboard_table_{st.session_state.table_version}",
     column_config={
-        "Status_Display": st.column_config.TextColumn("Status"),
+        "Mobility": st.column_config.TextColumn("🛂 Status", width="small", help="🟢 Friendly | 🟡 Neutral | 🔴 Restricted"),
         "url": st.column_config.LinkColumn("Link", display_text="Open"),
         "score": st.column_config.ProgressColumn("Score", format="%d", min_value=0, max_value=50),
         "id": None
@@ -495,6 +547,11 @@ if selected_indices:
                     tracking_data[job_id]['status'] = new_status
                     if new_status in ["Applied", "Interviewing", "Offer"]:
                         tracking_data[job_id]['saved'] = True
+                    
+                    # [CLEANUP] If job is moved to terminal state, remove drafts
+                    if new_status in ["Applied", "Rejected", "Hidden"]:
+                        JobDataService.cleanup_job_drafts(job_id)
+                
                 JobDataService.save_tracking_atomically(tracking_data)
                 
                 # Clear selection after action
@@ -502,9 +559,14 @@ if selected_indices:
                 st.rerun()
 
 
-    # --- CV Editor / Resume Navigation ---
+    # --- CV Editor / Resume Navigation & Restriction Audit ---
     if num_selected == 1:
         selected_job_row = filtered_df.iloc[selected_indices[0]]
+        
+        # Restriction Audit Trail
+        res_data = selected_job_row.get('restriction_data', {})
+        if isinstance(res_data, dict) and res_data.get('restricted'):
+            st.error(f"🚫 **Restricted Role:** {res_data.get('reason')}", icon="🚫")
         resume_file = selected_job_row.get('resume', '')
         has_resume = bool(resume_file)
 

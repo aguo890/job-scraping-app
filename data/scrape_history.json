@@ -100,5 +100,41 @@
         "jobs_found": 1980,
         "duration_seconds": 20.5,
         "status": "Success"
+    },
+    {
+        "timestamp": "2026-04-03 20:08:21",
+        "jobs_found": 1982,
+        "duration_seconds": 45.19,
+        "status": "Success"
+    },
+    {
+        "timestamp": "2026-04-03 21:45:03",
+        "jobs_found": 1973,
+        "duration_seconds": 21.43,
+        "status": "Success"
+    },
+    {
+        "timestamp": "2026-04-03 21:45:58",
+        "jobs_found": 1973,
+        "duration_seconds": 32.75,
+        "status": "Success"
+    },
+    {
+        "timestamp": "2026-04-03 22:03:06",
+        "jobs_found": 1975,
+        "duration_seconds": 31.12,
+        "status": "Success"
+    },
+    {
+        "timestamp": "2026-04-03 22:31:27",
+        "jobs_found": 1974,
+        "duration_seconds": 37.26,
+        "status": "Success"
+    },
+    {
+        "timestamp": "2026-04-03 22:39:02",
+        "jobs_found": 1974,
+        "duration_seconds": 28.42,
+        "status": "Success"
     }
 ]

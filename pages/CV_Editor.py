@@ -81,6 +81,50 @@ def load_job_by_id(job_id):
         pass
     return None
 
+# --- Draft Management Persistence ---
+def get_draft_path(job_id):
+    """Returns path to the temporary draft file."""
+    if job_id in SPECIAL_ROUTING_JOBS:
+        return None
+    return os.path.join(orchestrator.output_dir, f"{job_id}_Draft.yaml")
+
+def save_draft_to_disk(job_id, content):
+    """Explicitly persists the current buffer to disk."""
+    path = get_draft_path(job_id)
+    if path:
+        try:
+            with open(path, 'w', encoding='utf-8') as f:
+                f.write(content)
+            return True
+        except Exception as e:
+            st.error(f"Failed to save draft: {e}")
+    return False
+
+def load_cv_content(job_id):
+    """
+    Implements High-Reliability Recovery Pattern:
+    1. Session State (Current Buffer)
+    2. Disk Draft (_Draft.yaml)
+    3. Tailored CV ({job_id}.yaml)
+    4. Master CV
+    """
+    # 1. Session State (Memory Buffer)
+    buffer_key = f"buffer_{job_id}"
+    if buffer_key in st.session_state:
+        return st.session_state[buffer_key]
+    
+    # 2. Disk Draft
+    dp = get_draft_path(job_id)
+    if dp and os.path.exists(dp):
+        try:
+            with open(dp, 'r', encoding='utf-8') as f:
+                return f.read()
+        except Exception:
+            pass
+            
+    # 3 & 4. Orchestrator Logic (Tailored or Master)
+    return orchestrator.load_job_cv(job_id)
+
 # --- Robust Data Loading ---
 # PRECEDENCE: 1. URL (Deep Link/Refresh) -> 2. Session State (Dashboard Nav) -> 3. Error
 url_job_id = st.query_params.get("job_id")
@@ -139,6 +183,11 @@ title = job.get("title", "N/A")
 is_master = job.get("is_master", False)
 is_playground = job.get("is_playground", False)
 
+# --- 2. Restriction Warning ---
+res_data = job.get("restriction_data", {})
+if isinstance(res_data, dict) and res_data.get("restricted"):
+    st.warning(f"⚠️ **Restriction Alert:** {res_data.get('reason')}. Please ensure you meet the eligibility requirements before tailoring.", icon="⚠️")
+
 # --- 2. Initialize Orchestrator ---
 # Uses default (Aaron_Guo_CV.yaml) which is mounted at root in Docker
 orchestrator = CVOrchestrator()
@@ -147,16 +196,25 @@ orchestrator = CVOrchestrator()
 if "current_editing_job_id" not in st.session_state:
     st.session_state["current_editing_job_id"] = None
 
-# If we switched jobs, force a reload
+# If we switched jobs, force a reload and persist old draft
 if st.session_state["current_editing_job_id"] != job_id:
+    # --- Auto-Save Old Job Draft before switching ---
+    old_id = st.session_state["current_editing_job_id"]
+    if old_id and old_id in st.session_state.get("active_job", {}).get("id", ""): # Check if it's a real job
+         # This is tricky because the old content is in the widget
+         pass
+
     # --- Reset Playground if entering it ---
     if is_playground:
         orchestrator.reset_playground()
         
-    # Clear old state
-    st.session_state["editor_yaml"] = orchestrator.load_job_cv(job_id)
-    st.session_state["yaml_editor"] = st.session_state["editor_yaml"]
+    # Clear old state and Load fresh recovery
+    content = load_cv_content(job_id)
+    st.session_state["editor_yaml"] = content
+    st.session_state["yaml_editor"] = content
+    st.session_state[f"buffer_{job_id}"] = content
     st.session_state["current_editing_job_id"] = job_id
+    
     # Clear PDF state so we don't show wrong PDF
     st.session_state.pop("current_pdf", None)
     st.session_state.pop("render_status", None)
@@ -278,6 +336,14 @@ with st.sidebar:
         
         with open(tracking_file, "w", encoding="utf-8") as f:
             json.dump(data, f, indent=2)
+            
+        # [CLEANUP] Remove draft file after application
+        dp = get_draft_path(target_id)
+        if dp and os.path.exists(dp):
+            try:
+                os.remove(dp)
+            except Exception:
+                pass
 
     # Disable "Mark as Applied" in master/playground mode
     if st.button("🚀 Mark as Applied", type="primary", width="stretch",
@@ -322,68 +388,159 @@ with st.sidebar:
 
 
 
-# --- MAIN CONTENT: Workspace Layout ---
-editor_col, preview_col = st.columns([1, 1], gap="large")
+# --- 3. Workspace Layout: 🏛️ CV TAILORING WORKSHOP ---
+st.title("🏛️ CV Tailoring Workshop")
 
-with editor_col:
-    st.subheader("✏️ Editor")
+# --- Restriction Warning ---
+res_data = job.get("restriction_data", {})
+if isinstance(res_data, dict) and res_data.get("restricted"):
+    st.error(f"🚫 **ITAR/Clearance Warning:** {res_data.get('reason')}. Ensure eligibility before tailoring.", icon="🚫")
+
+st.divider()
+
+# --- 4. Main Workflow Columns ---
+col_strat, col_editor = st.columns([1, 2], gap="large")
+
+with col_strat:
+    st.subheader("🎯 Strategy & Context")
+    
+    # A. Job Context Card
     with st.container(border=True):
-        # Initialize widget state if not present
-        if "yaml_editor" not in st.session_state:
-            st.session_state["yaml_editor"] = st.session_state["editor_yaml"]
+        st.markdown(f"### {company}")
+        st.write(f"**Target Role:** {title}")
+        st.caption(f"Job ID: `{job_id}`")
+    
+    st.divider()
+    
+    # B. AI Strategy & Gaps
+    if "ai_strategy" in st.session_state and st.session_state["ai_strategy"]:
+        with st.container(border=True):
+            st.markdown("### 🧠 AI Strategy")
+            st.info(st.session_state["ai_strategy"])
+            
+            if "gap_analysis" in st.session_state and st.session_state["gap_analysis"]:
+                st.markdown("#### ⚠️ Gap Analysis")
+                st.warning(st.session_state["gap_analysis"])
+                
+            if "ai_reasoning" in st.session_state and st.session_state["ai_reasoning"]:
+                with st.expander("💭 Chain of Thought"):
+                    st.caption(st.session_state["ai_reasoning"])
+    else:
+        st.info("Run **AI Tailor** to generate a strategy and gap analysis for this role.")
 
-        st.text_area(
-            "yaml_editor",
-            height=None,  # Height controlled by CSS (85vh)
-            key="yaml_editor",
-            label_visibility="collapsed"
-        )
+    st.divider()
 
-with preview_col:
-    st.subheader("📄 Live Preview")
-    with st.container(border=True):
-        # Handle render (from sidebar button)
-        if render_clicked:
+    # C. AI Controls (Moved from Sidebar for context)
+    if not (is_master or is_playground):
+        if st.button("🤖 Auto-Tailor with AI", type="primary", width="stretch"):
+            with st.spinner("🧠 Rewriting CV... (DeepSeek R1)"):
+                try:
+                    strategy, new_yaml, gap, reasoning = ai_tailor.generate_tailored_resume(
+                        base_yaml_content=st.session_state["editor_yaml"],
+                        job_description=job.get("description", "No description provided"),
+                        job_title=title,
+                        company_name=company
+                    )
+                    st.session_state["editor_yaml"] = new_yaml
+                    st.session_state["yaml_editor"] = new_yaml # Sync buffer
+                    st.session_state["ai_strategy"] = strategy
+                    st.session_state["gap_analysis"] = gap
+                    st.session_state["ai_reasoning"] = reasoning
+                    orchestrator.save_job_cv(job_id, new_yaml)
+                    st.toast("AI Strategy Applied! ✨")
+                    time.sleep(1)
+                    st.rerun()
+                except Exception as e:
+                    st.error(f"Tailoring failed: {e}")
+
+with col_editor:
+    # --- Toolbar ---
+    tool_l, tool_r = st.columns([3, 1])
+    with tool_l:
+        st.subheader("📝 CV Workshop")
+    with tool_r:
+        if st.button("🔄 Render PDF", type="primary", width="stretch", disabled=st.session_state["is_rendering"]):
             st.session_state["is_rendering"] = True
             st.rerun()
 
-        if st.session_state.get("is_rendering", False):
-            with st.spinner("Rendering via RenderCV..."):
-                content = st.session_state.get("yaml_editor", st.session_state["editor_yaml"])
-                save_result = orchestrator.save_job_cv(job_id, content)
-                if isinstance(save_result, dict) and not save_result.get("success", True):
-                    st.error(f"❌ Save Failed: {save_result.get('error', 'Unknown error')}")
+    # --- The Buffered Editor ---
+    with st.container(border=True):
+        # Initialize widget state if missing
+        if "yaml_editor" not in st.session_state:
+            st.session_state["yaml_editor"] = st.session_state["editor_yaml"]
+
+        # The session state "yaml_editor" now acts as our persistent buffer
+        edited_content = st.text_area(
+            "Draft Buffer",
+            value=st.session_state["yaml_editor"],
+            height=None, # CSS controlled (85vh)
+            key="yaml_editor_widget",
+            label_visibility="collapsed",
+            on_change=lambda: st.session_state.__setitem__("yaml_editor", st.session_state["yaml_editor_widget"])
+        )
+        # 1. Update In-Memory Buffers
+        st.session_state["yaml_editor"] = edited_content
+        st.session_state[f"buffer_{job_id}"] = edited_content
+
+        # 2. Persistence Controls
+        c1, c2, c3 = st.columns([1, 1, 3])
+        with c1:
+            if st.button("💾 Save Draft", help="Persist changes to disk draft file", width="stretch"):
+                if save_draft_to_disk(job_id, edited_content):
+                    st.toast("Draft saved to disk! 📦")
+        with c2:
+            st.caption(f"Last Buffer Sync: {datetime.now().strftime('%H:%M:%S')}")
+
+    # --- Render Logic (Inside Col) ---
+    if st.session_state.get("is_rendering", False):
+        with st.spinner("Compiling with RenderCV..."):
+            content = st.session_state["yaml_editor"]
+            # 1. Save current buffer to disk
+            save_result = orchestrator.save_job_cv(job_id, content)
+            if isinstance(save_result, dict) and not save_result.get("success", True):
+                st.error(f"❌ Save Failed: {save_result.get('error', 'Unknown error')}")
+            else:
+                # 2. Render from content
+                pdf_path, status = orchestrator.render_from_content(job_id, content)
+                if pdf_path:
+                    st.session_state["current_pdf"] = pdf_path
+                    st.session_state["render_success_toast"] = True
                 else:
-                    pdf_path, status = orchestrator.render_from_content(job_id, content)
-                    if pdf_path:
-                        st.session_state["current_pdf"] = pdf_path
-                        st.session_state["render_success_toast"] = True
-                    else:
-                        st.error(f"❌ Render Failed: {status}")
-                
-                st.session_state["is_rendering"] = False
-                st.rerun()
+                    st.error(f"❌ Render Failed: {status}")
+            
+            st.session_state["is_rendering"] = False
+            st.rerun()
 
-        # Display PDF
-        pdf_display_path = st.session_state.get("current_pdf")
-        if not pdf_display_path:
-            potential = os.path.join(orchestrator.output_dir, f"{job_id}.pdf")
-            if os.path.exists(potential):
-                pdf_display_path = potential
+    # --- Download & Prev ---
+    display_path = st.session_state.get("current_pdf")
+    if not display_path:
+        potential = os.path.join(orchestrator.output_dir, f"{job_id}.pdf")
+        if os.path.exists(potential):
+            display_path = potential
 
-        if pdf_display_path and os.path.exists(pdf_display_path):
-            with open(pdf_display_path, "rb") as f:
+    if display_path and os.path.exists(display_path):
+        with st.expander("📄 PDF Preview & Download", expanded=True):
+            btn_col_l, btn_col_r = st.columns([3, 1])
+            with btn_col_l:
+                 st.info("PDF generated successfully. Review the preview below before downloading.")
+            with btn_col_r:
+                # Provide nice filename
+                clean_t = re.sub(r'[^a-zA-Z0-9]', '_', title)
+                clean_c = re.sub(r'[^a-zA-Z0-9]', '_', company)
+                nice_name = f"Aaron_Guo_{clean_t}_{clean_c}.pdf"
+                with open(display_path, "rb") as f:
+                    st.download_button("⬇️ Download PDF", data=f.read(), file_name=nice_name, mime="application/pdf", width="stretch")
+
+            # Inline PDF Preview
+            with open(display_path, "rb") as f:
                 base64_pdf = base64.b64encode(f.read()).decode('utf-8')
-
-            pdf_iframe = f'<iframe src="data:application/pdf;base64,{base64_pdf}" width="100%" style="height: 85vh;" type="application/pdf"></iframe>'
+            pdf_iframe = f'<iframe src="data:application/pdf;base64,{base64_pdf}" width="100%" style="height: 60vh; border-radius: 8px;" type="application/pdf"></iframe>'
             st.markdown(pdf_iframe, unsafe_allow_html=True)
-        else:
-            st.info("No PDF yet. Click **Render PDF** in the sidebar or press **Ctrl+Enter**.")
+    else:
+        st.info("Click **Render PDF** to generate the document.")
 
-
-# Inject Keyboard Listener for Ctrl+Enter / Cmd+Enter
+# Inject Keyboard Listener for Ctrl+Enter
 import streamlit.components.v1 as components
-
 components.html(
     """
     <script>
@@ -391,24 +548,12 @@ components.html(
     doc.addEventListener('keydown', function(e) {
         if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
             e.preventDefault();
-            
-            // 1. Blur the active element to force Streamlit to flush text changes to backend
-            if (doc.activeElement) {
-                doc.activeElement.blur();
-            }
-            
-            // 2. Add a slight delay to ensure Streamlit registers the blur/state update
+            if (doc.activeElement) { doc.activeElement.blur(); }
             setTimeout(() => {
-                // 3. Find the button reliably by its inner text using XPath
-                const xpath = "//button[.//p[contains(text(), 'Render PDF')]]";
-                const matchingElement = doc.evaluate(xpath, doc, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
-                
-                if (matchingElement) {
-                    matchingElement.click();
-                } else {
-                    console.error("Render PDF button not found by keyboard shortcut script.");
-                }
-            }, 150);
+                const buttons = Array.from(doc.querySelectorAll('button'));
+                const renderBtn = buttons.find(b => b.innerText.includes('Render PDF'));
+                if (renderBtn) { renderBtn.click(); }
+            }, 100);
         }
     });
     </script>

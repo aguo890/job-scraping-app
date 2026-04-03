@@ -1,5 +1,159 @@
+import re
 import yaml
 import logging
+
+# Centralized Constants for Restriction Filtering (Hardened 2026 Registry)
+RESTRICTION_PRESETS = {
+    "no_sponsorship": [
+        "no sponsorship", "will not sponsor", "cannot sponsor", 
+        "no visa", "h1-b sponsorship not available", "h1-b sponsorship is not available",
+        "work authorization required", "legal right to work in the u.s. without sponsorship",
+        "visa sponsorship", "sponsorship is not available", "e-verify", "i-9 compliance"
+    ],
+    "no_clearance": [
+        # Citizens & Persons (Core Triggers)
+        "u.s. citizen", "us citizen", "u.s. person", "us person",
+        "dual citizen", "lawful permanent resident", "lpr", "u.s. national",
+        # Standard Clearances (Reinforced)
+        "clearance", "security clearance", "ts/sci", "secret clearance", 
+        "polygraph", "top secret", "clearance required", "public trust", 
+        "adjudication", "personnel vetting", "ts clearance", "secret level",
+        # Federal Forms & Legal Codes (The 'Anduril' Fix)
+        "sf-86", "sf-85", "sf-85p", "e-qip", "eqip", "eapp", "of-306",
+        "8 u.s.c. 1324b", "1324b(a)(3)", "protected individual", "export control", "ear/itar",
+        # Vetting Tiers
+        "tier 1", "tier 2", "tier 3", "tier 4", "tier 5", "t1-t5", "t5 investigation",
+        # Defense & Export Controls (ITAR/EAR)
+        "itar", "ear", "export control", "22 cfr", "15 cfr", "ddtc",
+        # Government Agencies (Global Exclude)
+        "cia", "fbi", "nsa", "homeland security", "department of defense", "dod"
+    ],
+    "mobility_friendly": [
+        "sponsorship available", "h1-b sponsorship", "h1b welcome", 
+        "visa sponsorship", "will sponsor", "sponsorship provided",
+        "global mobility", "relocation assistance", "transfers welcome"
+    ]
+}
+
+# False Positive Guardrails: Ignore matches if near these terms
+CONTEXT_EXCLUSIONS = ["sale", "event", "inventory", "warehouse", "retail", "store"]
+
+def build_flexible_us_pattern(keywords):
+    """
+    Normalizes 'U.S.' and 'H1-B' variations within keywords into a flexible regex.
+    Handles: US, U.S., U. S., u.s, us, H1B, H1-B, and varying spaces.
+    """
+    normalized = []
+    for k in keywords:
+        # 1. Handle U.S. prefix variations
+        # Replace 'u.s.' or 'us' variations with a flexible prefix pattern
+        k_flex = re.sub(r'u\.?\s?s\.?', r'u\\.?\\s?s\\.?', k, flags=re.IGNORECASE)
+        
+        # 2. Handle H1-B / H1B variations (make hyphen optional)
+        k_flex = re.sub(r'h1-?b', r'h1-?b', k_flex, flags=re.IGNORECASE)
+
+        # 3. Handle overall spacing flexibility (replace spaces with optional whitespace)
+        k_flex = k_flex.replace(" ", r"\s+") # Changed from \s* to \s+ for better separation
+        
+        normalized.append(k_flex)
+    return normalized
+
+
+class RestrictionEngine:
+    def __init__(self, config_or_keywords):
+        """
+        High-performance scanning engine. 
+        Compiles regex pattern once for use across thousands of jobs.
+        Supports both direct keyword lists (Legacy) and Config Objects (Presets).
+        """
+        if isinstance(config_or_keywords, list):
+            # Legacy Support: Direct keyword list
+            active_keywords = config_or_keywords
+        elif isinstance(config_or_keywords, dict):
+            # 2026 Enhanced Logic: Merge Presets + Custom Keywords
+            config = config_or_keywords
+            custom_keywords = config.get('keywords', [])
+            active_keywords = list(custom_keywords)
+            
+            if config.get('needs_sponsorship'):
+                active_keywords.extend(RESTRICTION_PRESETS["no_sponsorship"])
+            if config.get('no_clearance'):
+                active_keywords.extend(RESTRICTION_PRESETS["no_clearance"])
+        else:
+            active_keywords = []
+
+        # 🟢 Positive Mobility Patterns (Merged Presets + Custom)
+        friendly_keywords = list(RESTRICTION_PRESETS["mobility_friendly"])
+        if isinstance(config_or_keywords, dict):
+            friendly_keywords.extend(config_or_keywords.get('mobility_friendly', []))
+        
+        friendly_keywords = sorted(list(set([str(k).lower() for k in friendly_keywords if k])))
+        friendly_flex = build_flexible_us_pattern(friendly_keywords)
+        
+        if friendly_flex:
+            friendly_str = r'\b(?:' + '|'.join(friendly_flex) + r')\b'
+            self.friendly_pattern = re.compile(friendly_str, re.IGNORECASE)
+        else:
+            self.friendly_pattern = None
+
+        if not active_keywords:
+            self.pattern = None
+            return
+            
+        # Unique list and remove empty strings
+        active_keywords = sorted(list(set([str(k).lower() for k in active_keywords if k])))
+        
+        # Apply Flexible U.S. Normalization
+        flexible_keywords = build_flexible_us_pattern(active_keywords)
+            
+        # Pattern ensures word boundaries (\b) to avoid false positives 
+        # Non-capturing group (?:...) for performance
+        pattern_str = r'\b(?:' + '|'.join(flexible_keywords) + r')\b'
+        self.pattern = re.compile(pattern_str, re.IGNORECASE)
+
+    def analyze(self, text):
+        """
+        Returns stability metadata about mobility compatibility.
+        Strict Hierarchy: 🔴 RESTRICTED > 🟢 FRIENDLY > 🟡 NEUTRAL
+        """
+        if not text:
+            return {"restricted": False, "friendly": False, "reason": None, "mobility_status": "NEUTRAL"}
+            
+        # 1. PRIORITY 1: SCAN FOR RED FLAGS (🔴 RESTRICTED)
+        if self.pattern:
+            match = self.pattern.search(text)
+            if match:
+                # Contextual Ignore-Check (e.g., "clearance sale")
+                start = max(0, match.start() - 30)
+                end = min(len(text), match.end() + 30)
+                snippet = text[start:end].lower()
+                
+                if not any(word in snippet for word in CONTEXT_EXCLUSIONS):
+                    return {
+                        "restricted": True,
+                        "friendly": False,
+                        "reason": f"🔴 Red Flag: '{match.group(0)}'",
+                        "mobility_status": "RESTRICTED"
+                    }
+
+        # 2. PRIORITY 2: SCAN FOR GREEN FLAGS (🟢 FRIENDLY)
+        if hasattr(self, 'friendly_pattern') and self.friendly_pattern:
+            f_match = self.friendly_pattern.search(text)
+            if f_match:
+                return {
+                    "restricted": False,
+                    "friendly": True,
+                    "reason": f"🟢 Green Flag: '{f_match.group(0)}'",
+                    "mobility_status": "FRIENDLY"
+                }
+
+        # 3. PRIORITY 3: FALLBACK (🟡 NEUTRAL)
+        return {
+            "restricted": False, 
+            "friendly": False, 
+            "reason": "🟡 Neutral: No mobility keywords detected", 
+            "mobility_status": "NEUTRAL"
+        }
 
 class SmartFilter:
     _instance = None

@@ -43,23 +43,36 @@ class JobDataService:
         mock_jobs = [
             {
                 "id": "stub_1", 
-                "company": "Acme [MOCK]", 
-                "title": "Principal AI Orchestrator", 
-                "location": "Remote", 
+                "company": "Google [MOCK]", 
+                "title": "Senior Cloud Architect", 
+                "location": "Mountain View, CA", 
                 "score": 48, 
                 "date_posted": "2026-04-01", 
                 "url": "https://example.com/mock1",
-                "Status": "New"
+                "Status": "New",
+                "restriction_data": {"restricted": False, "reason": "Green flag: 'sponsorship available'", "mobility_status": "FRIENDLY"}
             },
             {
                 "id": "stub_2", 
-                "company": "Globex [MOCK]", 
-                "title": "Cloud Stability Engineer", 
-                "location": "San Francisco", 
+                "company": "Anduril [MOCK]", 
+                "title": "Defense Stability Engineer", 
+                "location": "Costa Mesa, CA", 
                 "score": 42, 
                 "date_posted": "2026-04-02", 
                 "url": "https://example.com/mock2",
-                "Status": "Interviewing"
+                "Status": "Interviewing",
+                "restriction_data": {"restricted": True, "reason": "Legal Code: 8 U.S.C. 1324b", "mobility_status": "RESTRICTED"}
+            },
+            {
+                "id": "stub_3", 
+                "company": "Standard Tech [MOCK]", 
+                "title": "Full Stack Developer", 
+                "location": "Remote", 
+                "score": 35, 
+                "date_posted": "2026-04-03", 
+                "url": "https://example.com/mock3",
+                "Status": "New",
+                "restriction_data": {"restricted": False, "reason": None, "mobility_status": "NEUTRAL"}
             }
         ]
         return pd.DataFrame(mock_jobs)
@@ -225,4 +238,19 @@ class JobDataService:
             logger.error(f"❌ Failed to save history run: {e}")
             if temp_path.exists():
                 temp_path.unlink()
+
+    @staticmethod
+    def cleanup_job_drafts(job_id):
+        """Removes temporary draft files for a given job."""
+        if not job_id: return
+        # drafts are in Job-Automation-Suite/generated_cvs
+        # BASE_DIR is job-scraping-app/
+        root_dir = BASE_DIR.parent
+        draft_file = root_dir / "generated_cvs" / f"{job_id}_Draft.yaml"
+        if draft_file.exists():
+            try:
+                draft_file.unlink()
+                logger.info(f"🧹 Cleaned up draft for job {job_id}")
+            except Exception as e:
+                logger.warning(f"Failed to cleanup draft {draft_file}: {e}")
 
