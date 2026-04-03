@@ -114,12 +114,12 @@ else:
     col_master, col_playground = st.columns(2)
     with col_master:
         st.write("Edit the **Master CV Source** directly. Changes affect all future CV generations.")
-        if st.button("🛠️ Edit Master CV Source", type="secondary", use_container_width=True):
+        if st.button("🛠️ Edit Master CV Source", type="secondary", width="stretch"):
             st.session_state["active_job"] = SPECIAL_ROUTING_JOBS["master_cv"]
             st.rerun()
     with col_playground:
         st.write("Open a **Playground** to draft a CV from your template without affecting anything.")
-        if st.button("🧪 Playground", type="secondary", use_container_width=True):
+        if st.button("🧪 Playground", type="secondary", width="stretch"):
             st.session_state["active_job"] = SPECIAL_ROUTING_JOBS["playground"]
             st.rerun()
 

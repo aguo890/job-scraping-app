@@ -32,37 +32,31 @@ class SmartFilter:
         """
         from datetime import datetime, timezone
         
-        if not date_str:
-            logging.warning("Missing date field from ATS API. Defaulting to current scrape time (Keep Job).")
-            return True
-
+        from dateutil import parser
         try:
-            # Handle numeric timestamps (e.g. "1761200402074")
+            # 1. Pre-check for Unix Timestamps (Numeric strings or numbers)
             date_str_val = str(date_str).strip() if date_str is not None else ""
-            
-            # Catch numeric timestamps before standard parsing
-            if date_str_val.isdigit() and len(date_str_val) >= 10:
-                # Millis to seconds
-                ts = int(date_str_val) / 1000.0
+            if date_str_val.isdigit():
+                ts = int(date_str_val)
+                # Detect milliseconds (13+ digits) vs seconds (10 digits)
+                if ts > 10000000000:
+                    ts = ts / 1000.0
                 job_date = datetime.fromtimestamp(ts, tz=timezone.utc)
             else:
-                # Standard ISO 8601 with Z for UTC
-                clean_date_str = date_str_val.replace("Z", "+00:00")
-                job_date = datetime.fromisoformat(clean_date_str)
+                # 2. Standard ISO/String Parsing (Robust via dateutil)
+                job_date = parser.parse(date_str_val)
+                if job_date.tzinfo is None:
+                    job_date = job_date.replace(tzinfo=timezone.utc)
             
-            # Ensure job_date is timezone aware for accurate comparison
-            if job_date.tzinfo is None:
-                 job_date = job_date.replace(tzinfo=timezone.utc)
-
-
             now = datetime.now(timezone.utc)
             # age_days will be 0 if today, 1 if yesterday, etc.
             age_days = (now - job_date).days
 
             return age_days <= self.max_days_old
 
-        except ValueError as e:
-            logging.warning(f"Unparseable date '{date_str}': {e}. Failsafe triggered: keeping job.")
+        except (ValueError, OverflowError, TypeError, parser.ParserError) as e:
+            # 3. Silent Failsafe for Production Logs (DEBUG level)
+            logging.debug(f"Date Parsing: Format not recognized for '{date_str}': {e}. Defaulting to 'Keep'.")
             return True
 
     def is_valid_location(self, location: str) -> bool:

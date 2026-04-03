@@ -362,7 +362,7 @@ col_head, col_btn = st.columns([3, 1], vertical_alignment="bottom")
 with col_head:
     st.subheader("📊 Overview & Controls")
 with col_btn:
-    if st.button("🚀 Run Scraper Now", type="primary", use_container_width=True):
+    if st.button("🚀 Run Scraper Now", type="primary", width="stretch"):
         with st.status("Running Scraper...", expanded=True) as status:
             st.write("Initializing engine...")
             
@@ -495,7 +495,7 @@ with st.container(border=True):
         
         st.dataframe(
             df_history, 
-            use_container_width=True, 
+            width="stretch", 
             hide_index=True,
             column_config={
                 "duration_seconds": st.column_config.NumberColumn("Duration (s)", format="%.2f"),
