@@ -12,8 +12,8 @@ import json
 import time
 import yaml
 from utils.ui_utils import render_status, format_status_df
-from main import execute_scraping_run
-from utils.history_manager import log_scrape_run, get_scrape_history_df
+from utils.data_manager import JobDataService
+
 
 # Silence pandas downcasting warning
 pd.set_option('future.no_silent_downcasting', True)
@@ -67,85 +67,51 @@ def save_tracking(data):
     with open(TRACKING_FILE, 'w', encoding='utf-8') as f:
         json.dump(data, f, indent=2)
 
-@st.cache_data(ttl=900)
-def load_jobs_raw():
-    if not os.path.exists(JOB_DATA_FILE):
-        return None
-    try:
-        with open(JOB_DATA_FILE, "r", encoding='utf-8') as f:
-            return json.load(f)
-    except (json.JSONDecodeError, FileNotFoundError):
-        return None
-
-def load_jobs_df(data):
-    if not data:
-        return pd.DataFrame()
-    jobs = data.get("jobs", [])
-    if not jobs:
-        return pd.DataFrame()
-    
-    df = pd.DataFrame(jobs)
-    
-    # Cleanup
-    object_cols = ['raw_data', 'keywords_matched']
-    for col in object_cols:
-        if col in df.columns:
-            df[col] = df[col].astype(str)
-            
-    if 'score' in df.columns:
-        df['score'] = pd.to_numeric(df['score'], errors='coerce').fillna(0)
-        
-    return df
-
 # --- Main App ---
 
-# Load Raw Data (Cached with TTL)
-raw_data = load_jobs_raw()
+# Fetch Data Envelope via Centralized Service
+payload = JobDataService.fetch_dashboard_payload()
+raw_data_obj = payload.get("data", pd.DataFrame())
+is_mock = payload.get("is_mock", False)
+df_jobs_raw = raw_data_obj.copy()
 
-# Sideboard: Control & Observability
+# Sideboard: Status & Stats
 with st.sidebar:
     st.title("Job Hunter")
     st.markdown("---")
     
     # --- System Status ---
     st.markdown("### 🛰️ System Status")
-    if raw_data:
-        st.markdown("🟢 **Live Connection**")
-        generated_at = raw_data.get("generated_at", "Unknown")
-        # Format the ISO string for better readability if possible
-        try:
-            dt = datetime.fromisoformat(generated_at)
-            display_time = dt.strftime("%b %d, %H:%M")
-        except:
-            display_time = generated_at
-        st.caption(f"Last Scraped: {display_time}")
+    
+    if is_mock:
+        st.error("⚠️ **[INTERNAL_TEST_STUB]**")
+        st.caption("Using mock data. Live feed unavailable.")
     else:
-        st.markdown("🔴 **Offline / No Data**")
+        st.markdown("🟢 **Live Connection**")
+        display_time = payload.get("last_updated", "Unknown")
+        st.caption(f"Last Scraped: {display_time}")
+    
     st.markdown("---")
 
     st.header("⚙️ Controls")
     if st.button("🔄 Force Refresh Data", type="primary", width="stretch"):
-        load_jobs_raw.clear()
         st.cache_data.clear()
         st.rerun()
-    
-    if raw_data:
-        total_count = raw_data.get("total_jobs", 0)
-        st.caption(f"🗃️ Total Aggregated: {total_count}")
+
+    total_count = payload.get("total_jobs", 0)
+    st.caption(f"🗃️ Total Aggregated: {total_count}")
     st.divider()
 
-if not raw_data:
-    st.warning("⚠️ Waiting for the background scraper to complete its first run. Please check back in a few minutes.")
-    st.info("💡 You can check the logs for progress.")
+if df_jobs_raw.empty and not is_mock:
+    st.warning("⚠️ No data found. Head to the Scraper page to start.")
+    if st.button("🚀 Go to Scraper", width="stretch"):
+        st.switch_page("pages/2_🚀_Scraper.py")
     st.stop()
 
-# Create a copy to prevent mutating the cached object
-df_jobs = load_jobs_df(raw_data).copy()
-tracking_data = load_tracking()
+# Initialize Tracking
+tracking_data = JobDataService.load_tracking()
+df_jobs = df_jobs_raw.copy()
 
-if df_jobs.empty:
-    st.warning("No jobs found in the aggregation file. Run the scraper!")
-    st.stop()
 
 # --- Merge Data ---
 saved_map = {k: v.get('saved', False) for k, v in tracking_data.items()}
@@ -355,41 +321,22 @@ with st.sidebar:
                                         key="filter_date_range")
 
 # --- Main Dashboard Area ---
-st.title("🎯 Job Hunter Dashboard")
+# PURPOSELY HIDDEN (Architectural Decision) - Moving Scraper to a separate page. 
+# DO NOT RE-ENABLE WITHOUT EXPLICIT USER CONSENT.
+# st.title("🎯 Job Hunter Dashboard")
 
-# --- ACTION BAR ---
-col_head, col_btn = st.columns([3, 1], vertical_alignment="bottom")
-with col_head:
-    st.subheader("📊 Overview & Controls")
-with col_btn:
-    if st.button("🚀 Run Scraper Now", type="primary", width="stretch"):
-        with st.status("Running Scraper...", expanded=True) as status:
-            st.write("Initializing engine...")
-            
-            # Call the decoupled function (Returns ingested and processed)
-            result = execute_scraping_run() 
-            
-            st.write("Updating history log...")
-            # Use processed count for the historical log to maintain consistency
-            log_scrape_run(result.get("processed", 0), result["duration_seconds"], result["status"])
-            
-            if "Success" in result["status"]:
-                status.update(label="Scraping Complete!", state="complete", expanded=False)
-                st.success(f"✅ Scraping Complete!")
-                col_res1, col_res2 = st.columns(2)
-                col_res1.metric("Ingested (Raw)", result.get('ingested', 0))
-                col_res2.metric("Matches Your Filters", result.get('processed', 0))
-                # Clear raw data cache to show new jobs
-                load_jobs_raw.clear()
-            else:
-                status.update(label="Scraping Failed!", state="error", expanded=True)
-                st.error(result["status"])
-                
-        # Force rerun to update UI metrics and history table
-        time.sleep(1) # Small delay for visual pleasure
-        st.rerun()
+if is_mock:
+    st.warning("⚠️ **[INTERNAL_TEST_STUB]** — Currently using generated mock data for UI testing. Scrape history unavailable.")
+else:
+    # Check for Active Scraper
+    if JobDataService.is_scraper_running():
+        st.info("🚀 **Scraper In Progress:** The background engine is currently searching for new listings. Refresh in a few minutes.")
+
+# st.info("💡 **Manual Controls Moved:** You can now trigger manual updates or view logs on the [🚀 Scraper Page](Scraper).")
+
 
 st.divider()
+
 
 # --- Apply Filters ---
 filtered_df = df_jobs.copy()
@@ -482,30 +429,13 @@ event = st.dataframe(
     height=530
 )
 
-# --- HISTORY SECTION ---
+# --- FOOTER ---
 st.write("")
-st.subheader("📜 Scraping History")
-with st.container(border=True):
-    df_history = get_scrape_history_df()
-    if not df_history.empty:
-        # Style the status column
-        def color_status(val):
-            color = 'green' if 'Success' in val else 'red'
-            return f'color: {color}'
-        
-        st.dataframe(
-            df_history, 
-            width="stretch", 
-            hide_index=True,
-            column_config={
-                "duration_seconds": st.column_config.NumberColumn("Duration (s)", format="%.2f"),
-                "jobs_found": st.column_config.NumberColumn("Jobs Found"),
-                "status": st.column_config.TextColumn("Status"),
-                "timestamp": st.column_config.TextColumn("Run Date")
-            }
-        )
-    else:
-        st.info("No historical runs found. Click 'Run Scraper Now' to start.")
+# PURPOSELY HIDDEN (Architectural Decision) - Moving Scraper to a separate page. 
+# DO NOT RE-ENABLE WITHOUT EXPLICIT USER CONSENT.
+# st.caption("Job Tracker v2026.4.3 | Architecture by [DEEPMIND_ANTIGRAVITY]")
+
+
 
 
 # --- ACTION TOOLBAR ---
@@ -548,9 +478,10 @@ if selected_indices:
                     if job_id not in tracking_data: tracking_data[job_id] = {}
                     current = tracking_data[job_id].get('saved', False)
                     tracking_data[job_id]['saved'] = not current
-                save_tracking(tracking_data)
+                JobDataService.save_tracking_atomically(tracking_data)
                 st.session_state.table_version += 1
                 st.rerun()
+
 
         with col_hide:
             if st.button("🚫 Hide", width="stretch", help="Hide from Feed"):
@@ -558,9 +489,10 @@ if selected_indices:
                     if job_id not in tracking_data: tracking_data[job_id] = {}
                     tracking_data[job_id]['status'] = 'Hidden'
                     tracking_data[job_id]['saved'] = False # Usually if hiding, we don't want it saved
-                save_tracking(tracking_data)
+                JobDataService.save_tracking_atomically(tracking_data)
                 st.session_state.table_version += 1
                 st.rerun()
+
 
         with col3:
             new_status = st.selectbox(
@@ -577,13 +509,12 @@ if selected_indices:
                     tracking_data[job_id]['status'] = new_status
                     if new_status in ["Applied", "Interviewing", "Offer"]:
                         tracking_data[job_id]['saved'] = True
-                save_tracking(tracking_data)
-                
-                save_tracking(tracking_data)
+                JobDataService.save_tracking_atomically(tracking_data)
                 
                 # Clear selection after action
                 st.session_state.table_version += 1
                 st.rerun()
+
 
     # --- CV Editor / Resume Navigation ---
     if num_selected == 1:
