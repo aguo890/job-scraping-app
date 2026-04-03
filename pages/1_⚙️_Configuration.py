@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 import os
 import sys
+import yaml
 
 # Ensure root directory is on the path if needed
 current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -14,109 +15,177 @@ from config_utils import load_config, load_companies, save_yaml_safely, clean_df
 # Set page config
 st.set_page_config(page_title="Job Hunter - Configuration", layout="wide")
 
+# Path to AI Config
+AI_CONFIG_PATH = os.path.join(parent_dir, "config", "ai_config.yaml")
+
+def load_ai_config():
+    if os.path.exists(AI_CONFIG_PATH):
+        try:
+            with open(AI_CONFIG_PATH, 'r', encoding='utf-8') as f:
+                return yaml.safe_load(f) or {}
+        except Exception:
+            return {}
+    return {}
+
 config = load_config()
 companies_config = load_companies()
+ai_config = load_ai_config()
 
-if not config and not companies_config:
-    st.warning("No configuration found. Please check your config files.")
+st.title("⚙️ Configuration")
+st.markdown("Manage your job automation rules, AI prompts, and system preferences.")
 
-tabs = st.tabs(["🎯 General", "📝 Titles", "📍 Locations", "🛠️ Skills", "🏢 Companies"])
+tabs = st.tabs(["🕸️ Scraping Rules", "🧠 AI & Prompts", "🖥️ System Options", "🏢 Companies"])
 
-with tabs[0]: # General
-    st.header("General Settings")
-    if config:
-        col1, col2, col3 = st.columns(3)
-        with col1:
-            st.metric("Filtering", "Enabled" if config.get('filtering', {}).get('is_enabled', True) else "Disabled")
-        with col2:
-            st.metric("Max Age", f"{config.get('filtering', {}).get('max_days_old', 14)} Days")
-        with col3:
-            st.metric("Max Exp", f"{config.get('filtering', {}).get('max_years_experience', 2)} Years")
+# --- TAB 1: SCRAPING RULES ---
+with tabs[0]:
+    with st.form("form_scraping_rules", border=False):
+        st.subheader("🎯 Job Title & Keyword Filters")
         
-        with st.expander("System Specs"):
-            st.json(config.get('system', {}))
-    else:
-        st.info("General settings not found in filtering.yaml")
-
-with tabs[1]: # Titles
-    st.header("Job Title Rules")
-    if config:
         col1, col2 = st.columns(2)
         with col1:
             st.markdown("### 🌟 High Priority")
+            st.caption("Jobs matching these keywords will be prioritized and starred.")
             hp_titles = config.get('titles', {}).get('high_priority', [])
             df_hp = pd.DataFrame(hp_titles, columns=["Keyword"])
-            ed_hp = st.data_editor(df_hp, num_rows="dynamic", width="stretch", hide_index=True, key="ed_hp")
+            ed_hp = st.data_editor(df_hp, num_rows="dynamic", width="stretch", hide_index=True, key="ed_hp_new")
+        
         with col2:
             st.markdown("### 🚫 Skip Titles")
+            st.caption("Jobs with these keywords in the title will be automatically excluded.")
             ex_titles = config.get('titles', {}).get('exclude', [])
             df_ex = pd.DataFrame(ex_titles, columns=["Keyword"])
-            ed_ex = st.data_editor(df_ex, num_rows="dynamic", width="stretch", hide_index=True, key="ed_ex")
+            ed_ex = st.data_editor(df_ex, num_rows="dynamic", width="stretch", hide_index=True, key="ed_ex_new")
             
-        st.divider()
-        st.markdown("### 🛑 Degree & Domain Blocklist")
-        bl_titles = config.get('title_blocklist', [])
-        df_bl = pd.DataFrame(bl_titles, columns=["Restricted Match"])
-        ed_bl = st.data_editor(df_bl, num_rows="dynamic", width="stretch", hide_index=True, key="ed_bl")
+        with st.expander("🛠️ Advanced Skill & Content Filtering"):
+            col_s1, col_s2 = st.columns(2)
+            with col_s1:
+                st.markdown("### 💎 Preferred Skills")
+                pref_skills = config.get('preferred_skills', [])
+                ed_sk_pref = st.data_editor(pd.DataFrame(pref_skills, columns=["Skill"]), num_rows="dynamic", width="stretch", hide_index=True, key="ed_sk_pref_new")
+            with col_s2:
+                st.markdown("### ⚠️ Penalty Skills")
+                pen_skills = config.get('penalty_skills', [])
+                ed_sk_pen = st.data_editor(pd.DataFrame(pen_skills, columns=["Skill"]), num_rows="dynamic", width="stretch", hide_index=True, key="ed_sk_pen_new")
+            
+            st.divider()
+            st.markdown("### 🛑 Content Blocklist")
+            st.caption("Exclude jobs containing these specific terms (e.g., 'PhD', 'Security Clearance').")
+            bl_titles = config.get('title_blocklist', [])
+            ed_bl = st.data_editor(pd.DataFrame(bl_titles, columns=["Restricted Match"]), num_rows="dynamic", width="stretch", hide_index=True, key="ed_bl_new")
 
-        if st.button("💾 Save Title Rules", type="primary", width="stretch", key="save_titles"):
+        st.subheader("📍 Location Preferences")
+        col_l1, col_l2 = st.columns(2)
+        with col_l1:
+            st.markdown("### ✅ Include")
+            inc_locs = config.get('locations', {}).get('include', [])
+            ed_loc_inc = st.data_editor(pd.DataFrame(inc_locs, columns=["Region"]), num_rows="dynamic", width="stretch", hide_index=True, key="ed_loc_inc_new")
+        with col_l2:
+            st.markdown("### 🚫 Exclude")
+            ex_locs = config.get('locations', {}).get('exclude', [])
+            ed_loc_ex = st.data_editor(pd.DataFrame(ex_locs, columns=["Region"]), num_rows="dynamic", width="stretch", hide_index=True, key="ed_loc_ex_new")
+
+        if st.form_submit_button("💾 Save Scraping Rules", type="primary"):
             if 'titles' not in config: config['titles'] = {}
             config['titles']['high_priority'] = clean_df_list(ed_hp, "Keyword")
             config['titles']['exclude'] = clean_df_list(ed_ex, "Keyword")
             config['title_blocklist'] = clean_df_list(ed_bl, "Restricted Match")
-            if save_yaml_safely(config, FILTERING_PATH):
-                st.success("Title rules updated!")
-                st.rerun()
-
-with tabs[2]: # Locations
-    st.header("Location Preferences")
-    if config:
-        col1, col2 = st.columns(2)
-        with col1:
-            st.markdown("### ✅ Include")
-            inc_locs = config.get('locations', {}).get('include', [])
-            df_loc_inc = pd.DataFrame(inc_locs, columns=["Region"])
-            ed_loc_inc = st.data_editor(df_loc_inc, num_rows="dynamic", width="stretch", hide_index=True, key="ed_loc_inc")
-        with col2:
-            st.markdown("### 🚫 Exclude")
-            ex_locs = config.get('locations', {}).get('exclude', [])
-            df_loc_ex = pd.DataFrame(ex_locs, columns=["Region"])
-            ed_loc_ex = st.data_editor(df_loc_ex, num_rows="dynamic", width="stretch", hide_index=True, key="ed_loc_ex")
-
-        if st.button("💾 Save Location Rules", type="primary", width="stretch", key="save_locs"):
+            
             if 'locations' not in config: config['locations'] = {}
             config['locations']['include'] = clean_df_list(ed_loc_inc, "Region")
             config['locations']['exclude'] = clean_df_list(ed_loc_ex, "Region")
-            if save_yaml_safely(config, FILTERING_PATH):
-                st.success("Location rules updated!")
-                st.rerun()
-
-with tabs[3]: # Skills
-    st.header("Skill Weighting")
-    if config:
-        col1, col2 = st.columns(2)
-        with col1:
-            st.markdown("### 💎 Preferred")
-            pref_skills = config.get('preferred_skills', [])
-            df_sk_pref = pd.DataFrame(pref_skills, columns=["Skill"])
-            ed_sk_pref = st.data_editor(df_sk_pref, num_rows="dynamic", width="stretch", hide_index=True, key="ed_sk_pref")
-        with col2:
-            st.markdown("### ⚠️ Penalty")
-            pen_skills = config.get('penalty_skills', [])
-            df_sk_pen = pd.DataFrame(pen_skills, columns=["Skill"])
-            ed_sk_pen = st.data_editor(df_sk_pen, num_rows="dynamic", width="stretch", hide_index=True, key="ed_sk_pen")
-
-        if st.button("💾 Save Skill Rules", type="primary", width="stretch", key="save_skills"):
+            
             config['preferred_skills'] = clean_df_list(ed_sk_pref, "Skill")
             config['penalty_skills'] = clean_df_list(ed_sk_pen, "Skill")
+            
             if save_yaml_safely(config, FILTERING_PATH):
-                st.success("Skill rules updated!")
+                st.success("Scraping rules updated successfully!")
                 st.rerun()
 
-with tabs[4]: # Companies
-    st.header("Company Management")
-    if companies_config:
-        st.markdown("### 🏢 Source Companies (ATS Targets)")
+# --- TAB 2: AI & PROMPTS ---
+with tabs[1]:
+    with st.form("form_ai_settings", border=False):
+        st.subheader("🔒 Authentication")
+        st.info("API keys are stored in memory for this session and are never saved to disk.")
+        
+        # Load default from ENV, but allow user to override in session state
+        default_key = os.getenv("DEEPSEEK_API_KEY") or os.getenv("OPENAI_API_KEY", "")
+        current_key = st.session_state.get("session_api_key", default_key)
+        
+        new_api_key = st.text_input("API Key (DeepSeek or OpenAI)", value=current_key, type="password")
+        
+        st.subheader("🧠 Model & Prompts")
+        ai_model = st.selectbox("Model", ["deepseek-reasoner", "deepseek-chat", "gpt-4o", "gpt-4o-mini"], 
+                               index=0 if ai_config.get('model') == "deepseek-reasoner" else 2)
+        
+        base_prompt = st.text_area("Base Tailoring Prompt", 
+                                  value=ai_config.get('base_prompt', "You are an expert resume writer..."),
+                                  height=200)
+        
+        with st.expander("Advanced AI Parameters"):
+            temp = st.slider("Temperature", 0.0, 1.0, float(ai_config.get('temperature', 0.7)), 0.1)
+            max_tokens = st.number_input("Max Tokens", 100, 4000, int(ai_config.get('max_tokens', 2000)))
+
+        if st.form_submit_button("💾 Save AI Settings", type="primary"):
+            # 1. Securely store the API key in memory ONLY
+            if new_api_key:
+                st.session_state["session_api_key"] = new_api_key
+            
+            # 2. Safely write non-sensitive config to disk
+            new_ai_config = {
+                "model": ai_model,
+                "base_prompt": base_prompt,
+                "temperature": temp,
+                "max_tokens": max_tokens
+            }
+            
+            try:
+                os.makedirs(os.path.dirname(AI_CONFIG_PATH), exist_ok=True)
+                with open(AI_CONFIG_PATH, "w", encoding='utf-8') as file:
+                    yaml.safe_dump(new_ai_config, file, default_flow_style=False)
+                st.success("AI Session Key and Prompts updated successfully!")
+            except Exception as e:
+                st.error(f"Failed to save AI configuration: {e}")
+
+# --- TAB 3: SYSTEM OPTIONS ---
+with tabs[2]:
+    with st.form("form_sys_settings", border=False):
+        st.subheader("⚙️ System Performance")
+        
+        col_s1, col_s2 = st.columns(2)
+        with col_s1:
+            max_age = st.number_input("Max Job Age (Days)", 1, 90, int(config.get('filtering', {}).get('max_days_old', 14)))
+            max_exp = st.number_input("Max Experience (Years)", 0, 20, int(config.get('filtering', {}).get('max_years_experience', 2)))
+        with col_s2:
+            concurrency = st.slider("Concurrency Limit", 1, 20, int(config.get('system', {}).get('concurrency_limit', 5)))
+            timeout = st.slider("Request Timeout (Seconds)", 5, 60, int(config.get('system', {}).get('request_timeout', 15)))
+
+        filter_enabled = st.toggle("Enable Filtering Logic", value=config.get('filtering', {}).get('is_enabled', True))
+        
+        with st.expander("🌐 Network & Browser"):
+            user_agent = st.text_input("User Agent", value=config.get('system', {}).get('user_agent', ""))
+            st.caption("Change this only if you encounter frequent bot detection.")
+
+        if st.form_submit_button("💾 Save System Settings", type="primary"):
+            if 'filtering' not in config: config['filtering'] = {}
+            config['filtering']['max_days_old'] = max_age
+            config['filtering']['max_years_experience'] = max_exp
+            config['filtering']['is_enabled'] = filter_enabled
+            
+            if 'system' not in config: config['system'] = {}
+            config['system']['concurrency_limit'] = concurrency
+            config['system']['request_timeout'] = timeout
+            config['system']['user_agent'] = user_agent
+            
+            if save_yaml_safely(config, FILTERING_PATH):
+                st.success("System options updated successfully!")
+                st.rerun()
+
+# --- TAB 4: COMPANIES ---
+with tabs[3]:
+    with st.form("form_companies", border=False):
+        st.subheader("🏢 Company Management")
+        st.caption("Manage titles and ATS targets for bulk scraping.")
+        
         all_cos = companies_config.get('companies', [])
         df_cos = pd.DataFrame(all_cos)
         ed_cos = st.data_editor(
@@ -124,7 +193,7 @@ with tabs[4]: # Companies
             num_rows="dynamic", 
             width="stretch", 
             hide_index=True, 
-            key="ed_companies",
+            key="ed_companies_new",
             column_config={
                 "ats": st.column_config.SelectboxColumn("ATS", options=["greenhouse", "lever", "ashby"], required=True)
             }
@@ -135,13 +204,13 @@ with tabs[4]: # Companies
         with col_c1:
             st.markdown("### 🎯 Target Filter")
             tar_cos = companies_config.get('target_companies', [])
-            ed_tar = st.data_editor(pd.DataFrame(tar_cos, columns=["Company"]), num_rows="dynamic", width="stretch", hide_index=True, key="ed_tar_cos")
+            ed_tar = st.data_editor(pd.DataFrame(tar_cos, columns=["Company"]), num_rows="dynamic", width="stretch", hide_index=True, key="ed_tar_cos_new")
         with col_c2:
             st.markdown("### 🚫 Exclude Filter")
             exc_cos = companies_config.get('exclude_companies', [])
-            ed_exc = st.data_editor(pd.DataFrame(exc_cos, columns=["Company"]), num_rows="dynamic", width="stretch", hide_index=True, key="ed_exc_cos")
+            ed_exc = st.data_editor(pd.DataFrame(exc_cos, columns=["Company"]), num_rows="dynamic", width="stretch", hide_index=True, key="ed_exc_cos_new")
 
-        if st.button("💾 Save Company Management", type="primary", width="stretch", key="save_cos"):
+        if st.form_submit_button("💾 Save Company Management", type="primary"):
             new_cos = ed_cos.dropna(subset=['name']).to_dict('records')
             companies_config['companies'] = [c for c in new_cos if str(c.get('name', '')).strip() != ""]
             companies_config['target_companies'] = clean_df_list(ed_tar, "Company")
@@ -150,5 +219,3 @@ with tabs[4]: # Companies
             if save_yaml_safely(companies_config, COMPANIES_PATH):
                 st.success("Company configuration updated!")
                 st.rerun()
-    else:
-        st.warning("`companies.yaml` not found or empty.")

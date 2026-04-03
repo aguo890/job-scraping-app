@@ -322,65 +322,64 @@ with st.sidebar:
 
 
 
-# --- MAIN CONTENT: Editor | Preview ---
-col_edit, col_prev = st.columns([1, 1])
+# --- MAIN CONTENT: Workspace Layout ---
+editor_col, preview_col = st.columns([1, 1], gap="large")
 
-with col_edit:
-    # Initialize widget state if not present (to avoid empty box on first load)
-    if "yaml_editor" not in st.session_state:
-        st.session_state["yaml_editor"] = st.session_state["editor_yaml"]
+with editor_col:
+    st.subheader("✏️ Editor")
+    with st.container(border=True):
+        # Initialize widget state if not present
+        if "yaml_editor" not in st.session_state:
+            st.session_state["yaml_editor"] = st.session_state["editor_yaml"]
 
-    st.text_area(
-        "yaml_editor",
-        # value is handled by key="yaml_editor" in session_state
-        height=None,  # Height controlled by CSS (85vh)
-        key="yaml_editor",
-        label_visibility="collapsed"
-    )
+        st.text_area(
+            "yaml_editor",
+            height=None,  # Height controlled by CSS (85vh)
+            key="yaml_editor",
+            label_visibility="collapsed"
+        )
 
-with col_prev:
-    # Handle render (from sidebar button)
-    if render_clicked:
-        st.session_state["is_rendering"] = True
-        st.rerun() # Immediately re-run to update UI state (disable buttons)
-
-    if st.session_state.get("is_rendering", False):
-        with st.spinner("Rendering via RenderCV..."):
-            content = st.session_state.get("yaml_editor", st.session_state["editor_yaml"])
-            # Save first — validates YAML for master CV
-            save_result = orchestrator.save_job_cv(job_id, content)
-            if isinstance(save_result, dict) and not save_result.get("success", True):
-                st.error(f"❌ Save Failed: {save_result.get('error', 'Unknown error')}")
-            else:
-                pdf_path, status = orchestrator.render_from_content(job_id, content)
-                if pdf_path:
-                    st.session_state["current_pdf"] = pdf_path
-                    st.session_state["render_success_toast"] = True
-                else:
-                    st.error(f"❌ Render Failed: {status}")
-            
-            # Rendering finished, reset flag and re-run to re-enable buttons
-            st.session_state["is_rendering"] = False
+with preview_col:
+    st.subheader("📄 Live Preview")
+    with st.container(border=True):
+        # Handle render (from sidebar button)
+        if render_clicked:
+            st.session_state["is_rendering"] = True
             st.rerun()
 
+        if st.session_state.get("is_rendering", False):
+            with st.spinner("Rendering via RenderCV..."):
+                content = st.session_state.get("yaml_editor", st.session_state["editor_yaml"])
+                save_result = orchestrator.save_job_cv(job_id, content)
+                if isinstance(save_result, dict) and not save_result.get("success", True):
+                    st.error(f"❌ Save Failed: {save_result.get('error', 'Unknown error')}")
+                else:
+                    pdf_path, status = orchestrator.render_from_content(job_id, content)
+                    if pdf_path:
+                        st.session_state["current_pdf"] = pdf_path
+                        st.session_state["render_success_toast"] = True
+                    else:
+                        st.error(f"❌ Render Failed: {status}")
+                
+                st.session_state["is_rendering"] = False
+                st.rerun()
 
+        # Display PDF
+        pdf_display_path = st.session_state.get("current_pdf")
+        if not pdf_display_path:
+            potential = os.path.join(orchestrator.output_dir, f"{job_id}.pdf")
+            if os.path.exists(potential):
+                pdf_display_path = potential
 
-    # Determine which PDF to display
-    pdf_display_path = st.session_state.get("current_pdf")
-    if not pdf_display_path:
-        potential = os.path.join(orchestrator.output_dir, f"{job_id}.pdf")
-        if os.path.exists(potential):
-            pdf_display_path = potential
+        if pdf_display_path and os.path.exists(pdf_display_path):
+            with open(pdf_display_path, "rb") as f:
+                base64_pdf = base64.b64encode(f.read()).decode('utf-8')
 
-    # Display PDF
-    if pdf_display_path and os.path.exists(pdf_display_path):
-        with open(pdf_display_path, "rb") as f:
-            base64_pdf = base64.b64encode(f.read()).decode('utf-8')
+            pdf_iframe = f'<iframe src="data:application/pdf;base64,{base64_pdf}" width="100%" style="height: 85vh;" type="application/pdf"></iframe>'
+            st.markdown(pdf_iframe, unsafe_allow_html=True)
+        else:
+            st.info("No PDF yet. Click **Render PDF** in the sidebar or press **Ctrl+Enter**.")
 
-        pdf_iframe = f'<iframe src="data:application/pdf;base64,{base64_pdf}" width="100%" style="height: 85vh;" type="application/pdf"></iframe>'
-        st.markdown(pdf_iframe, unsafe_allow_html=True)
-    else:
-        st.info("No PDF yet. Click **Render PDF** in the sidebar or press **Ctrl+Enter**.")
 
 # Inject Keyboard Listener for Ctrl+Enter / Cmd+Enter
 import streamlit.components.v1 as components

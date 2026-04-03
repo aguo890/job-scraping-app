@@ -11,6 +11,7 @@ import pandas as pd
 import json
 import time
 import yaml
+from utils.ui_utils import render_status, format_status_df
 
 # Silence pandas downcasting warning
 pd.set_option('future.no_silent_downcasting', True)
@@ -151,6 +152,7 @@ cv_status_map = {k: v.get('cv_status', 'Generic') for k, v in tracking_data.item
 resume_map = {k: os.path.basename(v['cv_pdf_path']) if v.get('cv_pdf_path') else '' for k, v in tracking_data.items()}
 
 df_jobs['Status'] = df_jobs['id'].map(status_map).fillna('New')
+df_jobs['Status_Display'] = df_jobs['Status'].apply(format_status_df)
 df_jobs['is_saved'] = df_jobs['id'].map(saved_map).fillna(False)
 df_jobs['cv_status'] = df_jobs['id'].map(cv_status_map).fillna('Generic')
 df_jobs['resume'] = df_jobs['id'].map(resume_map).fillna('')
@@ -177,8 +179,9 @@ df_jobs['title'] = df_jobs['display_title']
 # --- Sidebar ---
 with st.sidebar:
     # --- Quick Stats ---
-    st.header("📊 Overview")
-
+    st.subheader("📊 Quick Insights")
+    
+    # Calculate stats
     total_jobs = len(df_jobs)
     num_companies = df_jobs['company'].nunique()
     num_saved = int(df_jobs['is_saved'].sum())
@@ -188,24 +191,35 @@ with st.sidebar:
     num_rejected = len([v for v in tracking_data.values() if v.get('status') == 'Rejected'])
     num_saved_unapplied = int((df_jobs['is_saved'] & (df_jobs['Status'] != 'Applied')).sum())
     avg_score = df_jobs['score'].mean()
+    
+    with st.container(border=True):
+        st.caption("⚠️ Mock Data")
+        col_a, col_b = st.columns(2)
+        col_a.metric("Total Jobs", total_jobs)
+        col_b.metric("Companies", num_companies)
 
-    col_a, col_b = st.columns(2)
-    col_a.metric("Total Jobs", total_jobs)
-    col_b.metric("Companies", num_companies)
+    with st.container(border=True):
+        st.caption("⚠️ Mock Data")
+        col_c, col_d = st.columns(2)
+        col_c.metric("⭐ Saved", num_saved)
+        col_d.metric("📝 Applied", num_applied)
 
-    col_c, col_d = st.columns(2)
-    col_c.metric("⭐ Saved", num_saved)
-    col_d.metric("📝 Applied", num_applied)
+    with st.container(border=True):
+        st.caption("⚠️ Mock Data")
+        col_e, col_f = st.columns(2)
+        col_e.metric("🎤 Interviewing", num_interviewing)
+        col_f.metric("🎉 Offers", num_offers)
 
-    col_e, col_f = st.columns(2)
-    col_e.metric("🎤 Interviewing", num_interviewing)
-    col_f.metric("🎉 Offers", num_offers)
+    with st.container(border=True):
+        st.caption("⚠️ Mock Data")
+        col_g, col_h = st.columns(2)
+        col_g.metric("📋 TODO", num_saved_unapplied, help="Saved but not yet applied")
+        col_h.metric("❌ Rejected", num_rejected)
 
-    col_g, col_h = st.columns(2)
-    col_g.metric("📋 TODO", num_saved_unapplied, help="Saved but not yet applied")
-    col_h.metric("❌ Rejected", num_rejected)
+    with st.container(border=True):
+        st.caption("⚠️ Mock Data")
+        st.metric("Avg Score", f"{avg_score:.1f}")
 
-    st.metric("Avg Score", f"{avg_score:.1f}")
 
     if 'date_posted' in df_jobs.columns:
         dates = pd.to_datetime(df_jobs['date_posted'], errors='coerce', format='ISO8601').dropna()
@@ -412,7 +426,7 @@ filtered_df = filtered_df.sort_values(by=["status_prio", "is_saved", "date_poste
 # --- TABLE ---
 st.caption(f"Showing **{len(filtered_df)}** of {len(df_jobs)} jobs")
 
-display_cols = ['Status', 'score', 'date_posted', 'company', 'title', 'location', 'url', 'id']
+display_cols = ['Status_Display', 'score', 'date_posted', 'company', 'title', 'location', 'url', 'id']
 final_cols = [c for c in display_cols if c in filtered_df.columns]
 
 event = st.dataframe(
@@ -421,7 +435,7 @@ event = st.dataframe(
     selection_mode=["multi-row", "single-cell"],
     key=f"job_dashboard_table_{st.session_state.table_version}",
     column_config={
-        "Status": st.column_config.TextColumn("Status"),
+        "Status_Display": st.column_config.TextColumn("Status"),
         "url": st.column_config.LinkColumn("Link", display_text="Open"),
         "score": st.column_config.ProgressColumn("Score", format="%d", min_value=0, max_value=50),
         "id": None
@@ -430,6 +444,7 @@ event = st.dataframe(
     hide_index=True,
     height=530
 )
+
 
 # --- ACTION TOOLBAR ---
 # Extract selected row from either row selection OR cell click
