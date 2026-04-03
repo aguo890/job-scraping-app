@@ -77,30 +77,11 @@ df_jobs_raw = raw_data_obj.copy()
 
 # Sideboard: Status & Stats
 with st.sidebar:
-    st.title("Job Hunter")
-    st.markdown("---")
-    
-    # --- System Status ---
-    st.markdown("### 🛰️ System Status")
-    
-    if is_mock:
-        st.error("⚠️ **[INTERNAL_TEST_STUB]**")
-        st.caption("Using mock data. Live feed unavailable.")
-    else:
-        st.markdown("🟢 **Live Connection**")
-        display_time = payload.get("last_updated", "Unknown")
-        st.caption(f"Last Scraped: {display_time}")
-    
-    st.markdown("---")
+    # --- Controls ---
 
-    st.header("⚙️ Controls")
     if st.button("🔄 Force Refresh Data", type="primary", width="stretch"):
         st.cache_data.clear()
         st.rerun()
-
-    total_count = payload.get("total_jobs", 0)
-    st.caption(f"🗃️ Total Aggregated: {total_count}")
-    st.divider()
 
 if df_jobs_raw.empty and not is_mock:
     st.warning("⚠️ No data found. Head to the Scraper page to start.")
@@ -161,31 +142,36 @@ with st.sidebar:
     avg_score = df_jobs['score'].mean()
     
     with st.container(border=True):
-        st.caption("⚠️ Mock Data")
+        if is_mock:
+            st.caption("⚠️ Mock Data")
         col_a, col_b = st.columns(2)
         col_a.metric("Total Jobs", total_jobs)
         col_b.metric("Companies", num_companies)
 
     with st.container(border=True):
-        st.caption("⚠️ Mock Data")
+        if is_mock:
+            st.caption("⚠️ Mock Data")
         col_c, col_d = st.columns(2)
         col_c.metric("⭐ Saved", num_saved)
         col_d.metric("📝 Applied", num_applied)
 
     with st.container(border=True):
-        st.caption("⚠️ Mock Data")
+        if is_mock:
+            st.caption("⚠️ Mock Data")
         col_e, col_f = st.columns(2)
         col_e.metric("🎤 Interviewing", num_interviewing)
         col_f.metric("🎉 Offers", num_offers)
 
     with st.container(border=True):
-        st.caption("⚠️ Mock Data")
+        if is_mock:
+            st.caption("⚠️ Mock Data")
         col_g, col_h = st.columns(2)
         col_g.metric("📋 TODO", num_saved_unapplied, help="Saved but not yet applied")
         col_h.metric("❌ Rejected", num_rejected)
 
     with st.container(border=True):
-        st.caption("⚠️ Mock Data")
+        if is_mock:
+            st.caption("⚠️ Mock Data")
         st.metric("Avg Score", f"{avg_score:.1f}")
 
 
