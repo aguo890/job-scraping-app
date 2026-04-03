@@ -4,7 +4,7 @@ import logging
 import sys
 from datetime import datetime
 import pytz
-from main import run_scraper
+from main import execute_scraping_run
 
 # Configure logging to stdout so Docker captures it
 logging.basicConfig(
@@ -17,7 +17,13 @@ logger = logging.getLogger(__name__)
 def job():
     logger.info("Starting scheduled job scraping...")
     try:
-        run_scraper()
+        result = execute_scraping_run()
+        
+        if "Success" in result["status"]:
+            # Use the new 'ingested' and 'processed' keys we defined in main.py
+            logger.info(f"Scraper summary: Ingested {result['ingested']} | Filtered to {result['processed']} jobs in {round(result['duration_seconds'], 1)}s")
+        else:
+            logger.error(f"Scraper failed: {result['status']}")
         
         # Touch a heartbeat file for Docker health checks
         import pathlib

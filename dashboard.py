@@ -12,6 +12,8 @@ import json
 import time
 import yaml
 from utils.ui_utils import render_status, format_status_df
+from main import execute_scraping_run
+from utils.history_manager import log_scrape_run, get_scrape_history_df
 
 # Silence pandas downcasting warning
 pd.set_option('future.no_silent_downcasting', True)
@@ -353,6 +355,41 @@ with st.sidebar:
                                         key="filter_date_range")
 
 # --- Main Dashboard Area ---
+st.title("🎯 Job Hunter Dashboard")
+
+# --- ACTION BAR ---
+col_head, col_btn = st.columns([3, 1], vertical_alignment="bottom")
+with col_head:
+    st.subheader("📊 Overview & Controls")
+with col_btn:
+    if st.button("🚀 Run Scraper Now", type="primary", use_container_width=True):
+        with st.status("Running Scraper...", expanded=True) as status:
+            st.write("Initializing engine...")
+            
+            # Call the decoupled function (Returns ingested and processed)
+            result = execute_scraping_run() 
+            
+            st.write("Updating history log...")
+            # Use processed count for the historical log to maintain consistency
+            log_scrape_run(result.get("processed", 0), result["duration_seconds"], result["status"])
+            
+            if "Success" in result["status"]:
+                status.update(label="Scraping Complete!", state="complete", expanded=False)
+                st.success(f"✅ Scraping Complete!")
+                col_res1, col_res2 = st.columns(2)
+                col_res1.metric("Ingested (Raw)", result.get('ingested', 0))
+                col_res2.metric("Matches Your Filters", result.get('processed', 0))
+                # Clear raw data cache to show new jobs
+                load_jobs_raw.clear()
+            else:
+                status.update(label="Scraping Failed!", state="error", expanded=True)
+                st.error(result["status"])
+                
+        # Force rerun to update UI metrics and history table
+        time.sleep(1) # Small delay for visual pleasure
+        st.rerun()
+
+st.divider()
 
 # --- Apply Filters ---
 filtered_df = df_jobs.copy()
@@ -444,6 +481,31 @@ event = st.dataframe(
     hide_index=True,
     height=530
 )
+
+# --- HISTORY SECTION ---
+st.write("")
+st.subheader("📜 Scraping History")
+with st.container(border=True):
+    df_history = get_scrape_history_df()
+    if not df_history.empty:
+        # Style the status column
+        def color_status(val):
+            color = 'green' if 'Success' in val else 'red'
+            return f'color: {color}'
+        
+        st.dataframe(
+            df_history, 
+            use_container_width=True, 
+            hide_index=True,
+            column_config={
+                "duration_seconds": st.column_config.NumberColumn("Duration (s)", format="%.2f"),
+                "jobs_found": st.column_config.NumberColumn("Jobs Found"),
+                "status": st.column_config.TextColumn("Status"),
+                "timestamp": st.column_config.TextColumn("Run Date")
+            }
+        )
+    else:
+        st.info("No historical runs found. Click 'Run Scraper Now' to start.")
 
 
 # --- ACTION TOOLBAR ---

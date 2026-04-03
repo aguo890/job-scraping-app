@@ -7,6 +7,7 @@ import sys
 import logging
 import yaml
 import asyncio
+import time
 from datetime import datetime
 from pathlib import Path
 
@@ -17,6 +18,9 @@ from github_integration import GitHubIntegration
 from ai_assistant import AIAssistant
 
 
+# Base directory for absolute path resolution
+BASE_DIR = Path(__file__).resolve().parent
+
 def setup_logging():
     """Configure logging"""
     log_format = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
@@ -26,8 +30,8 @@ def setup_logging():
     console_handler.setLevel(logging.INFO)
     console_handler.setFormatter(logging.Formatter(log_format))
     
-    # File handler
-    log_dir = Path('logs')
+    # File handler (Absolute path)
+    log_dir = BASE_DIR / 'logs'
     log_dir.mkdir(exist_ok=True)
     
     log_file = log_dir / f"job_scraping_{datetime.now().strftime('%Y-%m-%d')}.log"
@@ -54,125 +58,162 @@ def load_config(config_file: str):
         with open(config_file, 'r', encoding='utf-8') as f:
             return yaml.safe_load(f)
     except FileNotFoundError:
-        logging.error(f"Configuration file not found: {config_file}")
+        logging.getLogger().error(f"Configuration file not found: {config_file}")
         raise
     except yaml.YAMLError as e:
-        logging.error(f"Error parsing YAML configuration: {e}")
+        logging.getLogger().error(f"Error parsing YAML configuration: {e}")
         raise
 
 
-async def main():
-    """Main execution flow"""
-    logger = setup_logging()
-    logger.info("=" * 80)
-    logger.info("Starting Job Scraping Application")
-    logger.info("=" * 80)
+async def async_main(companies_filter: str = None):
+    """Core async execution logic"""
+    logger = logging.getLogger()
     
     try:
-        # Argument Parsing
-        import argparse
-        parser = argparse.ArgumentParser(description="Job Dashboard Scraper")
-        parser.add_argument("--companies", type=str, help="Comma-separated list of companies to scrape (e.g., 'Astranis,Anduril')")
-        args = parser.parse_args()
-
-        # Load configurations
-        logger.info("Loading configurations...")
-        companies_config = load_config('config/companies.yaml')
-        
-        # Unifying configuration to a single source of truth
-        app_config = load_config('config/filtering.yaml')
+        # Load configurations using absolute paths
+        logger.info(f"Loading configurations from {BASE_DIR}/config...")
+        companies_config = load_config(str(BASE_DIR / 'config' / 'companies.yaml'))
+        app_config = load_config(str(BASE_DIR / 'config' / 'filtering.yaml'))
         
         companies = companies_config.get('companies', [])
         
         # Filter if argument provided
-        if args.companies:
-            target_names = [name.strip().lower() for name in args.companies.split(",")]
+        if companies_filter:
+            target_names = [name.strip().lower() for name in companies_filter.split(",")]
             companies = [c for c in companies if c['name'].lower() in target_names]
-            logger.info(f"🔧 Filter active: Scraping {len(companies)} companies matching: {args.companies}")
+            logger.info(f"🔧 Filter active: Scraping {len(companies)} companies matching: {companies_filter}")
         
         logger.info(f"Loaded {len(companies)} companies")
         
+        if not companies:
+            logger.warning("No companies to scrape. Exiting.")
+            return {"ingested_count": 0, "processed_count": 0}
+            
         # Initialize components
         logger.info("Initializing components...")
         fetcher_manager = JobFetcherManager()
         processor = JobProcessor(app_config)
         reporter = JobReporter()
-        github = GitHubIntegration()
-        ai_assistant = AIAssistant()
         
         # Fetch jobs
         logger.info("Fetching jobs from all sources...")
-        # Await the async fetcher
         raw_jobs = await fetcher_manager.fetch_all_jobs(companies)
         logger.info(f"Fetched {len(raw_jobs)} raw job postings")
         
         if not raw_jobs:
-            logger.warning("No jobs found. Exiting.")
-            return 0
+            logger.warning("No jobs found.")
+            return {"ingested_count": 0, "processed_count": 0}
         
         # Process jobs
-        # NOTE: We keep this active to ensure jobs are Saved and Deduplicated.
-        # This usually doesn't trigger costs unless it calls an LLM internally.
         logger.info("Processing jobs (normalize, deduplicate, rank)...")
         processed_jobs = processor.process_jobs(raw_jobs)
-        
         logger.info(f"Processed to {len(processed_jobs)} unique jobs")
         
         if not processed_jobs:
-            logger.warning("No jobs after processing. Exiting.")
-            return 0
+            logger.warning("No jobs after processing.")
+            return {"ingested_count": (len(raw_jobs) if 'raw_jobs' in locals() else 0), "processed_count": 0}
         
-        # Generate reports (DISABLED)
-        logger.info("Generating reports...")
-        report_files = reporter.generate_reports(processed_jobs) 
-        # report_files = {} 
-        
-        # AI Analysis (DISABLED)
-        logger.info("Skipping AI analysis (disabled)...")
-        ai_results = {'enabled': False}
-        # ai_results = ai_assistant.analyze_top_jobs(processed_jobs, top_n=5)
-        
-        # GitHub Integration (DISABLED)
-        # logger.info("Committing and pushing reports to GitHub...")
-        # files_to_commit = []
-        # if 'ai_insights' in report_files:
-        #     files_to_commit.append(report_files['ai_insights'])
-        # github.commit_and_push_reports(files_to_commit)
-        
-        # Create/Update GitHub Issue (DISABLED)
-        # logger.info("Creating/updating Daily Roles Digest issue...")
-        # github.create_daily_digest_issue(processed_jobs, report_files.get('markdown', ''))
-        
-        # Summary
-        logger.info("=" * 80)
-        logger.info("Job Scraping Complete!")
-        logger.info(f"  - Total jobs fetched: {len(raw_jobs)}")
-        logger.info(f"  - Jobs after processing: {len(processed_jobs)}")
-        if processed_jobs:
-            logger.info(f"  - Top job score: {processed_jobs[0].get('score', 0):.1f}")
-        logger.info("=" * 80)
-        
-        return 0
+        # Return both counts for transparency
+        return {
+            "ingested_count": len(raw_jobs),
+            "processed_count": len(processed_jobs)
+        }
     
     except Exception as e:
-        logger.error(f"Fatal error in main execution: {e}", exc_info=True)
-        return 1
+        logger.error(f"Error in async_main: {e}", exc_info=True)
+        raise
 
 
-def run_scraper():
-    """Wrapper for the main async execution"""
+LOCK_FILE = BASE_DIR / "data" / "scraper.lock"
+
+def execute_scraping_run(companies_filter: str = None):
+    """
+    Core logic meant to be imported by the Streamlit UI or other scripts.
+    Returns a dictionary summary.
+    """
+    # 1. Check for existing lock
+    if LOCK_FILE.exists():
+        return {
+            "status": "Failed: Scraper is already running in another process.", 
+            "jobs_found": 0, 
+            "duration_seconds": 0
+        }
+
+    setup_logging()
+    logger = logging.getLogger()
+    logger.info("=" * 80)
+    logger.info("Starting Job Scraping Run")
+    logger.info("=" * 80)
+    
+    start_time = time.time()
+    
+    # Handle Windows event loop policy if needed
     if sys.platform == 'win32':
         asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+        
     try:
-        # Use asyncio.run handling for the main entry point
-        return asyncio.run(main())
-    except KeyboardInterrupt:
-        pass
+        # 2. Create the lock file
+        LOCK_FILE.parent.mkdir(parents=True, exist_ok=True)
+        with open(LOCK_FILE, "w") as f:
+            f.write(f"locked at {datetime.now().isoformat()}")
+
+        # Use asyncio.run to execute the async logic synchronously
+        # returns a dict with ingested_count and processed_count
+        counts = asyncio.run(async_main(companies_filter))
+        jobs_found = counts["processed_count"]
+        ingested_count = counts["ingested_count"]
+        duration = time.time() - start_time
+        
+        # [BUG FIX] Return separate counts for transparency (Ingested vs Processed)
+        result = {
+            "status": "Success",
+            "ingested": ingested_count,
+            "processed": jobs_found,
+            "jobs_found": jobs_found, # Backwards compatibility
+            "duration_seconds": round(duration, 2)
+        }
+        
+        logger.info("=" * 80)
+        logger.info(f"Run Complete: {result['status']}")
+        logger.info(f"  - Ingested: {result['ingested']}")
+        logger.info(f"  - Processed: {result['processed']}")
+        logger.info(f"  - Duration: {result['duration_seconds']}s")
+        logger.info("=" * 80)
+        
+        return result
+        
     except Exception as e:
-        # Log any top-level errors not caught inside main()
-        logging.getLogger().error(f"Top-level error in scraper: {e}", exc_info=True)
+        duration = time.time() - start_time
+        logger.error(f"Scraping run failed: {e}")
+        return {
+            "status": f"Failed: {str(e)}",
+            "jobs_found": 0,
+            "duration_seconds": round(duration, 2)
+        }
+    finally:
+        # 3. Always release the lock
+        if LOCK_FILE.exists():
+            try:
+                os.remove(LOCK_FILE)
+            except Exception as e:
+                logger.error(f"Failed to remove lock file: {e}")
+
+def main():
+    """CLI Entry Point"""
+    import argparse
+    parser = argparse.ArgumentParser(description="Job Dashboard Scraper (CLI)")
+    parser.add_argument("--companies", type=str, help="Comma-separated list of companies to scrape")
+    args = parser.parse_args()
+    
+    print("🚀 Starting Job Scraper CLI...")
+    result = execute_scraping_run(args.companies)
+    
+    if "Success" in result["status"]:
+        print(f"✅ Success! Found {result['jobs_found']} jobs in {result['duration_seconds']}s.")
+        return 0
+    else:
+        print(f"❌ Error: {result['status']}")
         return 1
-    return 0
 
 if __name__ == "__main__":
-    sys.exit(run_scraper())
+    sys.exit(main())

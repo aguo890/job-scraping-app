@@ -44,7 +44,7 @@ class JobListing:
             if not text: return ""
             # Basic HTML stripping
             clean = re.sub('<[^<]+?>', '', text)
-            return clean.replace('\n', ' ').strip()
+            return str(clean).replace('\n', ' ').strip()
 
         self.title = clean_html(self.title)
         self.company = clean_html(self.company)

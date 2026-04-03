@@ -12,7 +12,11 @@ class SmartFilter:
 
     def _load_config(self):
         try:
-            with open("config/filtering.yaml", "r") as f:
+            # Use absolute path for reliability across containers
+            from pathlib import Path
+            base_path = Path(__file__).resolve().parent.parent
+            config_path = base_path / "config" / "filtering.yaml"
+            with open(config_path, "r") as f:
                 self.config = yaml.safe_load(f)
             # Scalar configuration: Separate from arrays
             self.max_days_old = self.config.get('filtering', {}).get('max_days_old', 14)
@@ -33,13 +37,23 @@ class SmartFilter:
             return True
 
         try:
-            # Handle standard ISO 8601 with Z for UTC
-            clean_date_str = date_str.replace("Z", "+00:00")
-            job_date = datetime.fromisoformat(clean_date_str)
+            # Handle numeric timestamps (e.g. "1761200402074")
+            date_str_val = str(date_str).strip() if date_str is not None else ""
+            
+            # Catch numeric timestamps before standard parsing
+            if date_str_val.isdigit() and len(date_str_val) >= 10:
+                # Millis to seconds
+                ts = int(date_str_val) / 1000.0
+                job_date = datetime.fromtimestamp(ts, tz=timezone.utc)
+            else:
+                # Standard ISO 8601 with Z for UTC
+                clean_date_str = date_str_val.replace("Z", "+00:00")
+                job_date = datetime.fromisoformat(clean_date_str)
             
             # Ensure job_date is timezone aware for accurate comparison
             if job_date.tzinfo is None:
                  job_date = job_date.replace(tzinfo=timezone.utc)
+
 
             now = datetime.now(timezone.utc)
             # age_days will be 0 if today, 1 if yesterday, etc.

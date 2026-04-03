@@ -1,5 +1,6 @@
 import yaml
 import aiohttp
+import asyncio
 import logging
 from typing import Optional, Any
 
@@ -54,7 +55,6 @@ class SafeSession:
                     elif response.status in (429, 500, 502, 503, 504):
                         wait_time = (2 ** attempt) # 1s, 2s, 4s
                         logger.warning(f"HTTP {response.status} on {url}. Retrying in {wait_time}s (Attempt {attempt+1}/{max_retries})")
-                        import asyncio
                         await asyncio.sleep(wait_time)
                         continue
 

@@ -5,17 +5,20 @@ import json
 import logging
 from typing import List, Dict, Any
 from datetime import datetime
+from pathlib import Path
 import os
 
 logger = logging.getLogger(__name__)
+# Base directory for absolute path resolution
+BASE_DIR = Path(__file__).resolve().parent
 
 
 class JobReporter:
     """Generates reports and output files"""
     
-    def __init__(self, output_dir: str = "data", report_dir: str = "report"):
-        self.output_dir = output_dir
-        self.report_dir = report_dir
+    def __init__(self, output_dir: str = None, report_dir: str = None):
+        self.output_dir = output_dir or str(BASE_DIR / "data")
+        self.report_dir = report_dir or str(BASE_DIR / "report")
         
         # Ensure directories exist
         os.makedirs(self.output_dir, exist_ok=True)

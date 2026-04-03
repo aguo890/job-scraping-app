@@ -1,5 +1,6 @@
-import json
+from pathlib import Path
 import os
+import json
 from datetime import datetime, timedelta
 import pytz
 from dateutil import parser
@@ -7,6 +8,8 @@ import re
 import logging
 
 logger = logging.getLogger(__name__)
+# Base directory for absolute path resolution
+BASE_DIR = Path(__file__).resolve().parent
 from utils.location_filter import is_us_or_remote
 
 class JobProcessor:
@@ -87,8 +90,8 @@ class JobProcessor:
     def load_applied_jobs(self):
         """Load jobs that have been marked as applied"""
         try:
-            path = os.path.join('data', 'applied_jobs.json')
-            if not os.path.exists(path):
+            path = BASE_DIR / 'data' / 'applied_jobs.json'
+            if not path.exists():
                 return []
             with open(path, 'r', encoding='utf-8') as f:
                 data = json.load(f)
@@ -198,7 +201,7 @@ class JobProcessor:
             # 5. DISPLAY FORMATTING
             display_title = job['title']
             if is_applied:
-                clean_title = display_title.replace("🔥 ", "").replace("✅ ", "")
+                clean_title = str(display_title).replace("🔥 ", "").replace("✅ ", "")
                 display_title = "✅ " + clean_title
             elif is_fresh:
                 if "🔥" not in display_title:
@@ -235,7 +238,7 @@ class JobProcessor:
                 # Update Title/Status
                 title = ghost_job['title']
                 if "✅" not in title:
-                    title = "✅ " + title.replace("🔥 ", "")
+                    title = "✅ " + str(title).replace("🔥 ", "")
                 
                 # Explicitly set title to indicate closed? 
                 # User asked for status: "✅ Applied (Closed)"

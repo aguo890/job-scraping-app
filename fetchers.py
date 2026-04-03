@@ -11,8 +11,11 @@ import os
 from utils.network import SafeSession
 from utils.smart_filter import job_filter
 from utils.schemas import JobListing
+from pathlib import Path
 
 logger = logging.getLogger(__name__)
+# Base directory for absolute path resolution
+BASE_DIR = Path(__file__).resolve().parent
 
 class GreenhouseFetcher:
     """Async Fetcher for Greenhouse API"""
@@ -218,7 +221,8 @@ class JobFetcherManager:
         # Ideally, we should use the same source of truth.
         try:
             import yaml
-            with open("config/filtering.yaml", "r") as f:
+            config_path = BASE_DIR / "config" / "filtering.yaml"
+            with open(config_path, "r") as f:
                 data = yaml.safe_load(f)
                 limit = data.get("system", {}).get("concurrency_limit", 5)
         except:
@@ -231,8 +235,8 @@ class JobFetcherManager:
         
         # Load applied IDs once to pass down to fetchers
         applied_ids = set()
-        applied_path = os.path.join('data', 'applied_jobs.json')
-        if os.path.exists(applied_path):
+        applied_path = BASE_DIR / 'data' / 'applied_jobs.json'
+        if applied_path.exists():
             try:
                 with open(applied_path, 'r', encoding='utf-8') as f:
                     applied_data = json.load(f)
