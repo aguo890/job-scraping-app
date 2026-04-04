@@ -34,6 +34,8 @@ class JobProcessor:
         # Helper lists for filtering/scoring
         # Unified config uses 'titles' section for keywords
         self.exclude_keywords = self.config.get('titles', {}).get('exclude', [])
+        # Merge neutral keywords (e.g., II, III) which carry no weight but prevent exclusion
+        self.neutral_keywords = self.config.get('titles', {}).get('neutral', [])
         self.high_priority_keywords = self.config.get('titles', {}).get('high_priority', [])
         
         # Initialize Restriction Engine (Visa/Clearance Filter)
@@ -199,9 +201,9 @@ class JobProcessor:
                 score += 10
 
             # 2. SOFT FILTERS: YOE Penalty
-            # Architecture: Penalty = (extracted_min - limit) * -10
-            # Skips for Applied or "Entry-level" Titles
-            bypass_keywords = ['intern', 'new grad', 'entry level', 'university grad', 'junior']
+            # Architecture: Penalty = (extracted_min - limit) * -100
+            # Skips for Applied, "Entry-level" Titles, or Neutral Titles (II, III)
+            bypass_keywords = ['intern', 'new grad', 'entry level', 'university grad', 'junior'] + self.neutral_keywords
             if not is_applied and not any(kw in title_lower for kw in bypass_keywords):
                 min_yoe = self.extract_min_years_experience(description_text)
                 if min_yoe > max_exp_limit:
@@ -264,8 +266,10 @@ class JobProcessor:
                 continue
 
             # --- STRICT MODE DROP: Discard jobs with negative scores ---
+            # SRE QUALITY CHECK: "Golden Ticket" pattern.
+            # Never drop a job the user has already interacted with (is_applied).
             if self.strict_mode and score < 0 and not is_applied:
-                logger.info(f"🗑️ Hard Drop (Strict Mode): Skipping low-score role '{job['title']}' ({score} points)")
+                logger.info(f"🗑️ Hard Drop (Strict Mode): Skipping role '{job['title']}' ({score} pts)")
                 continue
 
             processed_job = {

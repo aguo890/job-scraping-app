@@ -20,6 +20,8 @@ titles:
   - Associate
   - '2026'
   - Early Career
+  - Rotation
+  - Rotational
   - Linesight
   - ERP
   - PLC
@@ -34,6 +36,9 @@ titles:
   - Controls
   - Controls Engineering
   - Controls Engineer
+  neutral:
+  - II
+  - III
   exclude:
   - Senior
   - Sr
@@ -44,10 +49,23 @@ titles:
   - Director
   - Manager
   - VP
-  - Head of
-  - Founding
-  - II
-  - III
+  - PhD
+  - Ph.D
+  - Doctorate
+  - MBA
+  - Postdoc
+  - Masters
+  - Master's
+  - Hardware
+  - Firmware
+  - Robotics
+  - Perception
+  - Mechanical
+  - Electrical
+  - iOS
+  - Android
+  - FPGA
+  - ASIC
   - Account Executive
   - Sales
   - Recruiter
@@ -186,6 +204,8 @@ preferred_skills:
 - Next.js
 - Node.js
 - Vite
+- Git
+- GitHub
 - Linesight
 - ERP
 - PLC
@@ -201,24 +221,7 @@ preferred_skills:
 - MySQL
 - SQLite
 - HMI
-title_blocklist:
-- PhD
-- Ph.D
-- Doctorate
-- MBA
-- Postdoc
-- Masters
-- Master's
-- Hardware
-- Firmware
-- Robotics
-- Perception
-- Mechanical
-- Electrical
-- iOS
-- Android
-- FPGA
-- ASIC
+ - VHDL
 penalty_skills:
 - Swift
 - Objective-C
