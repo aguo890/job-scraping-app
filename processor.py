@@ -5,6 +5,7 @@ import pytz
 from dateutil import parser
 import re
 import logging
+import os
 
 logger = logging.getLogger(__name__)
 # Base directory for absolute path resolution
@@ -38,6 +39,35 @@ class JobProcessor:
         # Initialize Restriction Engine (Visa/Clearance Filter)
         restriction_config = self.config.get('restrictions', {})
         self.restriction_engine = RestrictionEngine(restriction_config)
+        
+        # --- SRE Observability & Unified Config Sync ---
+        # Architecture: YAML-first (Source of Truth), Environment Overrides (Testing)
+        filter_config = self.config.get('filtering', {})
+        
+        # 1. Resolve MAX_YOE
+        self.max_exp_limit = int(os.getenv("MAX_YOE", filter_config.get('max_years_experience', 2)))
+        
+        # 2. Resolve Multiplier with Safety Validation
+        yaml_multiplier = filter_config.get('yoe_penalty_multiplier', -100)
+        env_multiplier = os.getenv("YOE_PENALTY_MULTIPLIER")
+        resolved_multiplier = int(env_multiplier) if env_multiplier else yaml_multiplier
+        
+        if resolved_multiplier > 0:
+            logger.warning(f"⚠️ Positive YOE multiplier ({resolved_multiplier}) detected. Defaulting to -100 for safety.")
+            resolved_multiplier = -100
+        self.yoe_penalty_multiplier = resolved_multiplier
+        
+        # 3. Resolve Strict Mode
+        yaml_strict = filter_config.get('strict_mode', False)
+        env_strict = os.getenv("STRICT_MODE")
+        self.strict_mode = env_strict.lower() == "true" if env_strict else yaml_strict
+        
+        logger.info("=" * 50)
+        logger.info("🚀 JobProcessor (Unified Config Model) Active")
+        logger.info(f"  - MAX_YOE Limit: {self.max_exp_limit} yrs")
+        logger.info(f"  - STRICT_MODE: {'ENABLED' if self.strict_mode else 'DISABLED'}")
+        logger.info(f"  - YOE Penalty: {self.yoe_penalty_multiplier}/yr")
+        logger.info("=" * 50)
         
     def extract_min_years_experience(self, text):
         """
@@ -139,9 +169,9 @@ class JobProcessor:
             "digital twin", "supply chain"
         }
         
-        # Experience Config
-        filter_config = self.config.get('filtering', {})
-        max_exp_limit = filter_config.get('max_years_experience', 5)
+        # [AI AGENT CONTEXT]: Experience limit and penalty now managed via __init__ 
+        # using environment variables for parity across Docker services.
+        max_exp_limit = self.max_exp_limit
 
         for job in jobs:
             job_id = job['id']
@@ -175,7 +205,8 @@ class JobProcessor:
             if not is_applied and not any(kw in title_lower for kw in bypass_keywords):
                 min_yoe = self.extract_min_years_experience(description_text)
                 if min_yoe > max_exp_limit:
-                    penalty = (min_yoe - max_exp_limit) * -10
+                    # [AI AGENT CONTEXT]: Aggressive penalty to ensure drift is impossible.
+                    penalty = (min_yoe - max_exp_limit) * self.yoe_penalty_multiplier
                     score += penalty
                     logger.debug(f"YOE Penalty for {job['title']}: {penalty} ({min_yoe} yrs > {max_exp_limit})")
 
@@ -227,9 +258,14 @@ class JobProcessor:
             if self.config.get('restrictions', {}).get('enabled', False):
                 restriction_data = self.restriction_engine.analyze(description_text)
             
-            # --- HARD DROP: Silently discard restricted roles if configured ---
+            # --- HARD DROP: Silently discard restricted roles ---
             if drop_enabled and restriction_data.get('restricted') and not is_applied:
-                logger.info(f"🗑️ Hard Drop: Skipping restricted role '{job['title']}' at {job['company']}")
+                logger.info(f"🗑️ Hard Drop (Restriction): Skipping '{job['title']}' at {job['company']}")
+                continue
+
+            # --- STRICT MODE DROP: Discard jobs with negative scores ---
+            if self.strict_mode and score < 0 and not is_applied:
+                logger.info(f"🗑️ Hard Drop (Strict Mode): Skipping low-score role '{job['title']}' ({score} points)")
                 continue
 
             processed_job = {

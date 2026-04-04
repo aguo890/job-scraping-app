@@ -7,6 +7,8 @@ filtering:
   is_enabled: true
   max_days_old: 14
   max_years_experience: 2
+  yoe_penalty_multiplier: -100
+  strict_mode: true
 titles:
   high_priority:
   - Intern
