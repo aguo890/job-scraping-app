@@ -69,7 +69,7 @@ class GreenhouseFetcher:
             if job_obj.is_valid():
                 normalized_jobs.append(job_obj.to_dict())
         
-        logger.info(f"Fetched {len(normalized_jobs)} jobs from Greenhouse for {company_name}")
+        logger.info(f"Qualified {len(normalized_jobs)} jobs from Greenhouse for {company_name}")
         return normalized_jobs
 
 
@@ -137,7 +137,7 @@ class LeverFetcher:
             if job_obj.is_valid():
                 normalized_jobs.append(job_obj.to_dict())
         
-        logger.info(f"Fetched {len(normalized_jobs)} jobs from Lever for {company_name}")
+        logger.info(f"Qualified {len(normalized_jobs)} jobs from Lever for {company_name}")
         return normalized_jobs
 
 
@@ -205,7 +205,7 @@ class AshbyFetcher:
             if job_obj.is_valid():
                 normalized_jobs.append(job_obj.to_dict())
         
-        logger.info(f"Fetched {len(normalized_jobs)} jobs from Ashby for {company_name}")
+        logger.info(f"Qualified {len(normalized_jobs)} jobs from Ashby for {company_name}")
         return normalized_jobs
 
 
@@ -271,7 +271,7 @@ class JobFetcherManager:
                 elif isinstance(res, Exception):
                     logger.error(f"Task failed with exception: {res}")
             
-            logger.info(f"Total jobs ingested: {len(all_jobs)}")
+            logger.info(f"Total jobs qualified (passed Hard Filters): {len(all_jobs)}")
             return all_jobs
 
     async def _bounded_fetch(self, company: Dict[str, Any], gh, lev, ash, applied_ids: set) -> List[Dict[str, Any]]:

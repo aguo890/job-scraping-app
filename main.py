@@ -96,7 +96,7 @@ async def async_main(companies_filter: str = None):
         # Fetch jobs
         logger.info("Fetching jobs from all sources...")
         raw_jobs = await fetcher_manager.fetch_all_jobs(companies)
-        logger.info(f"Fetched {len(raw_jobs)} raw job postings")
+        logger.info(f"Qualified {len(raw_jobs)} job postings (passed Hard Filters)")
         
         if not raw_jobs:
             logger.warning("No jobs found.")
