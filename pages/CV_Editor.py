@@ -29,28 +29,25 @@ except ImportError:
 
 st.set_page_config(page_title="CV Editor", layout="wide")
 
-# Global UI Inject (includes transparent toolbar)
-inject_custom_css()
+# Workshop-Specific CSS
+workshop_css = """
+.stMain {
+    min-height: 100vh !important;
+}
+/* Make YAML editor fill viewport like rendercv app */
+.stTextArea textarea {
+    font-family: 'Source Code Pro', monospace;
+    height: 85vh !important;
+}
+/* Workshop-specific container overrides */
+.stMainBlockContainer {
+    padding-bottom: 0rem !important;
+    max-width: 100% !important;
+}
+"""
 
-st.markdown("""
-    <style>
-    .stMainBlockContainer {
-        padding-top: 1rem !important;
-        padding-left: 2rem !important;
-        padding-right: 2rem !important;
-        padding-bottom: 0rem !important;
-        max-width: 100% !important;
-    }
-    .stMain {
-        min-height: 100vh !important;
-    }
-    /* Make YAML editor fill viewport like rendercv app */
-    .stTextArea textarea {
-        font-family: 'Source Code Pro', monospace;
-        height: 85vh !important;
-    }
-    </style>
-""", unsafe_allow_html=True)
+# Global UI Inject (includes transparent toolbar + workshop styles)
+inject_custom_css(workshop_css)
 
 # --- 1. Navigation Guard (with URL persistence) ---
 SPECIAL_ROUTING_JOBS = {

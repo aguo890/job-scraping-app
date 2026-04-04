@@ -33,23 +33,22 @@ JOB_DATA_FILE = os.path.join(BASE_DIR, "data", "jobs_agg.json")
 
 st.set_page_config(page_title="Job Hunter", layout="wide")
 
-# Global UI Inject (includes transparent toolbar)
-inject_custom_css()
+# Dashboard-Specific CSS (Passed to the global injector to prevent DOM clutter)
+dashboard_css = """
+/* Make ONLY the bottom action toolbar sticky, not every container */
+[data-testid="stVerticalBlockBorderWrapper"]:has(button[key="status_selector"]),
+[data-testid="stVerticalBlockBorderWrapper"]:has(button[key="ghost_status"]) {
+    position: sticky;
+    bottom: 20px;
+    z-index: 100;
+    background-color: white;
+    box-shadow: 0 -5px 15px rgba(0,0,0,0.05);
+    border-radius: 10px;
+}
+"""
 
-st.markdown("""
-    <style>
-    /* Make ONLY the bottom action toolbar sticky, not every container */
-    [data-testid="stVerticalBlockBorderWrapper"]:has(button[key="status_selector"]),
-    [data-testid="stVerticalBlockBorderWrapper"]:has(button[key="ghost_status"]) {
-        position: sticky;
-        bottom: 20px;
-        z-index: 100;
-        background-color: white;
-        box-shadow: 0 -5px 15px rgba(0,0,0,0.05);
-        border-radius: 10px;
-    }
-    </style>
-""", unsafe_allow_html=True)
+# Global UI Inject (One single stMarkdownContainer for ALL styles)
+inject_custom_css(dashboard_css)
 
 from config_utils import load_config, load_companies, clean_df_list, save_yaml_safely, FILTERING_PATH, COMPANIES_PATH
 
@@ -339,15 +338,12 @@ with st.sidebar:
 
 if is_mock:
     st.warning("⚠️ **[INTERNAL_TEST_STUB]** — Currently using generated mock data for UI testing. Scrape history unavailable.")
+    st.divider()
 else:
     # Check for Active Scraper
     if JobDataService.is_scraper_running():
         st.info("🚀 **Scraper In Progress:** The background engine is currently searching for new listings. Refresh in a few minutes.")
-
-# st.info("💡 **Manual Controls Moved:** You can now trigger manual updates or view logs on the [🚀 Scraper Page](Scraper).")
-
-
-st.divider()
+        st.divider()
 
 
 # --- Apply Filters ---
@@ -464,7 +460,7 @@ event = st.dataframe(
 )
 
 # --- FOOTER ---
-st.write("")
+# --- FOOTER ---
 # PURPOSELY HIDDEN (Architectural Decision) - Moving Scraper to a separate page. 
 # DO NOT RE-ENABLE WITHOUT EXPLICIT USER CONSENT.
 # st.caption("Job Tracker v2026.4.3 | Architecture by [DEEPMIND_ANTIGRAVITY]")
@@ -496,10 +492,7 @@ if selected_indices:
         num_selected = 0
         selected_ids = []
 
-    # Visual Separator
-    st.write("")
-
-    # THE SLEEK TOOLBAR
+    # THE SLEEK TOOLBAR (No extra st.write separator)
     with st.container(border=True):
         col1, col_save, col_hide, col3, col4 = st.columns([1, 1.2, 1.2, 1.5, 1.2], vertical_alignment="center")
 
@@ -601,8 +594,7 @@ if selected_indices:
                 st.button("📝 Create Resume", type="primary", width="stretch", disabled=True, key="multi_cv")
 
 else:
-    # Empty-state: ghost versions of both toolbar rows
-    st.write("")
+    # Empty-state: ghost versions of both toolbar rows (No extra st.write)
     with st.container(border=True):
         col1, col_save, col_hide, col3, col4 = st.columns([1, 1.2, 1.2, 1.5, 1.2], vertical_alignment="center")
         with col1:
