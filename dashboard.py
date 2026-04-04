@@ -196,7 +196,7 @@ with st.sidebar:
     if b_msg == "success":
         st.sidebar.caption(f"💾 **DR Backup:** ✅ {b_time}")
     elif b_msg == "No Backup Found":
-        st.sidebar.caption(f"💾 **DR Backup:** ⚠️ No Sync Detected")
+        st.sidebar.caption("💾 **DR Backup:** ⚠️ No Sync Detected")
     else:
         st.sidebar.error(f"💾 **DR Backup:** ❌ {b_msg}")
 
