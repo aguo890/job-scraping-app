@@ -6,6 +6,7 @@ import os
 import time
 from pathlib import Path
 from datetime import datetime
+import random
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -103,8 +104,24 @@ class JobDataService:
         """
         Returns a 'Data Envelope' containing the job dataframe 
         and metadata (mock status, last updated).
-        Uses explicit logging for cache monitoring.
         """
+        # OPTION: High-Frequency Remote Pull (SRE: Live Dashboard)
+        if os.getenv("USE_GITHUB_DATA") == "true":
+            raw_data = JobDataService._fetch_remote_jobs()
+            if raw_data:
+                jobs = raw_data.get("jobs", [])
+                total_jobs = raw_data.get("total_jobs", 0)
+                gen_at = raw_data.get("generated_at", "Unknown")
+                df = pd.DataFrame(jobs)
+                logger.info(f"🌐 LIVE: Fetched {len(df)} jobs from GitHub data-state branch.")
+                return {
+                    "data": df,
+                    "is_mock": False,
+                    "last_updated": gen_at,
+                    "total_jobs": total_jobs,
+                    "source": "GitHub (Live)"
+                }
+
         logger.info(f"🔄 Request: Dashboard Payload (Disk check: {JOB_DATA_FILE.name})")
         
         # Permission Guardrail
@@ -135,16 +152,52 @@ class JobDataService:
                 "data": df,
                 "is_mock": False,
                 "last_updated": gen_at,
-                "total_jobs": total_jobs
+                "total_jobs": total_jobs,
+                "source": "Local Disk"
             }
         except Exception as e:
             logger.error(f"❌ Failed to parse {JOB_DATA_FILE.name}: {e}")
             return {
-                "data": JobDataService._get_mock_df(), 
-                "is_mock": True, 
-                "last_updated": "ERR", 
                 "total_jobs": 0
             }
+
+    @staticmethod
+    def get_backup_status():
+        """Reads the last_backup.json file from the scraper to report DR status."""
+        status_file = DATA_DIR / "last_backup.json"
+        if not status_file.exists():
+            return {"status": "No Backup Found", "timestamp": "N/A"}
+        try:
+            with open(status_file, 'r', encoding='utf-8') as f:
+                return json.load(f)
+        except Exception as e:
+            logger.error(f"Failed to load backup status: {e}")
+            return {"status": "Error", "timestamp": "N/A"}
+
+    @staticmethod
+    def _fetch_remote_jobs():
+        """
+        Pull the latest state directly from the data-state branch (GitHub Raw).
+        Enabled via USE_GITHUB_DATA=true environment variable.
+        """
+        import requests
+        repo = os.getenv("GITHUB_REPOSITORY")
+        token = os.getenv("GITHUB_TOKEN")
+        
+        if not repo:
+            return None
+            
+        url = f"https://raw.githubusercontent.com/{repo}/data-state/job-scraping-app/data/jobs_agg.json"
+        headers = {"Authorization": f"token {token}"} if token else {}
+        
+        try:
+            logger.info(f"🌐 Fetching remote state from {url}...")
+            response = requests.get(url, headers=headers, timeout=10)
+            response.raise_for_status()
+            return response.json()
+        except Exception as e:
+            logger.error(f"Failed to fetch remote jobs: {e}")
+            return None
 
     @staticmethod
     def load_tracking():

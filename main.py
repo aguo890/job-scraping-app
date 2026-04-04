@@ -10,6 +10,7 @@ import asyncio
 import time
 from datetime import datetime
 from pathlib import Path
+import random
 
 from fetchers import JobFetcherManager
 from processor import JobProcessor
@@ -98,13 +99,26 @@ async def async_main(companies_filter: str = None):
         raw_jobs = await fetcher_manager.fetch_all_jobs(companies)
         logger.info(f"Qualified {len(raw_jobs)} job postings (passed Hard Filters)")
         
-        if not raw_jobs:
-            logger.warning("No jobs found.")
+        # 3. LOAD EXISTING STATE (SRE: Source of Truth)
+        existing_data = []
+        data_path = BASE_DIR / 'data' / 'jobs_agg.json'
+        if data_path.exists():
+            try:
+                with open(data_path, 'r', encoding='utf-8') as f:
+                    content = json.load(f)
+                    existing_data = content.get('jobs', [])
+                logger.info(f"📂 Loaded {len(existing_data)} existing jobs for state-merge.")
+            except Exception as e:
+                logger.error(f"Failed to load existing state for merge: {e}")
+
+        if not raw_jobs and not existing_data:
+            logger.warning("No jobs found and no existing state. Exiting.")
             return {"ingested_count": 0, "processed_count": 0}
         
         # Process jobs
         logger.info("Processing jobs (normalize, deduplicate, rank)...")
-        processed_jobs = processor.process_jobs(raw_jobs)
+        # [AI AGENT]: Pass existing_data to enable O(n) sync/retention logic
+        processed_jobs = processor.process_jobs(raw_jobs, existing_jobs=existing_data)
         logger.info(f"Processed to {len(processed_jobs)} unique jobs")
         
         # 4. ATOMIC SAVE & REPORTING
@@ -147,6 +161,14 @@ def execute_scraping_run(companies_filter: str = None):
 
     setup_logging()
     logger = logging.getLogger()
+    
+    # [SRE: ANTI-BOT JITTER]
+    # To avoid a consistent "Heartbeat" signature on job boards.
+    if os.getenv("GITHUB_ACTIONS") == "true":
+        jitter = random.randint(60, 600)  # 1-10 minutes
+        logger.info(f"⏳ CI Environment detected. Jitter: Sleeping for {jitter}s...")
+        time.sleep(jitter)
+
     logger.info("=" * 80)
     logger.info("Starting Job Scraping Run")
     logger.info("=" * 80)

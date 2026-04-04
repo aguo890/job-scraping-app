@@ -172,14 +172,33 @@ with st.sidebar:
         if not dates.empty:
             st.caption(f"📅 {dates.min().strftime('%b %d')} – {dates.max().strftime('%b %d, %Y')}")
 
-    # --- System Status (Hard Drop Indicator) ---
-    st.sidebar.subheader("⚙️ System Status")
+    # --- System Status (Hardened SRE Dashboard) ---
+    st.sidebar.subheader("⚙️ System Health")
+    
+    # 1. Ingestion Strategy
     app_config = load_config()
     drop_enabled = app_config.get('restrictions', {}).get('drop_restricted', False)
     if drop_enabled:
-        st.sidebar.info("🗑️ **Hard Drop Active:** Restricted jobs are permanently dropped during ingestion. Your database only contains viable leads.")
+        st.sidebar.info("🗑️ **Hard Drop Active:** Restricted jobs are permanently dropped during ingestion.")
+    
+    # 2. Data Source Logic (Live vs Local)
+    data_source_origin = payload.get("source", "Local Disk")
+    if data_source_origin == "GitHub (Live)":
+        st.sidebar.success(f"🌐 **Data Source:** {data_source_origin}")
     else:
-        st.sidebar.caption("🗄️ **Full Retention:** All jobs are saved. Use the Mobility Filter above to hide restricted leads.")
+        st.sidebar.caption(f"📂 **Data Source:** {data_source_origin}")
+
+    # 3. DR Backup Status (Visual Logic)
+    backup_status = JobDataService.get_backup_status()
+    b_msg = backup_status.get("status", "Unknown")
+    b_time = backup_status.get("timestamp", "N/A")
+    
+    if b_msg == "success":
+        st.sidebar.caption(f"💾 **DR Backup:** ✅ {b_time}")
+    elif b_msg == "No Backup Found":
+        st.sidebar.caption(f"💾 **DR Backup:** ⚠️ No Sync Detected")
+    else:
+        st.sidebar.error(f"💾 **DR Backup:** ❌ {b_msg}")
 
     st.divider()
 

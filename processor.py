@@ -145,12 +145,86 @@ class JobProcessor:
             logger.error(f"Error loading applied jobs: {e}")
             return []
 
-    def process_jobs(self, jobs):
+    def process_jobs(self, jobs, existing_jobs=None):
         """
         Evaluator: Applies Soft Filters and Scoring.
-        Note: Hard filters (Banned titles, old dates) already handled by Gatekeeper.
+        Now includes 'SRE-grade' state merging for GitHub Actions.
         """
         logger.info(f"Evaluating {len(jobs)} jobs...")
+        
+        # 1. EVALUATE & SCORE NEW JOBS
+        newly_processed = self._evaluate_and_score(jobs)
+        
+        # 2. SYNC WITH EXISTING STATE (If provided)
+        if existing_jobs:
+            final_jobs = self.sync_job_state(existing_jobs, newly_processed)
+        else:
+            final_jobs = newly_processed
+            
+        return final_jobs
+
+    def sync_job_state(self, existing_jobs, new_jobs, retention_days=60):
+        """
+        Merge & Purge: O(n) registry sync with 60-day retention policy.
+        Preserves 'Golden Ticket' (Applied/Saved) jobs.
+        """
+        if not existing_jobs:
+            return new_jobs
+            
+        logger.info(f"Syncing state: {len(existing_jobs)} existing vs {len(new_jobs)} new...")
+        
+        # Map existing jobs by ID for O(1) access
+        registry = {job['id']: job for job in existing_jobs}
+        now = datetime.now(pytz.utc)
+        retention_cutoff = now - timedelta(days=retention_days)
+
+        # 1. UPSERT: Update registry with new data, respecting Golden Ticket
+        for job in new_jobs:
+            jid = job['id']
+            if jid in registry:
+                # SRE RULE: Do not overwrite user-interacted status with raw scrape data
+                if registry[jid].get('status') in ['Applied', 'Saved', 'Interviewing', 'Offer']:
+                    continue
+            registry[jid] = job
+
+        # 2. RETENTION: Purge if (Old) AND (Not User-Interacted)
+        hardened_list = []
+        purged_count = 0
+        
+        for job in registry.values():
+            try:
+                # Parse fetch_date (ISO) or fallback to date_posted if missing
+                f_date_str = job.get('fetch_date')
+                if f_date_str:
+                    f_date = datetime.fromisoformat(f_date_str)
+                else:
+                    # Legacy fallback
+                    f_date = now # Default to now for missing dates
+                
+                # Keep Rule: (New enough) OR (Status is special)
+                is_fresh = f_date > retention_cutoff
+                is_gold = job.get('status') in ['Applied', 'Saved', 'Interviewing', 'Offer', 'Applied (Closed)']
+                
+                if is_fresh or is_gold:
+                    hardened_list.append(job)
+                else:
+                    purged_count += 1
+            except Exception as e:
+                logger.warning(f"Retention check failed for {job.get('id')}: {e}. Keeping by default.")
+                hardened_list.append(job)
+
+        if purged_count > 0:
+            logger.info(f"🧹 Retention: Purged {purged_count} stale jobs from registry.")
+            
+        # Re-sort by Score High->Low
+        hardened_list.sort(key=lambda x: x.get('score', 0), reverse=True)
+        return hardened_list
+
+    def _evaluate_and_score(self, jobs):
+        """
+        Internal logic extracted from process_jobs.
+        Strictly evaluates and scores a raw list of jobs.
+        """
         processed = []
         seen_ids = set()
         
@@ -283,6 +357,7 @@ class JobProcessor:
                 "is_applied": is_applied,
                 "status": "Applied" if is_applied else "Active",
                 "restriction_data": restriction_data,
+                "fetch_date": datetime.now(pytz.utc).isoformat(),
                 "raw_data": job.get('raw_data', {})
             }
             if is_applied:
