@@ -11,7 +11,7 @@ import pandas as pd
 import json
 import time
 import yaml
-from utils.ui_utils import render_status, format_status_df
+from utils.ui_utils import render_status, format_status_df, inject_custom_css
 from utils.data_manager import JobDataService
 
 
@@ -33,15 +33,11 @@ JOB_DATA_FILE = os.path.join(BASE_DIR, "data", "jobs_agg.json")
 
 st.set_page_config(page_title="Job Hunter", layout="wide")
 
+# Global UI Inject (includes transparent toolbar)
+inject_custom_css()
+
 st.markdown("""
     <style>
-    /* Reduce main container padding */
-    .stMainBlockContainer {
-        padding-top: 0px !important;
-        padding-left: 40px !important;
-        padding-right: 40px !important;
-        padding-bottom: 40px !important;
-    }
     /* Make ONLY the bottom action toolbar sticky, not every container */
     [data-testid="stVerticalBlockBorderWrapper"]:has(button[key="status_selector"]),
     [data-testid="stVerticalBlockBorderWrapper"]:has(button[key="ghost_status"]) {

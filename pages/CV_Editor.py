@@ -15,6 +15,8 @@ import time
 import re
 from datetime import datetime
 
+from utils.ui_utils import inject_custom_css
+
 try:
     from cv_bridge import CVOrchestrator
 except ImportError:
@@ -27,12 +29,15 @@ except ImportError:
 
 st.set_page_config(page_title="CV Editor", layout="wide")
 
+# Global UI Inject (includes transparent toolbar)
+inject_custom_css()
+
 st.markdown("""
     <style>
     .stMainBlockContainer {
-        padding-top: 40px !important;
-        padding-left: 40px !important;
-        padding-right: 40px !important;
+        padding-top: 1rem !important;
+        padding-left: 2rem !important;
+        padding-right: 2rem !important;
         padding-bottom: 0rem !important;
         max-width: 100% !important;
     }

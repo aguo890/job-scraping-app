@@ -169,15 +169,16 @@ class JobProcessor:
             if any(term in title_lower for term in ["software", "engineer", "developer", "data"]):
                 score += 10
 
-            # 2. SOFT FILTERS -> HARD DROP: YOE Limit
-            # Architecture: If min_yoe > limit, discard role (Disqualification)
+            # 2. SOFT FILTERS: YOE Penalty
+            # Architecture: Penalty = (extracted_min - limit) * -10
             # Skips for Applied or "Entry-level" Titles
             bypass_keywords = ['intern', 'new grad', 'entry level', 'university grad', 'junior']
             if not is_applied and not any(kw in title_lower for kw in bypass_keywords):
                 min_yoe = self.extract_min_years_experience(description_text)
                 if min_yoe > max_exp_limit:
-                    logger.info(f"🚫 YOE Drop: Skipping '{job['title']}' ({min_yoe} yrs > {max_exp_limit})")
-                    continue
+                    penalty = (min_yoe - max_exp_limit) * -10
+                    score += penalty
+                    logger.debug(f"YOE Penalty for {job['title']}: {penalty} ({min_yoe} yrs > {max_exp_limit})")
 
             # 3. INTERSECTION MULTIPLIER (The "Holy Grail" Boost)
             tech_hits = 0

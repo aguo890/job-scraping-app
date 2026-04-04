@@ -76,12 +76,14 @@ def test_process_jobs_no_bypass_for_description(processor):
         "company": "TestCorp",
         "location": "Remote",
         "url": "http://test.com",
+        "date_posted": "2024-01-01",
         "description": "Requires 8 years of experience. We also hire interns." 
     }]
     
     processed = processor.process_jobs(jobs)
-    # Should be skipped because it requires 8 years and title is NOT entry-level
-    assert len(processed) == 0
+    # Should be penalized because it requires 8 years and title is NOT entry-level
+    assert len(processed) == 1
+    assert processed[0]['score'] < 0  # Verify soft penalty was applied
 
 def test_process_jobs_disqualification(processor):
     """Test that non-entry roles are disqualified by high YOE."""
@@ -91,8 +93,11 @@ def test_process_jobs_disqualification(processor):
         "company": "TestCorp",
         "location": "Remote",
         "url": "http://test.com",
+        "date_posted": "2024-01-01",
         "description": "Requires 5 years of experience"
     }]
     
     processed = processor.process_jobs(jobs)
-    assert len(processed) == 0
+    # Should be penalized because it requires 5 years and title is NOT entry-level
+    assert len(processed) == 1
+    assert processed[0]['score'] < 0  # Verify soft penalty was applied

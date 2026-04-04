@@ -10,10 +10,14 @@ parent_dir = os.path.dirname(current_dir)
 if parent_dir not in sys.path:
     sys.path.insert(0, parent_dir)
 
+from utils.ui_utils import inject_custom_css
 from config_utils import load_config, load_companies, save_yaml_safely, clean_df_list, FILTERING_PATH, COMPANIES_PATH
 
 # Set page config
 st.set_page_config(page_title="Job Hunter - Configuration", layout="wide")
+
+# Global UI Inject (includes transparent toolbar)
+inject_custom_css()
 
 # Path to AI Config
 AI_CONFIG_PATH = os.path.join(parent_dir, "config", "ai_config.yaml")

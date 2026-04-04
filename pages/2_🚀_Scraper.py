@@ -2,9 +2,13 @@ import streamlit as st
 import time
 from utils.data_manager import JobDataService
 from main import execute_scraping_run
+from utils.ui_utils import inject_custom_css
 
 # Page Config
 st.set_page_config(page_title="Scraper Control", layout="wide")
+
+# Global UI Inject (includes transparent toolbar)
+inject_custom_css()
 
 st.title("🚀 Scraper Operations")
 st.markdown("---")
