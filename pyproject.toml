@@ -6,13 +6,27 @@ build-backend = "setuptools.build_meta"
 name = "job-scraping-app"
 version = "0.1.0"
 description = "Job scraping and analysis dashboard"
+
+# [AI AGENT CONTEXT]: Dependencies are managed via pip-tools. 
+# Do NOT add loose dependencies directly to Dockerfiles. 
+# Add them here and run `pip-compile --generate-hashes pyproject.toml -o requirements.txt`
 dependencies = [
     "requests==2.31.0",
     "PyYAML==6.0.1",
     "streamlit",
     "pandas",
     "pytz",
-    "aiohttp"
+    "aiohttp",
+    "openai",
+    "python-dotenv",
+    "ruamel.yaml",
+    "schedule==1.2.1"
+]
+
+[project.optional-dependencies]
+scraper = [
+    "python-dateutil",
+    "pytest"
 ]
 
 [tool.setuptools.packages.find]
