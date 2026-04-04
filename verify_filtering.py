@@ -5,8 +5,7 @@ import logging
 # Add project root to path
 sys.path.append(os.path.abspath('.'))
 
-from processor.py import JobProcessor # wait, file is processor.py but it might be in root.
-# Looking at list_dir: processor.py is in C:\Users\19803\Projects\job-scraping-app\
+# processor.py is in the current directory, already handled by lines 5-6 and line 38
 
 import re
 from datetime import datetime
@@ -27,12 +26,12 @@ config = {
 
 # Test cases
 test_jobs = [
-    {"id": "1", "title": "SE", "description": "Requires 5+ years of Java", "company": "A", "location": "Remote"},
-    {"id": "2", "title": "Early Career SE", "description": "Requires 1-3 years of experience", "company": "B", "location": "Remote"},
-    {"id": "3", "title": "Frontend", "description": "Experience with HTML5 and CSS3", "company": "C", "location": "Remote"},
-    {"id": "4", "title": "Support", "description": "Must be available 24/7", "company": "D", "location": "Remote"},
-    {"id": "5", "title": "Senior Engineer", "description": "7+ years experience", "company": "E", "location": "Remote"},
-    {"id": "6", "title": "Intern", "description": "New Grad or 0-1 years experience", "company": "F", "location": "Remote"},
+    {"id": "1", "title": "SE", "description": "Requires 5+ years of Java", "company": "A", "location": "Remote", "url": "https://example.com/1"},
+    {"id": "2", "title": "Early Career SE", "description": "Requires 1-3 years of experience", "company": "B", "location": "Remote", "url": "https://example.com/2"},
+    {"id": "3", "title": "Frontend", "description": "Experience with HTML5 and CSS3", "company": "C", "location": "Remote", "url": "https://example.com/3"},
+    {"id": "4", "title": "Support", "description": "Must be available 24/7", "company": "D", "location": "Remote", "url": "https://example.com/4"},
+    {"id": "5", "title": "Senior Engineer", "description": "7+ years experience", "company": "E", "location": "Remote", "url": "https://example.com/5"},
+    {"id": "6", "title": "Intern", "description": "New Grad or 0-1 years experience", "company": "F", "location": "Remote", "url": "https://example.com/6"},
 ]
 
 from processor import JobProcessor

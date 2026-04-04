@@ -1,897 +1,1926 @@
-# Companies configuration for job scraping
-# Format: company_name: {ats_type, board_url/board_token}
-
 companies:
-  # ---------------------------------------------------------
-  # CATEGORY 1: MIDSIZE / HIGH GROWTH (ASHBY)
-  # ---------------------------------------------------------
-  - name: "Notion"
-    ats: "ashby"
-    board_url: "https://jobs.ashbyhq.com/notion"
-    
-  - name: "Figma"
-    ats: "ashby"
-    board_url: "https://jobs.ashbyhq.com/figma"
-    
-  - name: "Reddit"
-    ats: "ashby"
-    board_url: "https://jobs.ashbyhq.com/reddit"
-    
-  - name: "PostHog"
-    ats: "ashby"
-    board_url: "https://jobs.ashbyhq.com/posthog"
-    
-  - name: "OpenAI"
-    ats: "ashby"
-    board_url: "https://jobs.ashbyhq.com/openai"
-    
-  - name: "Anthropic"
-    ats: "ashby"
-    board_url: "https://jobs.ashbyhq.com/anthropic"
-    
-  - name: "Snowflake"
-    ats: "ashby"
-    board_url: "https://jobs.ashbyhq.com/snowflake"
-    
-  - name: "Airwallex"
-    ats: "ashby"
-    board_url: "https://jobs.ashbyhq.com/airwallex"
-    
-  - name: "Quora"
-    ats: "ashby"
-    board_url: "https://jobs.ashbyhq.com/quora"
-    
-  - name: "Deliveroo"
-    ats: "ashby"
-    board_url: "https://jobs.ashbyhq.com/deliveroo"
-    
-  - name: "Linear"
-    ats: "ashby"
-    board_url: "https://jobs.ashbyhq.com/linear"
-
-  - name: "Vanta"
-    ats: "ashby"
-    board_url: "https://jobs.ashbyhq.com/vanta"
-
-  - name: "Deel"
-    ats: "ashby"
-    board_url: "https://jobs.ashbyhq.com/deel"
-
-  - name: "Whatnot"
-    ats: "ashby"
-    board_url: "https://jobs.ashbyhq.com/whatnot"
-
-  - name: "Cursor"
-    ats: "ashby"
-    board_url: "https://api.ashbyhq.com/posting-api/job-board/cursor"
-
-  - name: "Ironclad"
-    ats: "ashby"
-    board_url: "https://api.ashbyhq.com/posting-api/job-board/Ironclad"
-
-  - name: "Zapier"
-    ats: "ashby"
-    board_url: "https://api.ashbyhq.com/posting-api/job-board/zapier"
-
-  - name: "Coder"
-    ats: "ashby"
-    board_url: "https://api.ashbyhq.com/posting-api/job-board/coder"
-
-  - name: "Owner.com"
-    ats: "ashby"
-    board_url: "https://api.ashbyhq.com/posting-api/job-board/owner"
-
-  - name: "PermitFlow"
-    ats: "ashby"
-    board_url: "https://api.ashbyhq.com/posting-api/job-board/permitflow"
-
-  - name: "Thinkific"
-    ats: "ashby"
-    board_url: "https://api.ashbyhq.com/posting-api/job-board/thinkific"
-
-  - name: "Lemonade"
-    ats: "ashby"
-    board_url: "https://api.ashbyhq.com/posting-api/job-board/lemonade"
-
-  - name: "Gorgias"
-    ats: "ashby"
-    board_url: "https://api.ashbyhq.com/posting-api/job-board/gorgias"
-
-  - name: "Harvey"
-    ats: "ashby"
-    board_url: "https://api.ashbyhq.com/posting-api/job-board/harvey"
-
-  - name: "Cointracker"
-    ats: "ashby"
-    board_url: "https://api.ashbyhq.com/posting-api/job-board/cointracker"
-
-  - name: "Rippling"
-    ats: "ashby"
-    board_url: "https://jobs.ashbyhq.com/rippling"
-
-  - name: "Marqeta"
-    ats: "ashby"
-    board_url: "https://api.ashbyhq.com/posting-api/job-board/marqeta"
-
-  - name: "Replit"
-    ats: "ashby"
-    board_url: "https://jobs.ashbyhq.com/replit"
-
-  - name: "Bedrock Robotics"
-    ats: "ashby"
-    board_url: "https://jobs.ashbyhq.com/bedrock-robotics"
-
-  # ---------------------------------------------------------
-  # CATEGORY 2: HIGH GROWTH TECH (GREENHOUSE)
-  # ---------------------------------------------------------
-  - name: "Anduril"
-    ats: "greenhouse"
-    board_token: "andurilindustries"
-
-  - name: "Retool"
-    ats: "ashby"
-    board_url: "https://jobs.ashbyhq.com/retool"
-    
-  - name: "Benchling"
-    ats: "greenhouse"
-    board_token: "benchling"
-    
-  - name: "Hex"
-    ats: "greenhouse"
-    board_token: "hextechnologies"
-    
-  - name: "Verkada"
-    ats: "greenhouse"
-    board_token: "verkada"
-    
-  - name: "Datadog"
-    ats: "greenhouse"
-    board_token: "datadog"
-    
-  - name: "Flexport"
-    ats: "greenhouse"
-    board_token: "flexport"
-    
-  - name: "Harry's"
-    ats: "greenhouse"
-    board_token: "harrys"
-
-  - name: "Databricks"
-    ats: "greenhouse"
-    board_token: "databricks"
-
-  - name: "Runway ML"
-    ats: "greenhouse"
-    board_token: "runwayml"
-
-  - name: "Scale AI"
-    ats: "greenhouse"
-    board_token: "scaleai"
-
-  # ---------------------------------------------------------
-  # CATEGORY 3: FINTECH & PAYMENTS (GREENHOUSE DOMINANT)
-  # ---------------------------------------------------------
-  - name: "Stripe"
-    ats: "greenhouse"
-    board_token: "stripe"
-    
-  - name: "Brex"
-    ats: "greenhouse"
-    board_token: "brex"
-    
-  - name: "Adyen"
-    ats: "greenhouse"
-    board_token: "adyen"
-    
-  - name: "Affirm"
-    ats: "greenhouse"
-    board_token: "affirm"
-    
-  - name: "Plaid"
-    ats: "greenhouse"
-    board_token: "plaid"
-    
-  - name: "Instacart"
-    ats: "greenhouse"
-    board_token: "instacart"
-
-  - name: "Coinbase"
-    ats: "greenhouse"
-    board_token: "coinbase"
-
-  - name: "Ripple"
-    ats: "greenhouse"
-    board_token: "ripple"
-    
-  - name: "Chime"
-    ats: "greenhouse"
-    board_token: "chime"
-
-  - name: "SoFi"
-    ats: "greenhouse"
-    board_token: "sofi"
-
-  - name: "Carta"
-    ats: "greenhouse"
-    board_token: "carta"
-    
-  - name: "Rebellion Defense"
-    ats: "greenhouse"
-    board_token: "rebelliondefense"
-
-  - name: "Shift5"
-    ats: "greenhouse"
-    board_token: "shift5"
-
-  - name: "Vannevar Labs"
-    ats: "greenhouse"
-    board_token: "vannevarlabs"
-
-  - name: "Everlane"
-    ats: "greenhouse"
-    board_token: "everlane"
-
-  - name: "Allbirds"
-    ats: "greenhouse"
-    board_token: "allbirds"
-
-  - name: "Glossier"
-    ats: "greenhouse"
-    board_token: "glossier"
-
-  - name: "Peloton"
-    ats: "greenhouse"
-    board_token: "peloton"
-
-  - name: "Sweetgreen"
-    ats: "greenhouse"
-    board_token: "sweetgreen"
-
-  - name: "Gusto"
-    ats: "greenhouse"
-    board_token: "gusto"
-
-  - name: "HubSpot"
-    ats: "greenhouse"
-    board_token: "hubspot"
-
-  # ---------------------------------------------------------
-  # CATEGORY 4: DEFENSE, ROBOTICS & INFRASTRUCTURE (LEVER/Others)
-  # ---------------------------------------------------------
-  - name: "Shield AI"
-    ats: "lever"
-    board_token: "shieldai"
-    
-  - name: "Saronic"
-    ats: "lever"
-    board_token: "saronic"
-    
-  - name: "Zoox"
-    ats: "lever"
-    board_token: "zoox"
-    
-  - name: "Binance"
-    ats: "lever"
-    board_token: "binance"
-    
-  - name: "Atlassian"
-    ats: "lever"
-    board_token: "atlassian"
-    
-  - name: "DoorDash"
-    ats: "greenhouse"
-    board_token: "doordashusa"
-    
-  - name: "Opendoor"
-    ats: "greenhouse" 
-    board_token: "opendoor"
-
-  - name: "Kraken"
-    ats: "lever"
-    board_token: "kraken"
-
-  # ---------------------------------------------------------
-  # CATEGORY 5: NC / REGIONAL GIANTS
-  # ---------------------------------------------------------
-  - name: "Epic Games"
-    ats: "greenhouse"
-    board_token: "epicgames"
-
-  - name: "Pendo"
-    ats: "greenhouse"
-    board_token: "pendo"
-
-  - name: "LendingTree"
-    ats: "greenhouse"
-    board_token: "lendingtree"
-
-  - name: "nCino"
-    ats: "greenhouse"
-    board_token: "ncino"
-
-  - name: "Bandwidth"
-    ats: "greenhouse"
-    board_token: "bandwidth"
-
-  - name: "AvidXchange"
-    ats: "greenhouse"
-    board_token: "avidxchange"
-
-  - name: "Red Ventures"
-    ats: "greenhouse"
-    board_token: "redventures"
-
-  # ---------------------------------------------------------
-  # CATEGORY 6: NEW DEFENSE & SPACE
-  # ---------------------------------------------------------
-  - name: "Astranis"
-    ats: "greenhouse"
-    board_token: "astranis"
-
-  - name: "Varda Space"
-    ats: "greenhouse"
-    board_token: "vardaspace"
-
-  - name: "Hadrian"
-    ats: "ashby"
-    board_url: "https://jobs.ashbyhq.com/hadrian"
-
-  - name: "Skydio"
-    ats: "greenhouse"
-    board_token: "skydio"
-
-  - name: "Epirus"
-    ats: "greenhouse"
-    board_token: "epirus"
-
-  - name: "Helion Energy"
-    ats: "greenhouse"
-    board_token: "helionenergy"
-
-  - name: "Radiant"
-    ats: "greenhouse"
-    board_token: "radiant"
-
-  - name: "Helsing"
-    ats: "greenhouse"
-    board_token: "helsing"
-
-  # ---------------------------------------------------------
-  # CATEGORY 7: AI / ML FRONTIER (DeepResearch Feb 2026)
-  # ---------------------------------------------------------
-  - name: "xAI"
-    ats: "greenhouse"
-    board_token: "xai"
-
-  - name: "Glean"
-    ats: "greenhouse"
-    board_token: "gleanwork"
-
-  - name: "Descript"
-    ats: "greenhouse"
-    board_token: "descript"
-
-  - name: "Forethought"
-    ats: "greenhouse"
-    board_token: "forethought"
-
-  - name: "LangChain"
-    ats: "ashby"
-    board_url: "https://jobs.ashbyhq.com/langchain"
-
-  - name: "Cohere"
-    ats: "ashby"
-    board_url: "https://jobs.ashbyhq.com/cohere"
-
-  - name: "Nooks"
-    ats: "ashby"
-    board_url: "https://jobs.ashbyhq.com/nooks"
-
-  - name: "SF Tensor"
-    ats: "ashby"
-    board_url: "https://jobs.ashbyhq.com/sf-tensor"
-
-  - name: "UiPath"
-    ats: "ashby"
-    board_url: "https://jobs.ashbyhq.com/uipath"
-
-  # ---------------------------------------------------------
-  # CATEGORY 8: CYBERSECURITY (DeepResearch Feb 2026)
-  # ---------------------------------------------------------
-  - name: "Abnormal Security"
-    ats: "greenhouse"
-    board_token: "abnormalsecurity"
-
-  - name: "Chainguard"
-    ats: "greenhouse"
-    board_token: "chainguard"
-
-  - name: "Cloudflare"
-    ats: "greenhouse"
-    board_token: "cloudflare"
-
-  - name: "Dashlane"
-    ats: "greenhouse"
-    board_token: "dashlane"
-
-  - name: "Safebase"
-    ats: "greenhouse"
-    board_token: "safebase"
-
-  - name: "HackerOne"
-    ats: "ashby"
-    board_url: "https://jobs.ashbyhq.com/hackerone"
-
-  - name: "Chainalysis"
-    ats: "ashby"
-    board_url: "https://jobs.ashbyhq.com/chainalysis"
-
-  - name: "Flock Safety"
-    ats: "ashby"
-    board_url: "https://jobs.ashbyhq.com/Flock%20Safety"
-
-  # ---------------------------------------------------------
-  # CATEGORY 9: DATA INFRASTRUCTURE (DeepResearch Feb 2026)
-  # ---------------------------------------------------------
-  - name: "Checkr"
-    ats: "greenhouse"
-    board_token: "checkr"
-
-  - name: "Fivetran"
-    ats: "greenhouse"
-    board_token: "fivetran"
-
-  - name: "Mode"
-    ats: "greenhouse"
-    board_token: "mode"
-
-  - name: "mParticle"
-    ats: "greenhouse"
-    board_token: "mparticle"
-
-  - name: "Mixpanel"
-    ats: "greenhouse"
-    board_token: "mixpanel"
-
-  - name: "MotherDuck"
-    ats: "ashby"
-    board_url: "https://jobs.ashbyhq.com/MotherDuck"
-
-  - name: "Pinecone"
-    ats: "ashby"
-    board_url: "https://jobs.ashbyhq.com/pinecone"
-
-  - name: "Sentry"
-    ats: "ashby"
-    board_url: "https://jobs.ashbyhq.com/sentry"
-
-  - name: "Rackspace Technology"
-    ats: "lever"
-    board_token: "rackspace"
-
-  - name: "Dun & Bradstreet"
-    ats: "lever"
-    board_token: "dunandbradstreet"
-
-  # ---------------------------------------------------------
-  # CATEGORY 10: DEVELOPER TOOLS (DeepResearch Feb 2026)
-  # ---------------------------------------------------------
-  - name: "Supabase"
-    ats: "greenhouse"
-    board_token: "supabase"
-
-  - name: "Netlify"
-    ats: "greenhouse"
-    board_token: "netlify"
-
-  - name: "Sourcegraph"
-    ats: "greenhouse"
-    board_token: "sourcegraph"
-
-  - name: "Bubble"
-    ats: "greenhouse"
-    board_token: "bubble"
-
-  - name: "Postman"
-    ats: "greenhouse"
-    board_token: "postman"
-
-  - name: "Mapbox"
-    ats: "greenhouse"
-    board_token: "mapbox"
-
-  - name: "PartnerStack"
-    ats: "greenhouse"
-    board_token: "partnerstack"
-
-  - name: "Tray.io"
-    ats: "greenhouse"
-    board_token: "trayio"
-
-  - name: "Ably"
-    ats: "greenhouse"
-    board_token: "ably"
-
-  - name: "Contentful"
-    ats: "greenhouse"
-    board_token: "contentful"
-
-  - name: "Docker"
-    ats: "ashby"
-    board_url: "https://jobs.ashbyhq.com/docker"
-
-  - name: "OutRival"
-    ats: "ashby"
-    board_url: "https://jobs.ashbyhq.com/outrival"
-
-  - name: "Ci&T"
-    ats: "lever"
-    board_token: "cit"
-
-  # ---------------------------------------------------------
-  # CATEGORY 11: FINTECH & PAYMENTS (DeepResearch Feb 2026)
-  # ---------------------------------------------------------
-  - name: "Mercury"
-    ats: "greenhouse"
-    board_token: "mercury"
-
-  - name: "Wise"
-    ats: "greenhouse"
-    board_token: "wise"
-
-  - name: "Ramp"
-    ats: "ashby"
-    board_url: "https://jobs.ashbyhq.com/ramp"
-
-  - name: "Modern Treasury"
-    ats: "ashby"
-    board_url: "https://jobs.ashbyhq.com/modern-treasury"
-
-  - name: "Mollie"
-    ats: "ashby"
-    board_url: "https://jobs.ashbyhq.com/mollie"
-
-  - name: "EvenUp"
-    ats: "ashby"
-    board_url: "https://jobs.ashbyhq.com/evenup"
-
-  - name: "Elliptic"
-    ats: "ashby"
-    board_url: "https://jobs.ashbyhq.com/elliptic"
-
-  - name: "Jerry"
-    ats: "ashby"
-    board_url: "https://jobs.ashbyhq.com/jerry"
-
-  - name: "Mosaic"
-    ats: "ashby"
-    board_url: "https://jobs.ashbyhq.com/mosaic"
-
-  - name: "Paytm"
-    ats: "lever"
-    board_token: "paytm"
-
-  # ---------------------------------------------------------
-  # CATEGORY 12: DEFENSE & SPACE (DeepResearch Feb 2026)
-  # ---------------------------------------------------------
-  - name: "SpaceX"
-    ats: "greenhouse"
-    board_token: "spacex"
-
-  # ---------------------------------------------------------
-  # CATEGORY 13: AI / ML FRONTIER II (DeepResearch Feb 2026)
-  # ---------------------------------------------------------
-  - name: "Character.ai"
-    ats: "ashby"
-    board_url: "https://jobs.ashbyhq.com/character"
-
-  - name: "ElevenLabs"
-    ats: "ashby"
-    board_url: "https://jobs.ashbyhq.com/elevenlabs"
-
-  - name: "Fundamental Research Labs"
-    ats: "ashby"
-    board_url: "https://jobs.ashbyhq.com/fundamentalresearchlabs"
-
-  - name: "Normal Computing"
-    ats: "ashby"
-    board_url: "https://jobs.ashbyhq.com/Normal%20Computing%20AI"
-
-  - name: "Retell AI"
-    ats: "ashby"
-    board_url: "https://jobs.ashbyhq.com/retell-ai"
-
-  - name: "Wordware"
-    ats: "ashby"
-    board_url: "https://jobs.ashbyhq.com/wordware.ai"
-
-  - name: "Writer"
-    ats: "ashby"
-    board_url: "https://jobs.ashbyhq.com/writer"
-
-  - name: "SambaNova Systems"
-    ats: "greenhouse"
-    board_token: "sambanovarecruiting"
-
-  - name: "World Labs"
-    ats: "greenhouse"
-    board_token: "worldlabs"
-
-  - name: "Mistral AI"
-    ats: "lever"
-    board_token: "mistral"
-
-  # ---------------------------------------------------------
-  # CATEGORY 14: CYBERSECURITY II (DeepResearch Feb 2026)
-  # ---------------------------------------------------------
-  - name: "ConductorAI"
-    ats: "ashby"
-    board_url: "https://jobs.ashbyhq.com/conductorai"
-
-  - name: "Seven AI"
-    ats: "ashby"
-    board_url: "https://jobs.ashbyhq.com/sevenai"
-
-  - name: "Endor Labs"
-    ats: "greenhouse"
-    board_token: "endorlabs"
-
-  - name: "Thoropass"
-    ats: "greenhouse"
-    board_token: "thoropass"
-
-  - name: "Torq"
-    ats: "greenhouse"
-    board_token: "torq"
-
-  # ---------------------------------------------------------
-  # CATEGORY 15: DATA INFRASTRUCTURE II (DeepResearch Feb 2026)
-  # ---------------------------------------------------------
-  - name: "Crusoe"
-    ats: "ashby"
-    board_url: "https://jobs.ashbyhq.com/Crusoe"
-
-  - name: "d-Matrix"
-    ats: "ashby"
-    board_url: "https://jobs.ashbyhq.com/d-Matrix"
-
-  - name: "Eventual"
-    ats: "ashby"
-    board_url: "https://jobs.ashbyhq.com/eventualcomputing"
-
-  - name: "Lambda Labs"
-    ats: "ashby"
-    board_url: "https://jobs.ashbyhq.com/lambda"
-
-  - name: "CoreWeave"
-    ats: "greenhouse"
-    board_token: "coreweave"
-
-  - name: "Together AI"
-    ats: "greenhouse"
-    board_token: "togetherai"
-
-  # ---------------------------------------------------------
-  # CATEGORY 16: DEFENSE & SPACE II (DeepResearch Feb 2026)
-  # ---------------------------------------------------------
-  - name: "Arkenstone"
-    ats: "ashby"
-    board_url: "https://jobs.ashbyhq.com/ArkenstoneDefense"
-
-  - name: "Mach Industries"
-    ats: "ashby"
-    board_url: "https://jobs.ashbyhq.com/mach"
-
-  - name: "REGENT"
-    ats: "ashby"
-    board_url: "https://jobs.ashbyhq.com/regent"
-
-  - name: "Valinor"
-    ats: "ashby"
-    board_url: "https://jobs.ashbyhq.com/valinor"
-
-  - name: "Relativity Space"
-    ats: "greenhouse"
-    board_token: "relativity"
-
-  # ---------------------------------------------------------
-  # CATEGORY 17: DEV TOOLS II (DeepResearch Feb 2026)
-  # ---------------------------------------------------------
-  - name: "E2B"
-    ats: "ashby"
-    board_url: "https://jobs.ashbyhq.com/e2b"
-
-  - name: "Stack AI"
-    ats: "ashby"
-    board_url: "https://jobs.ashbyhq.com/stack-ai"
-
-  - name: "vCluster"
-    ats: "ashby"
-    board_url: "https://jobs.ashbyhq.com/vcluster"
-
-  # ---------------------------------------------------------
-  # CATEGORY 18: FINTECH II (DeepResearch Feb 2026)
-  # ---------------------------------------------------------
-  - name: "Saris AI"
-    ats: "ashby"
-    board_url: "https://jobs.ashbyhq.com/saris-ai"
-
-  - name: "SentiLink"
-    ats: "ashby"
-    board_url: "https://jobs.ashbyhq.com/sentilink"
-
-  - name: "Human Interest"
-    ats: "greenhouse"
-    board_token: "humaninterest"
-
-  # ---------------------------------------------------------
-  # CATEGORY 19: ROBOTICS (DeepResearch Feb 2026)
-  # ---------------------------------------------------------
-  - name: "Charge Robotics"
-    ats: "ashby"
-    board_url: "https://jobs.ashbyhq.com/charge-robotics"
-
-  - name: "Orchard Robotics"
-    ats: "ashby"
-    board_url: "https://jobs.ashbyhq.com/orchard"
-
-  - name: "Reflex Robotics"
-    ats: "ashby"
-    board_url: "https://jobs.ashbyhq.com/reflexrobotics"
-
-  - name: "Sunday Robotics"
-    ats: "ashby"
-    board_url: "https://jobs.ashbyhq.com/sunday"
-
-  - name: "Figure AI"
-    ats: "greenhouse"
-    board_token: "figureai"
-
-  # ---------------------------------------------------------
-  # CATEGORY 20: AI & AUTONOMY III (DeepResearch Feb 2026)
-  # ---------------------------------------------------------
-  - name: "Aurora Innovation"
-    ats: "greenhouse"
-    board_token: "aurorainnovation"
-
-  - name: "Durable"
-    ats: "greenhouse"
-    board_token: "durable"
-
-  - name: "Hebbia"
-    ats: "greenhouse"
-    board_token: "hebbia"
-
-  - name: "Prodigal"
-    ats: "greenhouse"
-    board_token: "prodigal"
-
-  - name: "Astera Institute"
-    ats: "ashby"
-    board_url: "https://jobs.ashbyhq.com/astera"
-
-  - name: "Twelve Labs"
-    ats: "ashby"
-    board_url: "https://jobs.ashbyhq.com/twelve-labs"
-
-  - name: "Invisible Technologies"
-    ats: "lever"
-    board_token: "invisible"
-
-  # ---------------------------------------------------------
-  # CATEGORY 21: CYBERSECURITY III (DeepResearch Feb 2026)
-  # ---------------------------------------------------------
-  - name: "Axonius"
-    ats: "greenhouse"
-    board_token: "axonius"
-
-  - name: "CertiK"
-    ats: "lever"
-    board_token: "certik"
-
-  - name: "Spruce Systems"
-    ats: "lever"
-    board_token: "sprucesystems"
-
-  # ---------------------------------------------------------
-  # CATEGORY 22: DATA INFRASTRUCTURE III (DeepResearch Feb 2026)
-  # ---------------------------------------------------------
-  - name: "Neo4j"
-    ats: "greenhouse"
-    board_token: "neo4j"
-
-  - name: "Pure Storage"
-    ats: "greenhouse"
-    board_token: "purestorage"
-
-  - name: "Sigma Computing"
-    ats: "greenhouse"
-    board_token: "sigmacomputing"
-
-  - name: "Zettabyte"
-    ats: "ashby"
-    board_url: "https://jobs.ashbyhq.com/zettabyte-space"
-
-  # ---------------------------------------------------------
-  # CATEGORY 23: DEFENSE & SPACE III (DeepResearch Feb 2026)
-  # ---------------------------------------------------------
-  - name: "Cape"
-    ats: "ashby"
-    board_url: "https://jobs.ashbyhq.com/Cape"
-
-  - name: "Gallatin"
-    ats: "ashby"
-    board_url: "https://jobs.ashbyhq.com/gallatin"
-
-  # ---------------------------------------------------------
-  # CATEGORY 24: DEV TOOLS & SAAS III (DeepResearch Feb 2026)
-  # ---------------------------------------------------------
-  - name: "Front"
-    ats: "ashby"
-    board_url: "https://jobs.ashbyhq.com/frontcareers"
-
-  - name: "Mural"
-    ats: "ashby"
-    board_url: "https://jobs.ashbyhq.com/mural"
-
-  - name: "The Browser Company"
-    ats: "ashby"
-    board_url: "https://jobs.ashbyhq.com/the%20browser%20company"
-
-  - name: "Miter"
-    ats: "ashby"
-    board_url: "https://jobs.ashbyhq.com/miter"
-
-  - name: "Weave"
-    ats: "ashby"
-    board_url: "https://jobs.ashbyhq.com/weave"
-
-  - name: "Aircall"
-    ats: "lever"
-    board_token: "aircall"
-
-  - name: "Mattermost"
-    ats: "lever"
-    board_token: "mattermost"
-
-  # ---------------------------------------------------------
-  # CATEGORY 25: FINTECH & WEB3 III (DeepResearch Feb 2026)
-  # ---------------------------------------------------------
-  - name: "Daylight"
-    ats: "greenhouse"
-    board_token: "daylight"
-
-  - name: "Credit Karma"
-    ats: "greenhouse"
-    board_token: "creditkarma"
-
-  - name: "Magic.dev"
-    ats: "greenhouse"
-    board_token: "magic"
-
-  - name: "Zora"
-    ats: "greenhouse"
-    board_token: "zora"
-
-  - name: "Cardless"
-    ats: "ashby"
-    board_url: "https://jobs.ashbyhq.com/cardless"
-
-  - name: "Middesk"
-    ats: "ashby"
-    board_url: "https://jobs.ashbyhq.com/middesk"
-
-  - name: "Flybits"
-    ats: "lever"
-    board_token: "flybits"
-
-  # ---------------------------------------------------------
-  # CATEGORY 26: HARDWARE & ROBOTICS II (DeepResearch Feb 2026)
-  # ---------------------------------------------------------
-  - name: "Scout Motors"
-    ats: "greenhouse"
-    board_token: "scoutmotors"
-
-  - name: "Formlabs"
-    ats: "lever"
-    board_token: "formlabs"
+- name: Notion
+  ats: ashby
+  board_url: https://jobs.ashbyhq.com/notion
+  board_token: notion
+  job_board_url: https://jobs.ashbyhq.com/notion
+  careers_page: https://www.notion.so/careers
+  enrichment:
+    status: verified
+    source: manual
+    last_verified: 2026-04-04
+- name: Figma
+  ats: ashby
+  board_url: https://jobs.ashbyhq.com/figma
+  board_token: figma
+  job_board_url: https://jobs.ashbyhq.com/figma
+  careers_page: https://www.figma.com/careers
+  enrichment:
+    status: verified
+    source: manual
+    last_verified: 2026-04-04
+- name: Reddit
+  ats: ashby
+  board_url: https://jobs.ashbyhq.com/reddit
+  board_token: reddit
+  job_board_url: https://jobs.ashbyhq.com/reddit
+  careers_page: https://www.redditinc.com/careers
+  enrichment:
+    status: verified
+    source: manual
+    last_verified: 2026-04-04
+- name: PostHog
+  ats: ashby
+  board_url: https://jobs.ashbyhq.com/posthog
+  board_token: posthog
+  job_board_url: https://jobs.ashbyhq.com/posthog
+  careers_page: https://posthog.com/careers
+  enrichment:
+    status: verified
+    source: manual
+    last_verified: 2026-04-04
+- name: OpenAI
+  ats: ashby
+  board_url: https://jobs.ashbyhq.com/openai
+  board_token: openai
+  job_board_url: https://jobs.ashbyhq.com/openai
+  careers_page: https://openai.com/careers
+  enrichment:
+    status: verified
+    source: manual
+    last_verified: 2026-04-04
+- name: Anthropic
+  ats: ashby
+  board_url: https://jobs.ashbyhq.com/anthropic
+  board_token: anthropic
+  job_board_url: https://jobs.ashbyhq.com/anthropic
+  careers_page: https://www.anthropic.com/careers
+  enrichment:
+    status: verified
+    source: manual
+    last_verified: 2026-04-04
+- name: Snowflake
+  ats: ashby
+  board_url: https://jobs.ashbyhq.com/snowflake
+  board_token: snowflake
+  job_board_url: https://jobs.ashbyhq.com/snowflake
+  careers_page: https://careers.snowflake.com
+  enrichment:
+    status: verified
+    source: manual
+    last_verified: 2026-04-04
+- name: Airwallex
+  ats: ashby
+  board_url: https://jobs.ashbyhq.com/airwallex
+  board_token: airwallex
+  job_board_url: https://jobs.ashbyhq.com/airwallex
+  careers_page: https://careers.airwallex.com
+  enrichment:
+    status: verified
+    source: manual
+    last_verified: 2026-04-04
+- name: Quora
+  ats: ashby
+  board_url: https://jobs.ashbyhq.com/quora
+  board_token: quora
+  job_board_url: https://jobs.ashbyhq.com/quora
+  careers_page: https://careers.quora.com
+  enrichment:
+    status: verified
+    source: manual
+    last_verified: 2026-04-04
+- name: Deliveroo
+  ats: ashby
+  board_url: https://jobs.ashbyhq.com/deliveroo
+  board_token: deliveroo
+  job_board_url: https://jobs.ashbyhq.com/deliveroo
+  careers_page: https://careers.deliveroo.co.uk
+  enrichment:
+    status: verified
+    source: manual
+    last_verified: 2026-04-04
+- name: Linear
+  ats: ashby
+  board_url: https://jobs.ashbyhq.com/linear
+  board_token: linear
+  job_board_url: https://jobs.ashbyhq.com/linear
+  careers_page: https://linear.app/careers
+  enrichment:
+    status: verified
+    source: automated_search
+    last_verified: 2026-04-04
+- name: Vanta
+  ats: ashby
+  board_url: https://jobs.ashbyhq.com/vanta
+  board_token: vanta
+  job_board_url: https://jobs.ashbyhq.com/vanta
+  careers_page: https://www.vanta.com/careers
+  enrichment:
+    status: verified
+    source: automated_search
+    last_verified: 2026-04-04
+- name: Deel
+  ats: ashby
+  board_url: https://jobs.ashbyhq.com/deel
+  board_token: deel
+  job_board_url: https://jobs.ashbyhq.com/deel
+  careers_page: https://www.deel.com/careers
+  enrichment:
+    status: verified
+    source: automated_search
+    last_verified: 2026-04-04
+- name: Whatnot
+  ats: ashby
+  board_url: https://jobs.ashbyhq.com/whatnot
+  board_token: whatnot
+  job_board_url: https://jobs.ashbyhq.com/whatnot
+  careers_page: https://www.whatnot.com/careers
+  enrichment:
+    status: verified
+    source: automated_search
+    last_verified: 2026-04-04
+- name: Cursor
+  ats: ashby
+  board_url: https://api.ashbyhq.com/posting-api/job-board/cursor
+  board_token: cursor
+  job_board_url: https://jobs.ashbyhq.com/cursor
+  careers_page: https://cursor.com/careers
+  enrichment:
+    status: verified
+    source: automated_search
+    last_verified: 2026-04-04
+- name: Ironclad
+  ats: ashby
+  board_url: https://api.ashbyhq.com/posting-api/job-board/Ironclad
+  board_token: Ironclad
+  job_board_url: https://jobs.ashbyhq.com/Ironclad
+  careers_page: https://ironcladapp.com/careers
+  enrichment:
+    status: verified
+    source: automated_search
+    last_verified: 2026-04-04
+- name: Zapier
+  ats: ashby
+  board_url: https://api.ashbyhq.com/posting-api/job-board/zapier
+  board_token: zapier
+  job_board_url: https://jobs.ashbyhq.com/zapier
+  careers_page: https://zapier.com/jobs
+  enrichment:
+    status: verified
+    source: automated_search
+    last_verified: 2026-04-04
+- name: Coder
+  ats: ashby
+  board_url: https://api.ashbyhq.com/posting-api/job-board/coder
+  board_token: coder
+  job_board_url: https://jobs.ashbyhq.com/coder
+  careers_page: https://coder.com/careers
+  enrichment:
+    status: verified
+    source: automated_search
+    last_verified: 2026-04-04
+- name: Owner.com
+  ats: ashby
+  board_url: https://api.ashbyhq.com/posting-api/job-board/owner
+  board_token: owner
+  job_board_url: https://jobs.ashbyhq.com/owner
+  careers_page: https://www.owner.com/careers
+  enrichment:
+    status: verified
+    source: automated_search
+    last_verified: 2026-04-04
+- name: PermitFlow
+  ats: ashby
+  board_url: https://api.ashbyhq.com/posting-api/job-board/permitflow
+  board_token: permitflow
+  job_board_url: https://jobs.ashbyhq.com/permitflow
+  careers_page: https://www.permitflow.com/careers
+  enrichment:
+    status: verified
+    source: automated_search
+    last_verified: 2026-04-04
+- name: Thinkific
+  ats: ashby
+  board_url: https://api.ashbyhq.com/posting-api/job-board/thinkific
+  board_token: thinkific
+  job_board_url: https://jobs.ashbyhq.com/thinkific
+  careers_page: https://www.thinkific.com/careers
+  enrichment:
+    status: verified
+    source: automated_search
+    last_verified: 2026-04-04
+- name: Lemonade
+  ats: ashby
+  board_url: https://api.ashbyhq.com/posting-api/job-board/lemonade
+  board_token: lemonade
+  job_board_url: https://jobs.ashbyhq.com/lemonade
+  careers_page: https://www.lemonade.com/careers
+  enrichment:
+    status: verified
+    source: automated_search
+    last_verified: 2026-04-04
+- name: Gorgias
+  ats: ashby
+  board_url: https://api.ashbyhq.com/posting-api/job-board/gorgias
+  board_token: gorgias
+  job_board_url: https://jobs.ashbyhq.com/gorgias
+  careers_page: https://www.gorgias.com/careers
+  enrichment:
+    status: verified
+    source: automated_search
+    last_verified: 2026-04-04
+- name: Harvey
+  ats: ashby
+  board_url: https://api.ashbyhq.com/posting-api/job-board/harvey
+  board_token: harvey
+  job_board_url: https://jobs.ashbyhq.com/harvey
+  careers_page: https://harvey.ai/careers
+  enrichment:
+    status: verified
+    source: automated_search
+    last_verified: 2026-04-04
+- name: Cointracker
+  ats: ashby
+  board_url: https://api.ashbyhq.com/posting-api/job-board/cointracker
+  board_token: cointracker
+  job_board_url: https://jobs.ashbyhq.com/cointracker
+  careers_page: https://www.cointracker.io/careers
+  enrichment:
+    status: verified
+    source: automated_search
+    last_verified: 2026-04-04
+- name: Rippling
+  ats: ashby
+  board_url: https://jobs.ashbyhq.com/rippling
+  board_token: rippling
+  job_board_url: https://jobs.ashbyhq.com/rippling
+  careers_page: https://www.rippling.com/careers
+  enrichment:
+    status: verified
+    source: automated_search
+    last_verified: 2026-04-04
+- name: Marqeta
+  ats: ashby
+  board_url: https://api.ashbyhq.com/posting-api/job-board/marqeta
+  board_token: marqeta
+  job_board_url: https://jobs.ashbyhq.com/marqeta
+  careers_page: https://www.marqeta.com/careers
+  enrichment:
+    status: verified
+    source: automated_search
+    last_verified: 2026-04-04
+- name: Replit
+  ats: ashby
+  board_url: https://jobs.ashbyhq.com/replit
+  board_token: replit
+  job_board_url: https://jobs.ashbyhq.com/replit
+  careers_page: https://replit.com/site/careers
+  enrichment:
+    status: verified
+    source: automated_search
+    last_verified: 2026-04-04
+- name: Bedrock Robotics
+  ats: ashby
+  board_url: https://jobs.ashbyhq.com/bedrock-robotics
+  board_token: bedrock-robotics
+  job_board_url: https://jobs.ashbyhq.com/bedrock-robotics
+  careers_page: https://www.bedrockrobotics.com/careers
+  enrichment:
+    status: verified
+    source: automated_search
+    last_verified: 2026-04-04
+- name: Anduril
+  ats: greenhouse
+  board_token: andurilindustries
+  job_board_url: https://boards.greenhouse.io/andurilindustries
+  careers_page: https://www.anduril.com/careers
+  enrichment:
+    status: verified
+    source: automated_search
+    last_verified: 2026-04-04
+- name: Retool
+  ats: ashby
+  board_url: https://jobs.ashbyhq.com/retool
+  board_token: retool
+  job_board_url: https://jobs.ashbyhq.com/retool
+  careers_page: https://retool.com/careers
+  enrichment:
+    status: verified
+    source: automated_search
+    last_verified: 2026-04-04
+- name: Benchling
+  ats: greenhouse
+  board_token: benchling
+  job_board_url: https://boards.greenhouse.io/benchling
+  careers_page: https://www.benchling.com/careers
+  enrichment:
+    status: verified
+    source: automated_search
+    last_verified: 2026-04-04
+- name: Hex
+  ats: greenhouse
+  board_token: hextechnologies
+  job_board_url: https://boards.greenhouse.io/hextechnologies
+  careers_page: https://hex.tech/careers
+  enrichment:
+    status: verified
+    source: automated_search
+    last_verified: 2026-04-04
+- name: Verkada
+  ats: greenhouse
+  board_token: verkada
+  job_board_url: https://boards.greenhouse.io/verkada
+  careers_page: https://www.verkada.com/careers
+  enrichment:
+    status: verified
+    source: automated_search
+    last_verified: 2026-04-04
+- name: Datadog
+  ats: greenhouse
+  board_token: datadog
+  job_board_url: https://boards.greenhouse.io/datadog
+  careers_page: https://www.datadoghq.com/careers
+  enrichment:
+    status: verified
+    source: automated_search
+    last_verified: 2026-04-04
+- name: Flexport
+  ats: greenhouse
+  board_token: flexport
+  job_board_url: https://boards.greenhouse.io/flexport
+  careers_page: https://www.flexport.com/careers
+  enrichment:
+    status: verified
+    source: automated_search
+    last_verified: 2026-04-04
+- name: Harry's
+  ats: greenhouse
+  board_token: harrys
+  job_board_url: https://boards.greenhouse.io/harrys
+  careers_page: https://www.harrys.com/en/us/careers
+  enrichment:
+    status: verified
+    source: automated_search
+    last_verified: 2026-04-04
+- name: Databricks
+  ats: greenhouse
+  board_token: databricks
+  job_board_url: https://boards.greenhouse.io/databricks
+  careers_page: https://www.databricks.com/company/careers
+  enrichment:
+    status: verified
+    source: automated_search
+    last_verified: 2026-04-04
+- name: Runway ML
+  ats: greenhouse
+  board_token: runwayml
+  job_board_url: https://boards.greenhouse.io/runwayml
+  careers_page: https://runwayml.com/careers
+  enrichment:
+    status: verified
+    source: automated_search
+    last_verified: 2026-04-04
+- name: Scale AI
+  ats: greenhouse
+  board_token: scaleai
+  job_board_url: https://boards.greenhouse.io/scaleai
+  careers_page: https://scale.com/careers
+  enrichment:
+    status: verified
+    source: automated_search
+    last_verified: 2026-04-04
+- name: Stripe
+  ats: greenhouse
+  board_token: stripe
+  job_board_url: https://boards.greenhouse.io/stripe
+  careers_page: https://stripe.com/jobs
+  enrichment:
+    status: verified
+    source: automated_search
+    last_verified: 2026-04-04
+- name: Brex
+  ats: greenhouse
+  board_token: brex
+  job_board_url: https://boards.greenhouse.io/brex
+  enrichment:
+    status: verified
+    source: automated_search
+    last_verified: '2026-04-04'
+  careers_page: https://www.brex.com/careers
+- name: Adyen
+  ats: greenhouse
+  board_token: adyen
+  job_board_url: https://boards.greenhouse.io/adyen
+  enrichment:
+    status: verified
+    source: automated_search
+    last_verified: '2026-04-04'
+  careers_page: https://www.adyen.com/careers
+- name: Affirm
+  ats: greenhouse
+  board_token: affirm
+  job_board_url: https://boards.greenhouse.io/affirm
+  enrichment:
+    status: verified
+    source: automated_search
+    last_verified: '2026-04-04'
+  careers_page: https://www.affirm.com/careers
+- name: Plaid
+  ats: greenhouse
+  board_token: plaid
+  job_board_url: https://boards.greenhouse.io/plaid
+  enrichment:
+    status: verified
+    source: automated_search
+    last_verified: '2026-04-04'
+  careers_page: https://plaid.com/careers
+- name: Instacart
+  ats: greenhouse
+  board_token: instacart
+  job_board_url: https://boards.greenhouse.io/instacart
+  enrichment:
+    status: verified
+    source: automated_search
+    last_verified: '2026-04-04'
+  careers_page: https://instacart.careers/
+- name: Coinbase
+  ats: greenhouse
+  board_token: coinbase
+  job_board_url: https://boards.greenhouse.io/coinbase
+  enrichment:
+    status: verified
+    source: automated_search
+    last_verified: '2026-04-04'
+  careers_page: https://www.coinbase.com/careers
+- name: Ripple
+  ats: greenhouse
+  board_token: ripple
+  job_board_url: https://boards.greenhouse.io/ripple
+  enrichment:
+    status: verified
+    source: automated_search
+    last_verified: '2026-04-04'
+  careers_page: https://ripple.com/careers
+- name: Chime
+  ats: greenhouse
+  board_token: chime
+  job_board_url: https://boards.greenhouse.io/chime
+  enrichment:
+    status: verified
+    source: automated_search
+    last_verified: '2026-04-04'
+  careers_page: https://www.chime.com/careers
+- name: SoFi
+  ats: greenhouse
+  board_token: sofi
+  job_board_url: https://boards.greenhouse.io/sofi
+  enrichment:
+    status: verified
+    source: automated_search
+    last_verified: '2026-04-04'
+  careers_page: https://www.sofi.com/careers
+- name: Carta
+  ats: greenhouse
+  board_token: carta
+  job_board_url: https://boards.greenhouse.io/carta
+  enrichment:
+    status: verified
+    source: automated_search
+    last_verified: '2026-04-04'
+  careers_page: https://carta.com/careers
+- name: Rebellion Defense
+  ats: greenhouse
+  board_token: rebelliondefense
+  job_board_url: https://boards.greenhouse.io/rebelliondefense
+  enrichment:
+    status: verified
+    source: automated_search
+    last_verified: '2026-04-04'
+  careers_page: https://rebelliondefense.com
+- name: Shift5
+  ats: greenhouse
+  board_token: shift5
+  job_board_url: https://boards.greenhouse.io/shift5
+  enrichment:
+    status: verified
+    source: automated_search
+    last_verified: '2026-04-04'
+  careers_page: https://shift5.io/careers
+- name: Vannevar Labs
+  ats: greenhouse
+  board_token: vannevarlabs
+  job_board_url: https://boards.greenhouse.io/vannevarlabs
+  enrichment:
+    status: verified
+    source: automated_search
+    last_verified: '2026-04-04'
+  careers_page: https://vannevarlabs.com/careers
+- name: Everlane
+  ats: greenhouse
+  board_token: everlane
+  job_board_url: https://boards.greenhouse.io/everlane
+  enrichment:
+    status: verified
+    source: automated_search
+    last_verified: '2026-04-04'
+  careers_page: https://everlane.com/careers
+- name: Allbirds
+  ats: greenhouse
+  board_token: allbirds
+  job_board_url: https://boards.greenhouse.io/allbirds
+  enrichment:
+    status: verified
+    source: automated_search
+    last_verified: '2026-04-04'
+  careers_page: https://www.allbirds.com/pages/careers
+- name: Glossier
+  ats: greenhouse
+  board_token: glossier
+  job_board_url: https://boards.greenhouse.io/glossier
+  enrichment:
+    status: verified
+    source: automated_search
+    last_verified: '2026-04-04'
+  careers_page: https://www.glossier.com/pages/careers
+- name: Peloton
+  ats: greenhouse
+  board_token: peloton
+  job_board_url: https://boards.greenhouse.io/peloton
+  enrichment:
+    status: verified
+    source: automated_search
+    last_verified: '2026-04-04'
+  careers_page: https://www.onepeloton.com/careers
+- name: Sweetgreen
+  ats: greenhouse
+  board_token: sweetgreen
+  job_board_url: https://boards.greenhouse.io/sweetgreen
+  enrichment:
+    status: verified
+    source: automated_search
+    last_verified: '2026-04-04'
+  careers_page: https://sweetgreen.com/careers
+- name: Gusto
+  ats: greenhouse
+  board_token: gusto
+  job_board_url: https://boards.greenhouse.io/gusto
+  enrichment:
+    status: verified
+    source: automated_search
+    last_verified: '2026-04-04'
+  careers_page: https://gusto.com/about/careers
+- name: HubSpot
+  ats: greenhouse
+  board_token: hubspot
+  job_board_url: https://boards.greenhouse.io/hubspot
+  enrichment:
+    status: verified
+    source: automated_search
+    last_verified: '2026-04-04'
+  careers_page: https://www.hubspot.com/careers
+- name: Shield AI
+  ats: lever
+  board_token: shieldai
+  job_board_url: https://jobs.lever.co/shieldai
+  enrichment:
+    status: verified
+    source: automated_search
+    last_verified: '2026-04-04'
+  careers_page: https://www.shield.ai/careers
+- name: Saronic
+  ats: lever
+  board_token: saronic
+  job_board_url: https://jobs.lever.co/saronic
+  enrichment:
+    status: verified
+    source: automated_search
+    last_verified: '2026-04-04'
+  careers_page: https://www.saronic.com/careers
+- name: Zoox
+  ats: lever
+  board_token: zoox
+  job_board_url: https://jobs.lever.co/zoox
+  enrichment:
+    status: verified
+    source: automated_search
+    last_verified: '2026-04-04'
+  careers_page: https://zoox.com/careers
+- name: Binance
+  ats: lever
+  board_token: binance
+  job_board_url: https://jobs.lever.co/binance
+  enrichment:
+    status: verified
+    source: automated_search
+    last_verified: '2026-04-04'
+  careers_page: https://www.binance.com/en/careers
+- name: Atlassian
+  ats: lever
+  board_token: atlassian
+  job_board_url: https://jobs.lever.co/atlassian
+  enrichment:
+    status: verified
+    source: automated_search
+    last_verified: '2026-04-04'
+  careers_page: https://www.atlassian.com/company/careers
+- name: DoorDash
+  ats: greenhouse
+  board_token: doordashusa
+  job_board_url: https://boards.greenhouse.io/doordashusa
+  enrichment:
+    status: verified
+    source: automated_search
+    last_verified: '2026-04-04'
+  careers_page: https://careers.doordash.com/
+- name: Opendoor
+  ats: greenhouse
+  board_token: opendoor
+  job_board_url: https://boards.greenhouse.io/opendoor
+  enrichment:
+    status: verified
+    source: automated_search
+    last_verified: '2026-04-04'
+  careers_page: https://www.opendoor.com/w/jobs
+- name: Kraken
+  ats: lever
+  board_token: kraken
+  job_board_url: https://jobs.lever.co/kraken
+  enrichment:
+    status: verified
+    source: automated_search
+    last_verified: '2026-04-04'
+  careers_page: https://www.kraken.com/careers
+- name: Epic Games
+  ats: greenhouse
+  board_token: epicgames
+  job_board_url: https://boards.greenhouse.io/epicgames
+  enrichment:
+    status: verified
+    source: automated_search
+    last_verified: '2026-04-04'
+  careers_page: https://epicgames.com/en-US/careers
+- name: Pendo
+  ats: greenhouse
+  board_token: pendo
+  job_board_url: https://boards.greenhouse.io/pendo
+  enrichment:
+    status: verified
+    source: automated_search
+    last_verified: '2026-04-04'
+  careers_page: https://www.pendo.io/careers
+- name: LendingTree
+  ats: greenhouse
+  board_token: lendingtree
+  job_board_url: https://boards.greenhouse.io/lendingtree
+  enrichment:
+    status: verified
+    source: automated_search
+    last_verified: '2026-04-04'
+  careers_page: https://www.lendingtree.com/careers/
+- name: nCino
+  ats: greenhouse
+  board_token: ncino
+  job_board_url: https://boards.greenhouse.io/ncino
+  enrichment:
+    status: verified
+    source: automated_search
+    last_verified: '2026-04-04'
+  careers_page: https://www.ncino.com/careers/
+- name: Bandwidth
+  ats: greenhouse
+  board_token: bandwidth
+  job_board_url: https://boards.greenhouse.io/bandwidth
+  enrichment:
+    status: verified
+    source: automated_search
+    last_verified: '2026-04-04'
+  careers_page: https://www.bandwidth.com/careers/
+- name: AvidXchange
+  ats: greenhouse
+  board_token: avidxchange
+  job_board_url: https://boards.greenhouse.io/avidxchange
+  enrichment:
+    status: verified
+    source: automated_search
+    last_verified: '2026-04-04'
+  careers_page: https://www.avidxchange.com/careers/
+- name: Red Ventures
+  ats: greenhouse
+  board_token: redventures
+  job_board_url: https://boards.greenhouse.io/redventures
+  enrichment:
+    status: verified
+    source: automated_search
+    last_verified: '2026-04-04'
+  careers_page: https://www.redventures.com/careers/
+- name: Astranis
+  ats: greenhouse
+  board_token: astranis
+  job_board_url: https://boards.greenhouse.io/astranis
+  enrichment:
+    status: verified
+    source: automated_search
+    last_verified: '2026-04-04'
+  careers_page: https://www.astranis.com/careers/
+- name: Varda Space
+  ats: greenhouse
+  board_token: vardaspace
+  job_board_url: https://boards.greenhouse.io/vardaspace
+  enrichment:
+    status: verified
+    source: automated_search
+    last_verified: '2026-04-04'
+  careers_page: https://varda.com/careers
+- name: Hadrian
+  ats: ashby
+  board_url: https://jobs.ashbyhq.com/hadrian
+  board_token: hadrian
+  job_board_url: https://jobs.ashbyhq.com/hadrian
+  careers_page: https://hadrian.co/careers
+  enrichment:
+    status: verified
+    source: automated_search
+    last_verified: '2026-04-04'
+- name: Skydio
+  ats: greenhouse
+  board_token: skydio
+  job_board_url: https://boards.greenhouse.io/skydio
+  enrichment:
+    status: verified
+    source: automated_search
+    last_verified: '2026-04-04'
+  careers_page: https://www.skydio.com/careers/
+- name: Epirus
+  ats: greenhouse
+  board_token: epirus
+  job_board_url: https://boards.greenhouse.io/epirus
+  enrichment:
+    status: verified
+    source: automated_search
+    last_verified: '2026-04-04'
+  careers_page: https://www.epirusinc.com/careers/
+- name: Helion Energy
+  ats: greenhouse
+  board_token: helionenergy
+  job_board_url: https://boards.greenhouse.io/helionenergy
+  enrichment:
+    status: verified
+    source: automated_search
+    last_verified: '2026-04-04'
+  careers_page: https://helionenergy.com/careers/
+- name: Radiant
+  ats: greenhouse
+  board_token: radiant
+  job_board_url: https://boards.greenhouse.io/radiant
+  enrichment:
+    status: verified
+    source: automated_search
+    last_verified: '2026-04-04'
+  careers_page: https://www.radiant.industries
+- name: Helsing
+  ats: greenhouse
+  board_token: helsing
+  job_board_url: https://boards.greenhouse.io/helsing
+  enrichment:
+    status: verified
+    source: automated_search
+    last_verified: '2026-04-04'
+  careers_page: https://helsing.ai/careers
+- name: xAI
+  ats: greenhouse
+  board_token: xai
+  job_board_url: https://boards.greenhouse.io/xai
+  enrichment:
+    status: verified
+    source: automated_search
+    last_verified: '2026-04-04'
+  careers_page: https://x.ai/careers
+- name: Glean
+  ats: greenhouse
+  board_token: gleanwork
+  job_board_url: https://boards.greenhouse.io/gleanwork
+  enrichment:
+    status: verified
+    source: automated_search
+    last_verified: '2026-04-04'
+  careers_page: https://glean.com/careers
+- name: Descript
+  ats: greenhouse
+  board_token: descript
+  job_board_url: https://boards.greenhouse.io/descript
+  enrichment:
+    status: verified
+    source: automated_search
+    last_verified: '2026-04-04'
+  careers_page: https://www.descript.com/careers
+- name: Forethought
+  ats: greenhouse
+  board_token: forethought
+  job_board_url: https://boards.greenhouse.io/forethought
+  enrichment:
+    status: verified
+    source: automated_search
+    last_verified: '2026-04-04'
+  careers_page: https://forethought.ai/careers/
+- name: LangChain
+  ats: ashby
+  board_url: https://jobs.ashbyhq.com/langchain
+  board_token: langchain
+  job_board_url: https://jobs.ashbyhq.com/langchain
+  careers_page: https://langchain.com/careers
+  enrichment:
+    status: verified
+    source: automated_search
+    last_verified: '2026-04-04'
+- name: Cohere
+  ats: ashby
+  board_url: https://jobs.ashbyhq.com/cohere
+  board_token: cohere
+  job_board_url: https://jobs.ashbyhq.com/cohere
+  careers_page: https://cohere.com/careers
+  enrichment:
+    status: verified
+    source: automated_search
+    last_verified: '2026-04-04'
+- name: Nooks
+  ats: ashby
+  board_url: https://jobs.ashbyhq.com/nooks
+  board_token: nooks
+  job_board_url: https://jobs.ashbyhq.com/nooks
+  careers_page: https://nooks.works/careers
+  enrichment:
+    status: verified
+    source: automated_search
+    last_verified: '2026-04-04'
+- name: SF Tensor
+  ats: ashby
+  board_url: https://jobs.ashbyhq.com/sf-tensor
+  board_token: sf-tensor
+  job_board_url: https://jobs.ashbyhq.com/sf-tensor
+  careers_page: https://sf-tensor.com/
+  enrichment:
+    status: verified
+    source: automated_search
+    last_verified: '2026-04-04'
+- name: UiPath
+  ats: ashby
+  board_url: https://jobs.ashbyhq.com/uipath
+  board_token: uipath
+  job_board_url: https://jobs.ashbyhq.com/uipath
+  careers_page: https://www.uipath.com/company/careers
+  enrichment:
+    status: verified
+    source: automated_search
+    last_verified: '2026-04-04'
+- name: Abnormal Security
+  ats: greenhouse
+  board_token: abnormalsecurity
+  job_board_url: https://boards.greenhouse.io/abnormalsecurity
+  enrichment:
+    status: verified
+    source: automated_search
+    last_verified: '2026-04-04'
+  careers_page: https://careers.abnormal.ai/
+- name: Chainguard
+  ats: greenhouse
+  board_token: chainguard
+  job_board_url: https://boards.greenhouse.io/chainguard
+  enrichment:
+    status: verified
+    source: automated_search
+    last_verified: '2026-04-04'
+  careers_page: https://www.chainguard.dev/careers
+- name: Cloudflare
+  ats: greenhouse
+  board_token: cloudflare
+  job_board_url: https://boards.greenhouse.io/cloudflare
+  enrichment:
+    status: verified
+    source: automated_search
+    last_verified: '2026-04-04'
+  careers_page: https://www.cloudflare.com/careers/
+- name: Dashlane
+  ats: greenhouse
+  board_token: dashlane
+  job_board_url: https://boards.greenhouse.io/dashlane
+  enrichment:
+    status: verified
+    source: automated_search
+    last_verified: '2026-04-04'
+  careers_page: https://www.dashlane.com/careers
+- name: Safebase
+  ats: greenhouse
+  board_token: safebase
+  job_board_url: https://boards.greenhouse.io/safebase
+  enrichment:
+    status: verified
+    source: automated_search
+    last_verified: '2026-04-04'
+  careers_page: https://www.safebase.com/careers
+- name: HackerOne
+  ats: ashby
+  board_url: https://jobs.ashbyhq.com/hackerone
+  board_token: hackerone
+  job_board_url: https://jobs.ashbyhq.com/hackerone
+  careers_page: https://www.hackerone.com/careers
+  enrichment:
+    status: verified
+    source: automated_search
+    last_verified: '2026-04-04'
+- name: Chainalysis
+  ats: ashby
+  board_url: https://jobs.ashbyhq.com/chainalysis
+  board_token: chainalysis
+  job_board_url: https://jobs.ashbyhq.com/chainalysis
+  careers_page: https://www.chainalysis.com/careers
+  enrichment:
+    status: verified
+    source: automated_search
+    last_verified: '2026-04-04'
+- name: Flock Safety
+  ats: ashby
+  board_url: https://jobs.ashbyhq.com/Flock%20Safety
+  board_token: Flock%20Safety
+  job_board_url: https://jobs.ashbyhq.com/Flock%20Safety
+  careers_page: https://www.flocksafety.com/careers
+  enrichment:
+    status: verified
+    source: automated_search
+    last_verified: '2026-04-04'
+- name: Checkr
+  ats: greenhouse
+  board_token: checkr
+  job_board_url: https://boards.greenhouse.io/checkr
+  enrichment:
+    status: verified
+    source: automated_search
+    last_verified: '2026-04-04'
+  careers_page: https://checkr.com/careers
+- name: Fivetran
+  ats: greenhouse
+  board_token: fivetran
+  job_board_url: https://boards.greenhouse.io/fivetran
+  enrichment:
+    status: verified
+    source: automated_search
+    last_verified: '2026-04-04'
+  careers_page: https://fivetran.com/careers
+- name: Mode
+  ats: greenhouse
+  board_token: mode
+  job_board_url: https://boards.greenhouse.io/mode
+  enrichment:
+    status: verified
+    source: automated_search
+    last_verified: '2026-04-04'
+  careers_page: https://www.thoughtspot.com/careers
+- name: mParticle
+  ats: greenhouse
+  board_token: mparticle
+  job_board_url: https://boards.greenhouse.io/mparticle
+  enrichment:
+    status: verified
+    source: automated_search
+    last_verified: '2026-04-04'
+  careers_page: https://www.mparticle.com/careers
+- name: Mixpanel
+  ats: greenhouse
+  board_token: mixpanel
+  job_board_url: https://boards.greenhouse.io/mixpanel
+  enrichment:
+    status: verified
+    source: automated_search
+    last_verified: '2026-04-04'
+  careers_page: https://mixpanel.com/careers
+- name: MotherDuck
+  ats: ashby
+  board_url: https://jobs.ashbyhq.com/MotherDuck
+  board_token: MotherDuck
+  job_board_url: https://jobs.ashbyhq.com/MotherDuck
+  careers_page: https://motherduck.com/careers
+  enrichment:
+    status: verified
+    source: automated_search
+    last_verified: '2026-04-04'
+- name: Pinecone
+  ats: ashby
+  board_url: https://jobs.ashbyhq.com/pinecone
+  board_token: pinecone
+  job_board_url: https://jobs.ashbyhq.com/pinecone
+  careers_page: https://www.pinecone.io/careers
+  enrichment:
+    status: verified
+    source: automated_search
+    last_verified: '2026-04-04'
+- name: Sentry
+  ats: ashby
+  board_url: https://jobs.ashbyhq.com/sentry
+  board_token: sentry
+  job_board_url: https://jobs.ashbyhq.com/sentry
+  careers_page: https://sentry.io/careers
+  enrichment:
+    status: verified
+    source: automated_search
+    last_verified: '2026-04-04'
+- name: Rackspace Technology
+  ats: lever
+  board_token: rackspace
+  job_board_url: https://jobs.lever.co/rackspace
+  enrichment:
+    status: verified
+    source: automated_search
+    last_verified: '2026-04-04'
+  careers_page: https://www.rackspace.com/careers
+- name: Dun & Bradstreet
+  ats: lever
+  board_token: dunandbradstreet
+  job_board_url: https://jobs.lever.co/dunandbradstreet
+  enrichment:
+    status: verified
+    source: automated_search
+    last_verified: '2026-04-04'
+  careers_page: https://www.dnb.com/careers
+- name: Supabase
+  ats: greenhouse
+  board_token: supabase
+  job_board_url: https://boards.greenhouse.io/supabase
+  enrichment:
+    status: verified
+    source: automated_search
+    last_verified: '2026-04-04'
+  careers_page: https://supabase.com/careers
+- name: Netlify
+  ats: greenhouse
+  board_token: netlify
+  job_board_url: https://boards.greenhouse.io/netlify
+  enrichment:
+    status: verified
+    source: automated_search
+    last_verified: '2026-04-04'
+  careers_page: https://www.netlify.com/careers
+- name: Sourcegraph
+  ats: greenhouse
+  board_token: sourcegraph
+  job_board_url: https://boards.greenhouse.io/sourcegraph
+  enrichment:
+    status: verified
+    source: automated_search
+    last_verified: '2026-04-04'
+  careers_page: https://sourcegraph.com/careers
+- name: Bubble
+  ats: greenhouse
+  board_token: bubble
+  job_board_url: https://boards.greenhouse.io/bubble
+  enrichment:
+    status: verified
+    source: automated_search
+    last_verified: '2026-04-04'
+  careers_page: https://bubble.io/careers
+- name: Postman
+  ats: greenhouse
+  board_token: postman
+  job_board_url: https://boards.greenhouse.io/postman
+  enrichment:
+    status: verified
+    source: automated_search
+    last_verified: '2026-04-04'
+  careers_page: https://www.postman.com/careers
+- name: Mapbox
+  ats: greenhouse
+  board_token: mapbox
+  job_board_url: https://boards.greenhouse.io/mapbox
+  enrichment:
+    status: verified
+    source: automated_search
+    last_verified: '2026-04-04'
+  careers_page: https://www.mapbox.com/careers
+- name: PartnerStack
+  ats: greenhouse
+  board_token: partnerstack
+  job_board_url: https://boards.greenhouse.io/partnerstack
+  enrichment:
+    status: verified
+    source: automated_search
+    last_verified: '2026-04-04'
+  careers_page: https://partnerstack.com/careers
+- name: Tray.io
+  ats: greenhouse
+  board_token: trayio
+  job_board_url: https://boards.greenhouse.io/trayio
+  enrichment:
+    status: verified
+    source: automated_search
+    last_verified: '2026-04-04'
+  careers_page: https://tray.io/careers
+- name: Ably
+  ats: greenhouse
+  board_token: ably
+  job_board_url: https://boards.greenhouse.io/ably
+  enrichment:
+    status: verified
+    source: automated_search
+    last_verified: '2026-04-04'
+  careers_page: https://ably.com/careers
+- name: Contentful
+  ats: greenhouse
+  board_token: contentful
+  job_board_url: https://boards.greenhouse.io/contentful
+  enrichment:
+    status: verified
+    source: automated_search
+    last_verified: '2026-04-04'
+  careers_page: https://www.contentful.com/careers
+- name: Docker
+  ats: ashby
+  board_url: https://jobs.ashbyhq.com/docker
+  board_token: docker
+  job_board_url: https://jobs.ashbyhq.com/docker
+  careers_page: https://www.docker.com/careers
+  enrichment:
+    status: verified
+    source: automated_search
+    last_verified: '2026-04-04'
+- name: OutRival
+  ats: ashby
+  board_url: https://jobs.ashbyhq.com/outrival
+  board_token: outrival
+  job_board_url: https://jobs.ashbyhq.com/outrival
+  careers_page: https://www.outrival.ai/careers
+  enrichment:
+    status: verified
+    source: automated_search
+    last_verified: '2026-04-04'
+- name: Ci&T
+  ats: lever
+  board_token: cit
+  job_board_url: https://jobs.lever.co/cit
+  enrichment:
+    status: verified
+    source: automated_search
+    last_verified: '2026-04-04'
+  careers_page: https://ciandt.com/careers
+- name: Mercury
+  ats: greenhouse
+  board_token: mercury
+  job_board_url: https://boards.greenhouse.io/mercury
+  enrichment:
+    status: verified
+    source: automated_search
+    last_verified: '2026-04-04'
+  careers_page: https://mercury.com/careers
+- name: Wise
+  ats: greenhouse
+  board_token: wise
+  job_board_url: https://boards.greenhouse.io/wise
+  enrichment:
+    status: verified
+    source: automated_search
+    last_verified: '2026-04-04'
+  careers_page: https://wise.jobs/
+- name: Ramp
+  ats: ashby
+  board_url: https://jobs.ashbyhq.com/ramp
+  board_token: ramp
+  job_board_url: https://jobs.ashbyhq.com/ramp
+  careers_page: https://ramp.com/careers
+  enrichment:
+    status: verified
+    source: automated_search
+    last_verified: '2026-04-04'
+- name: Modern Treasury
+  ats: ashby
+  board_url: https://jobs.ashbyhq.com/modern-treasury
+  board_token: modern-treasury
+  job_board_url: https://jobs.ashbyhq.com/modern-treasury
+  careers_page: https://www.moderntreasury.com/careers
+  enrichment:
+    status: verified
+    source: automated_search
+    last_verified: '2026-04-04'
+- name: Mollie
+  ats: ashby
+  board_url: https://jobs.ashbyhq.com/mollie
+  board_token: mollie
+  job_board_url: https://jobs.ashbyhq.com/mollie
+  careers_page: https://www.mollie.com/careers
+  enrichment:
+    status: verified
+    source: automated_search
+    last_verified: '2026-04-04'
+- name: EvenUp
+  ats: ashby
+  board_url: https://jobs.ashbyhq.com/evenup
+  board_token: evenup
+  job_board_url: https://jobs.ashbyhq.com/evenup
+  careers_page: https://www.evenuplaw.com/careers
+  enrichment:
+    status: verified
+    source: automated_search
+    last_verified: '2026-04-04'
+- name: Elliptic
+  ats: ashby
+  board_url: https://jobs.ashbyhq.com/elliptic
+  board_token: elliptic
+  job_board_url: https://jobs.ashbyhq.com/elliptic
+  careers_page: https://www.elliptic.co/careers
+  enrichment:
+    status: verified
+    source: automated_search
+    last_verified: '2026-04-04'
+- name: Jerry
+  ats: ashby
+  board_url: https://jobs.ashbyhq.com/jerry
+  board_token: jerry
+  job_board_url: https://jobs.ashbyhq.com/jerry
+  careers_page: https://jerry.ai/careers
+  enrichment:
+    status: verified
+    source: automated_search
+    last_verified: '2026-04-04'
+- name: Mosaic
+  ats: ashby
+  board_url: https://jobs.ashbyhq.com/mosaic
+  board_token: mosaic
+  job_board_url: https://jobs.ashbyhq.com/mosaic
+  careers_page: https://mosaic.pe/careers
+  enrichment:
+    status: verified
+    source: automated_search
+    last_verified: '2026-04-04'
+- name: Paytm
+  ats: lever
+  board_token: paytm
+  job_board_url: https://jobs.lever.co/paytm
+  enrichment:
+    status: verified
+    source: automated_search
+    last_verified: '2026-04-04'
+  careers_page: https://paytmpayments.com/careers
+- name: SpaceX
+  ats: greenhouse
+  board_token: spacex
+  job_board_url: https://boards.greenhouse.io/spacex
+  enrichment:
+    status: verified
+    source: automated_search
+    last_verified: '2026-04-04'
+  careers_page: https://www.spacex.com/careers/
+- name: Character.ai
+  ats: ashby
+  board_url: https://jobs.ashbyhq.com/character
+  board_token: character
+  job_board_url: https://jobs.ashbyhq.com/character
+  careers_page: https://character.ai/careers
+  enrichment:
+    status: verified
+    source: automated_search
+    last_verified: '2026-04-04'
+- name: ElevenLabs
+  ats: ashby
+  board_url: https://jobs.ashbyhq.com/elevenlabs
+  board_token: elevenlabs
+  job_board_url: https://jobs.ashbyhq.com/elevenlabs
+  careers_page: https://elevenlabs.io/careers
+  enrichment:
+    status: verified
+    source: automated_search
+    last_verified: '2026-04-04'
+- name: Fundamental Research Labs
+  ats: ashby
+  board_url: https://jobs.ashbyhq.com/fundamentalresearchlabs
+  board_token: fundamentalresearchlabs
+  job_board_url: https://jobs.ashbyhq.com/fundamentalresearchlabs
+  careers_page: https://fundamentalresearchlabs.com/open-roles
+  enrichment:
+    status: verified
+    source: automated_search
+    last_verified: '2026-04-04'
+- name: Normal Computing
+  ats: ashby
+  board_url: https://jobs.ashbyhq.com/Normal%20Computing%20AI
+  board_token: Normal%20Computing%20AI
+  job_board_url: https://jobs.ashbyhq.com/Normal%20Computing%20AI
+  careers_page: https://normalcomputing.com/careers
+  enrichment:
+    status: verified
+    source: automated_search
+    last_verified: '2026-04-04'
+- name: Retell AI
+  ats: ashby
+  board_url: https://jobs.ashbyhq.com/retell-ai
+  board_token: retell-ai
+  job_board_url: https://jobs.ashbyhq.com/retell-ai
+  careers_page: https://retellai.com/careers
+  enrichment:
+    status: verified
+    source: automated_search
+    last_verified: '2026-04-04'
+- name: Wordware
+  ats: ashby
+  board_url: https://jobs.ashbyhq.com/wordware.ai
+  board_token: wordware.ai
+  job_board_url: https://jobs.ashbyhq.com/wordware.ai
+  careers_page: https://wordware.ai/careers
+  enrichment:
+    status: verified
+    source: automated_search
+    last_verified: '2026-04-04'
+- name: Writer
+  ats: ashby
+  board_url: https://jobs.ashbyhq.com/writer
+  board_token: writer
+  job_board_url: https://jobs.ashbyhq.com/writer
+  careers_page: https://writer.com/careers
+  enrichment:
+    status: verified
+    source: automated_search
+    last_verified: '2026-04-04'
+- name: SambaNova Systems
+  ats: greenhouse
+  board_token: sambanovarecruiting
+  job_board_url: https://boards.greenhouse.io/sambanovarecruiting
+  enrichment:
+    status: verified
+    source: automated_search
+    last_verified: '2026-04-04'
+  careers_page: https://sambanova.ai/careers/
+- name: World Labs
+  ats: greenhouse
+  board_token: worldlabs
+  job_board_url: https://boards.greenhouse.io/worldlabs
+  enrichment:
+    status: verified
+    source: automated_search
+    last_verified: '2026-04-04'
+  careers_page: https://www.worldlabs.ai/careers
+- name: Mistral AI
+  ats: lever
+  board_token: mistral
+  job_board_url: https://jobs.lever.co/mistral
+  enrichment:
+    status: verified
+    source: automated_search
+    last_verified: '2026-04-04'
+  careers_page: https://mistral.ai/careers/
+- name: ConductorAI
+  ats: ashby
+  board_url: https://jobs.ashbyhq.com/conductorai
+  board_token: conductorai
+  job_board_url: https://jobs.ashbyhq.com/conductorai
+  careers_page: https://conductorai.co/careers
+  enrichment:
+    status: verified
+    source: automated_search
+    last_verified: '2026-04-04'
+- name: Seven AI
+  ats: ashby
+  board_url: https://jobs.ashbyhq.com/sevenai
+  board_token: sevenai
+  job_board_url: https://jobs.ashbyhq.com/sevenai
+  careers_page: https://7ai.com/careers
+  enrichment:
+    status: verified
+    source: automated_search
+    last_verified: '2026-04-04'
+- name: Endor Labs
+  ats: greenhouse
+  board_token: endorlabs
+  job_board_url: https://boards.greenhouse.io/endorlabs
+  enrichment:
+    status: verified
+    source: automated_search
+    last_verified: '2026-04-04'
+  careers_page: https://www.endorlabs.com/careers
+- name: Thoropass
+  ats: greenhouse
+  board_token: thoropass
+  job_board_url: https://boards.greenhouse.io/thoropass
+  enrichment:
+    status: verified
+    source: automated_search
+    last_verified: '2026-04-04'
+  careers_page: https://thoropass.com/careers
+- name: Torq
+  ats: greenhouse
+  board_token: torq
+  job_board_url: https://boards.greenhouse.io/torq
+  enrichment:
+    status: verified
+    source: automated_search
+    last_verified: '2026-04-04'
+  careers_page: https://torq.io/careers
+- name: Crusoe
+  ats: ashby
+  board_url: https://jobs.ashbyhq.com/Crusoe
+  board_token: Crusoe
+  job_board_url: https://jobs.ashbyhq.com/Crusoe
+  careers_page: https://crusoe.ai/careers
+  enrichment:
+    status: verified
+    source: automated_search
+    last_verified: '2026-04-04'
+- name: d-Matrix
+  ats: ashby
+  board_url: https://jobs.ashbyhq.com/d-Matrix
+  board_token: d-Matrix
+  job_board_url: https://jobs.ashbyhq.com/d-Matrix
+  careers_page: https://d-matrix.ai/careers
+  enrichment:
+    status: verified
+    source: automated_search
+    last_verified: '2026-04-04'
+- name: Eventual
+  ats: ashby
+  board_url: https://jobs.ashbyhq.com/eventualcomputing
+  board_token: eventualcomputing
+  job_board_url: https://jobs.ashbyhq.com/eventualcomputing
+  careers_page: https://eventual.ai/careers
+  enrichment:
+    status: verified
+    source: automated_search
+    last_verified: '2026-04-04'
+- name: Lambda Labs
+  ats: ashby
+  board_url: https://jobs.ashbyhq.com/lambda
+  board_token: lambda
+  job_board_url: https://jobs.ashbyhq.com/lambda
+  careers_page: https://lambda.ai/careers
+  enrichment:
+    status: verified
+    source: automated_search
+    last_verified: '2026-04-04'
+- name: CoreWeave
+  ats: greenhouse
+  board_token: coreweave
+  job_board_url: https://boards.greenhouse.io/coreweave
+  enrichment:
+    status: verified
+    source: automated_search
+    last_verified: '2026-04-04'
+  careers_page: https://coreweave.com/careers
+- name: Together AI
+  ats: greenhouse
+  board_token: togetherai
+  job_board_url: https://boards.greenhouse.io/togetherai
+  enrichment:
+    status: verified
+    source: automated_search
+    last_verified: '2026-04-04'
+  careers_page: https://www.together.ai/careers
+- name: Arkenstone
+  ats: ashby
+  board_url: https://jobs.ashbyhq.com/ArkenstoneDefense
+  board_token: ArkenstoneDefense
+  job_board_url: https://jobs.ashbyhq.com/ArkenstoneDefense
+  careers_page: https://arkenstonetechnologies.com/careers
+  enrichment:
+    status: verified
+    source: automated_search
+    last_verified: '2026-04-04'
+- name: Mach Industries
+  ats: ashby
+  board_url: https://jobs.ashbyhq.com/mach
+  board_token: mach
+  job_board_url: https://jobs.ashbyhq.com/mach
+  careers_page: https://machindustries.com/careers
+  enrichment:
+    status: verified
+    source: automated_search
+    last_verified: '2026-04-04'
+- name: REGENT
+  ats: ashby
+  board_url: https://jobs.ashbyhq.com/regent
+  board_token: regent
+  job_board_url: https://jobs.ashbyhq.com/regent
+  careers_page: https://regentcraft.com/careers
+  enrichment:
+    status: verified
+    source: automated_search
+    last_verified: '2026-04-04'
+- name: Valinor
+  ats: ashby
+  board_url: https://jobs.ashbyhq.com/valinor
+  board_token: valinor
+  job_board_url: https://jobs.ashbyhq.com/valinor
+  careers_page: https://valinor.co
+  enrichment:
+    status: verified
+    source: automated_search
+    last_verified: '2026-04-04'
+- name: Relativity Space
+  ats: greenhouse
+  board_token: relativity
+  job_board_url: https://boards.greenhouse.io/relativity
+  enrichment:
+    status: verified
+    source: automated_search
+    last_verified: '2026-04-04'
+  careers_page: https://relativityspace.com/careers
+- name: E2B
+  ats: ashby
+  board_url: https://jobs.ashbyhq.com/e2b
+  board_token: e2b
+  job_board_url: https://jobs.ashbyhq.com/e2b
+  careers_page: https://e2b.dev/careers
+  enrichment:
+    status: verified
+    source: automated_search
+    last_verified: '2026-04-04'
+- name: Stack AI
+  ats: ashby
+  board_url: https://jobs.ashbyhq.com/stack-ai
+  board_token: stack-ai
+  job_board_url: https://jobs.ashbyhq.com/stack-ai
+  careers_page: https://stack-ai.com/careers
+  enrichment:
+    status: verified
+    source: automated_search
+    last_verified: '2026-04-04'
+- name: vCluster
+  ats: ashby
+  board_url: https://jobs.ashbyhq.com/vcluster
+  board_token: vcluster
+  job_board_url: https://jobs.ashbyhq.com/vcluster
+  careers_page: https://vcluster.com/jobs
+  enrichment:
+    status: verified
+    source: automated_search
+    last_verified: '2026-04-04'
+- name: Saris AI
+  ats: ashby
+  board_url: https://jobs.ashbyhq.com/saris-ai
+  board_token: saris-ai
+  job_board_url: https://jobs.ashbyhq.com/saris-ai
+  careers_page: https://jobs.ashbyhq.com/saris-ai
+  enrichment:
+    status: verified
+    source: automated_search
+    last_verified: '2026-04-04'
+- name: SentiLink
+  ats: ashby
+  board_url: https://jobs.ashbyhq.com/sentilink
+  board_token: sentilink
+  job_board_url: https://jobs.ashbyhq.com/sentilink
+  careers_page: https://sentilink.com/join-our-team
+  enrichment:
+    status: verified
+    source: automated_search
+    last_verified: '2026-04-04'
+- name: Human Interest
+  ats: greenhouse
+  board_token: humaninterest
+  job_board_url: https://boards.greenhouse.io/humaninterest
+  enrichment:
+    status: verified
+    source: automated_search
+    last_verified: '2026-04-04'
+  careers_page: https://humaninterest.com/careers
+- name: Charge Robotics
+  ats: ashby
+  board_url: https://jobs.ashbyhq.com/charge-robotics
+  board_token: charge-robotics
+  job_board_url: https://jobs.ashbyhq.com/charge-robotics
+  careers_page: https://chargerobotics.com/careers
+  enrichment:
+    status: verified
+    source: automated_search
+    last_verified: '2026-04-04'
+- name: Orchard Robotics
+  ats: ashby
+  board_url: https://jobs.ashbyhq.com/orchard
+  board_token: orchard
+  job_board_url: https://jobs.ashbyhq.com/orchard
+  careers_page: https://orchard-robotics.com/jobs
+  enrichment:
+    status: verified
+    source: automated_search
+    last_verified: '2026-04-04'
+- name: Reflex Robotics
+  ats: ashby
+  board_url: https://jobs.ashbyhq.com/reflexrobotics
+  board_token: reflexrobotics
+  job_board_url: https://jobs.ashbyhq.com/reflexrobotics
+  careers_page: https://reflexrobotics.com/careers
+  enrichment:
+    status: verified
+    source: automated_search
+    last_verified: '2026-04-04'
+- name: Sunday Robotics
+  ats: ashby
+  board_url: https://jobs.ashbyhq.com/sunday
+  board_token: sunday
+  job_board_url: https://jobs.ashbyhq.com/sunday
+  careers_page: https://jobs.ashbyhq.com/sunday
+  enrichment:
+    status: verified
+    source: automated_search
+    last_verified: '2026-04-04'
+- name: Figure AI
+  ats: greenhouse
+  board_token: figureai
+  job_board_url: https://boards.greenhouse.io/figureai
+  enrichment:
+    status: verified
+    source: automated_search
+    last_verified: '2026-04-04'
+  careers_page: https://figure.ai/careers
+- name: Aurora Innovation
+  ats: greenhouse
+  board_token: aurorainnovation
+  job_board_url: https://boards.greenhouse.io/aurorainnovation
+  enrichment:
+    status: verified
+    source: automated_search
+    last_verified: '2026-04-04'
+  careers_page: https://aurora.tech/careers
+- name: Durable
+  ats: greenhouse
+  board_token: durable
+  job_board_url: https://boards.greenhouse.io/durable
+  enrichment:
+    status: verified
+    source: automated_search
+    last_verified: '2026-04-04'
+  careers_page: https://durable.ai/careers
+- name: Hebbia
+  ats: greenhouse
+  board_token: hebbia
+  job_board_url: https://boards.greenhouse.io/hebbia
+  enrichment:
+    status: verified
+    source: automated_search
+    last_verified: '2026-04-04'
+  careers_page: https://hebbia.com/careers
+- name: Prodigal
+  ats: greenhouse
+  board_token: prodigal
+  job_board_url: https://boards.greenhouse.io/prodigal
+  enrichment:
+    status: verified
+    source: automated_search
+    last_verified: '2026-04-04'
+  careers_page: https://boards.greenhouse.io/prodigal
+- name: Astera Institute
+  ats: ashby
+  board_url: https://jobs.ashbyhq.com/astera
+  board_token: astera
+  job_board_url: https://jobs.ashbyhq.com/astera
+  careers_page: https://jobs.ashbyhq.com/astera
+  enrichment:
+    status: verified
+    source: automated_search
+    last_verified: '2026-04-04'
+- name: Twelve Labs
+  ats: ashby
+  board_url: https://jobs.ashbyhq.com/twelve-labs
+  board_token: twelve-labs
+  job_board_url: https://jobs.ashbyhq.com/twelve-labs
+  careers_page: https://twelvelabs.io/careers
+  enrichment:
+    status: verified
+    source: automated_search
+    last_verified: '2026-04-04'
+- name: Invisible Technologies
+  ats: lever
+  board_token: invisible
+  job_board_url: https://jobs.lever.co/invisible
+  enrichment:
+    status: verified
+    source: automated_search
+    last_verified: '2026-04-04'
+  careers_page: https://www.invisible.co/careers
+- name: Axonius
+  ats: greenhouse
+  board_token: axonius
+  job_board_url: https://boards.greenhouse.io/axonius
+  enrichment:
+    status: verified
+    source: automated_search
+    last_verified: '2026-04-04'
+  careers_page: https://www.axonius.com/careers
+- name: CertiK
+  ats: lever
+  board_token: certik
+  job_board_url: https://jobs.lever.co/certik
+  enrichment:
+    status: verified
+    source: automated_search
+    last_verified: '2026-04-04'
+  careers_page: https://www.certik.com/careers
+- name: Spruce Systems
+  ats: lever
+  board_token: sprucesystems
+  job_board_url: https://jobs.lever.co/sprucesystems
+  enrichment:
+    status: verified
+    source: automated_search
+    last_verified: '2026-04-04'
+  careers_page: https://jobs.ashbyhq.com/spruce
+- name: Neo4j
+  ats: greenhouse
+  board_token: neo4j
+  job_board_url: https://boards.greenhouse.io/neo4j
+  enrichment:
+    status: verified
+    source: automated_search
+    last_verified: '2026-04-04'
+  careers_page: https://neo4j.com/careers/
+- name: Pure Storage
+  ats: greenhouse
+  board_token: purestorage
+  job_board_url: https://boards.greenhouse.io/purestorage
+  enrichment:
+    status: verified
+    source: automated_search
+    last_verified: '2026-04-04'
+  careers_page: https://www.purestorage.com/company/careers.html
+- name: Sigma Computing
+  ats: greenhouse
+  board_token: sigmacomputing
+  job_board_url: https://boards.greenhouse.io/sigmacomputing
+  enrichment:
+    status: verified
+    source: automated_search
+    last_verified: '2026-04-04'
+  careers_page: https://www.sigmacomputing.com/company/careers
+- name: Zettabyte
+  ats: ashby
+  board_url: https://jobs.ashbyhq.com/zettabyte-space
+  board_token: zettabyte-space
+  job_board_url: https://jobs.ashbyhq.com/zettabyte-space
+  careers_page: https://zettabyte.space/careers
+  enrichment:
+    status: verified
+    source: automated_search
+    last_verified: '2026-04-04'
+- name: Cape
+  ats: ashby
+  board_url: https://jobs.ashbyhq.com/Cape
+  board_token: Cape
+  job_board_url: https://jobs.ashbyhq.com/Cape
+  careers_page: null
+  enrichment:
+    status: error
+    source: automated_search
+    last_verified: '2026-04-04'
+- name: Gallatin
+  ats: ashby
+  board_url: https://jobs.ashbyhq.com/gallatin
+  board_token: gallatin
+  job_board_url: https://jobs.ashbyhq.com/gallatin
+  careers_page: null
+  enrichment:
+    status: error
+    source: automated_search
+    last_verified: '2026-04-04'
+- name: Front
+  ats: ashby
+  board_url: https://jobs.ashbyhq.com/frontcareers
+  board_token: frontcareers
+  job_board_url: https://jobs.ashbyhq.com/frontcareers
+  careers_page: https://front.com/careers
+  enrichment:
+    status: verified
+    source: automated_search
+    last_verified: '2026-04-04'
+- name: Mural
+  ats: ashby
+  board_url: https://jobs.ashbyhq.com/mural
+  board_token: mural
+  job_board_url: https://jobs.ashbyhq.com/mural
+  careers_page: https://www.mural.co/careers
+  enrichment:
+    status: verified
+    source: automated_search
+    last_verified: '2026-04-04'
+- name: The Browser Company
+  ats: ashby
+  board_url: https://jobs.ashbyhq.com/the%20browser%20company
+  board_token: the%20browser%20company
+  job_board_url: https://jobs.ashbyhq.com/the%20browser%20company
+  careers_page: https://thebrowser.company/careers
+  enrichment:
+    status: verified
+    source: automated_search
+    last_verified: '2026-04-04'
+- name: Miter
+  ats: ashby
+  board_url: https://jobs.ashbyhq.com/miter
+  board_token: miter
+  job_board_url: https://jobs.ashbyhq.com/miter
+  careers_page: https://miter.com/careers
+  enrichment:
+    status: verified
+    source: automated_search
+    last_verified: '2026-04-04'
+- name: Weave
+  ats: ashby
+  board_url: https://jobs.ashbyhq.com/weave
+  board_token: weave
+  job_board_url: https://jobs.ashbyhq.com/weave
+  careers_page: https://www.getweave.com/careers
+  enrichment:
+    status: verified
+    source: automated_search
+    last_verified: '2026-04-04'
+- name: Aircall
+  ats: lever
+  board_token: aircall
+  job_board_url: https://jobs.lever.co/aircall
+  enrichment:
+    status: verified
+    source: automated_search
+    last_verified: '2026-04-04'
+  careers_page: https://aircall.io/careers
+- name: Mattermost
+  ats: lever
+  board_token: mattermost
+  job_board_url: https://jobs.lever.co/mattermost
+  enrichment:
+    status: verified
+    source: automated_search
+    last_verified: '2026-04-04'
+  careers_page: https://mattermost.com/careers
+- name: Daylight
+  ats: greenhouse
+  board_token: daylight
+  job_board_url: https://boards.greenhouse.io/daylight
+  enrichment:
+    status: verified
+    source: automated_search
+    last_verified: '2026-04-04'
+  careers_page: https://godaylight.com/careers
+- name: Credit Karma
+  ats: greenhouse
+  board_token: creditkarma
+  job_board_url: https://boards.greenhouse.io/creditkarma
+  enrichment:
+    status: verified
+    source: automated_search
+    last_verified: '2026-04-04'
+  careers_page: https://www.creditkarma.com/careers
+- name: Magic.dev
+  ats: greenhouse
+  board_token: magic
+  job_board_url: https://boards.greenhouse.io/magic
+  enrichment:
+    status: verified
+    source: automated_search
+    last_verified: '2026-04-04'
+  careers_page: https://magic.dev/careers
+- name: Zora
+  ats: greenhouse
+  board_token: zora
+  job_board_url: https://boards.greenhouse.io/zora
+  enrichment:
+    status: verified
+    source: automated_search
+    last_verified: '2026-04-04'
+  careers_page: https://zora.co/careers
+- name: Cardless
+  ats: ashby
+  board_url: https://jobs.ashbyhq.com/cardless
+  board_token: cardless
+  job_board_url: https://jobs.ashbyhq.com/cardless
+  careers_page: https://cardless.com/careers
+  enrichment:
+    status: verified
+    source: automated_search
+    last_verified: '2026-04-04'
+- name: Middesk
+  ats: ashby
+  board_url: https://jobs.ashbyhq.com/middesk
+  board_token: middesk
+  job_board_url: https://jobs.ashbyhq.com/middesk
+  careers_page: https://www.middesk.com/careers
+  enrichment:
+    status: verified
+    source: automated_search
+    last_verified: '2026-04-04'
+- name: Flybits
+  ats: lever
+  board_token: flybits
+  job_board_url: https://jobs.lever.co/flybits
+  enrichment:
+    status: verified
+    source: automated_search
+    last_verified: '2026-04-04'
+  careers_page: https://flybits.com/careers
+- name: Scout Motors
+  ats: greenhouse
+  board_token: scoutmotors
+  job_board_url: https://boards.greenhouse.io/scoutmotors
+  enrichment:
+    status: verified
+    source: automated_search
+    last_verified: '2026-04-04'
+  careers_page: https://scoutmotors.com/careers
+- name: Formlabs
+  ats: lever
+  board_token: formlabs
+  job_board_url: https://jobs.lever.co/formlabs
+  enrichment:
+    status: verified
+    source: automated_search
+    last_verified: '2026-04-04'
+  careers_page: https://formlabs.com/careers

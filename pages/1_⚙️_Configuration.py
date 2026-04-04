@@ -196,14 +196,40 @@ with tabs[3]:
         
         all_cos = companies_config.get('companies', [])
         df_cos = pd.DataFrame(all_cos)
+
+        # Flatten enrichment status for easy indexing
+        if 'enrichment' in df_cos.columns:
+            df_cos['status_display'] = df_cos['enrichment'].apply(lambda x: x.get('status', 'pending') if isinstance(x, dict) else 'pending')
+        else:
+            df_cos['status_display'] = 'pending'
+
+        # Filter UI (Replaces the split-brain logging)
+        filter_status = st.radio(
+            "Filter by Verification Status:", 
+            ["All", "Verified", "Pending", "Error (Review Needed)"], 
+            horizontal=True
+        )
+
+        display_df = df_cos
+        if filter_status == "Verified":
+            display_df = display_df[display_df['status_display'] == 'verified']
+        elif filter_status == "Pending":
+            display_df = display_df[display_df['status_display'] == 'pending']
+        elif filter_status == "Error (Review Needed)":
+            display_df = display_df[display_df['status_display'] == 'error']
+
         ed_cos = st.data_editor(
-            df_cos, 
+            display_df, 
             num_rows="dynamic", 
             width="stretch", 
             hide_index=True, 
             key="ed_companies_new",
             column_config={
-                "ats": st.column_config.SelectboxColumn("ATS", options=["greenhouse", "lever", "ashby"], required=True)
+                "ats": st.column_config.SelectboxColumn("ATS", options=["greenhouse", "lever", "ashby"], required=True),
+                "board_token": st.column_config.TextColumn("Token", help="ATS Board Token"),
+                "job_board_url": st.column_config.LinkColumn("UI Link", help="Human-readable job board link"),
+                "careers_page": st.column_config.LinkColumn("Careers Page", help="Official company careers page"),
+                "status_display": st.column_config.TextColumn("Status", disabled=True, help="Automation verification status")
             }
         )
         
@@ -219,12 +245,19 @@ with tabs[3]:
             ed_exc = st.data_editor(pd.DataFrame(exc_cos, columns=["Company"]), num_rows="dynamic", width="stretch", hide_index=True, key="ed_exc_cos_new")
 
         if st.form_submit_button("💾 Save Company Management", type="primary"):
-            new_cos = ed_cos.dropna(subset=['name']).to_dict('records')
-            companies_config['companies'] = [c for c in new_cos if str(c.get('name', '')).strip() != ""]
+            # Drop the calculated column before saving
+            new_cos = ed_cos.dropna(subset=['name'])
+            if 'status_display' in new_cos.columns:
+                new_cos = new_cos.drop(columns=['status_display'])
+            
+            records = new_cos.to_dict('records')
+            companies_config['companies'] = [c for c in records if str(c.get('name', '')).strip() != ""]
             companies_config['target_companies'] = clean_df_list(ed_tar, "Company")
             companies_config['exclude_companies'] = clean_df_list(ed_exc, "Company")
             
             if save_yaml_safely(companies_config, COMPANIES_PATH):
+                st.success("Company configuration updated!")
+                st.rerun()
                 st.success("Company configuration updated!")
                 st.rerun()
 

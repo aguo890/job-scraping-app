@@ -573,12 +573,24 @@ if selected_indices:
         with st.container(border=True):
             col_cv1, col_cv2 = st.columns([3, 1], vertical_alignment="center")
             with col_cv1:
-                company = selected_job_row.get('company', 'Unknown')
-                title = selected_job_row.get('title', 'Unknown')
-                if has_resume:
-                    st.markdown(f"📄 **Resume**: `{resume_file}`  |  {company} — {title}")
+                company_name = selected_job_row.get('company', 'Unknown')
+                job_title = selected_job_row.get('title', 'Unknown')
+                
+                # Metadata-Driven Link Rendering (Quality Check: Verification Ledger)
+                enrichment = selected_job_row.get('enrichment') or {}
+                status = enrichment.get('status', 'pending')
+                
+                # Verified marketing pages are the primary target
+                if status == 'verified':
+                    display_url = selected_job_row.get('careers_page')
                 else:
-                    st.markdown(f"📝 **No Resume Yet** |  {company} — {title}")
+                    # Fallback for pending/unverified entries: use normalized UI link or legacy
+                    display_url = selected_job_row.get('job_board_url') or selected_job_row.get('url', '#')
+                
+                if has_resume:
+                    st.markdown(f"📄 **Resume**: `{resume_file}`  |  [{company_name} — {job_title}]({display_url})")
+                else:
+                    st.markdown(f"📝 **No Resume Yet** |  [{company_name} — {job_title}]({display_url})")
             with col_cv2:
                 btn_label = "📄 View Resume" if has_resume else "📝 Create Resume"
                 if st.button(btn_label, type="primary", width="stretch"):

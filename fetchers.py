@@ -285,23 +285,37 @@ class JobFetcherManager:
         async with self.semaphore:
             try:
                 if ats_type == 'greenhouse':
-                    board_token = company.get('board_token')
+                    board_token = company.get('board_token') or company.get('token')
                     if board_token:
-                        return await gh.fetch_jobs(board_token, company_name, applied_ids)
+                        results = await gh.fetch_jobs(board_token, company_name, applied_ids)
+                    else:
+                        results = []
                 
                 elif ats_type == 'lever':
-                    board_token = company.get('board_token')
+                    board_token = company.get('board_token') or company.get('token')
                     if board_token:
-                        return await lev.fetch_jobs(board_token, company_name, applied_ids)
+                        results = await lev.fetch_jobs(board_token, company_name, applied_ids)
+                    else:
+                        results = []
                 
                 elif ats_type == 'ashby':
-                    board_url = company.get('board_url')
-                    if board_url:
-                        return await ash.fetch_jobs(board_url, company_name, applied_ids)
+                    scraping_url = company.get('board_url', company.get('url'))
+                    if scraping_url:
+                        results = await ash.fetch_jobs(scraping_url, company_name, applied_ids)
+                    else:
+                        results = []
                 
                 else:
                     logger.warning(f"Unknown ATS type '{ats_type}' for {company_name}")
                     return []
+
+                # Enrich results with company-level UI info
+                for job in results:
+                    job['job_board_url'] = company.get('job_board_url')
+                    job['careers_page'] = company.get('careers_page')
+                    job['enrichment'] = company.get('enrichment')
+                
+                return results
                     
             except Exception as e:
                 logger.error(f"Error fetching {company_name}: {e}")
