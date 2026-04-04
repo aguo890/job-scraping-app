@@ -3,7 +3,7 @@ import logging
 from processor import JobProcessor
 
 @pytest.fixture
-def processor():
+def processor(tmp_path):
     config = {
         'keywords': {
             'exclude': [],
@@ -14,6 +14,17 @@ def processor():
             'max_years_experience': 3
         }
     }
+    
+    # Create isolated mock state
+    mock_file = tmp_path / "mock_applied_jobs.json"
+    mock_file.write_text("[]")
+    
+    # Inject into config
+    if isinstance(config, dict):
+        config['applied_jobs_path'] = str(mock_file)
+    else:
+        config.applied_jobs_path = str(mock_file)
+        
     return JobProcessor(config)
 
 def test_extract_yoe_valid(processor):

@@ -1,5 +1,5 @@
-from pathlib import Path
 import os
+from pathlib import Path
 import json
 from datetime import datetime, timedelta
 import pytz
@@ -22,6 +22,14 @@ class JobProcessor:
             with open(config_input, 'r') as f:
                 import yaml
                 self.config = yaml.safe_load(f)
+        
+        # Inject the applied jobs file path, defaulting to the production path if not provided
+        # Support both dict and object configs for backward compatibility
+        default_path = BASE_DIR / 'data' / 'applied_jobs.json'
+        if isinstance(self.config, dict):
+            self.applied_jobs_path = self.config.get('applied_jobs_path', default_path)
+        else:
+            self.applied_jobs_path = getattr(self.config, 'applied_jobs_path', default_path)
         
         # Helper lists for filtering/scoring
         # Unified config uses 'titles' section for keywords
@@ -95,7 +103,8 @@ class JobProcessor:
     def load_applied_jobs(self):
         """Load jobs that have been marked as applied"""
         try:
-            path = BASE_DIR / 'data' / 'applied_jobs.json'
+            # Use injected path (can be string or Path object)
+            path = Path(self.applied_jobs_path)
             if not path.exists():
                 return []
             with open(path, 'r', encoding='utf-8') as f:
@@ -160,16 +169,15 @@ class JobProcessor:
             if any(term in title_lower for term in ["software", "engineer", "developer", "data"]):
                 score += 10
 
-            # 2. SOFT FILTERS: YOE Penalty
-            # Architecture: Penalty = (extracted_min - limit) * -10
+            # 2. SOFT FILTERS -> HARD DROP: YOE Limit
+            # Architecture: If min_yoe > limit, discard role (Disqualification)
             # Skips for Applied or "Entry-level" Titles
             bypass_keywords = ['intern', 'new grad', 'entry level', 'university grad', 'junior']
             if not is_applied and not any(kw in title_lower for kw in bypass_keywords):
                 min_yoe = self.extract_min_years_experience(description_text)
                 if min_yoe > max_exp_limit:
-                    penalty = (min_yoe - max_exp_limit) * -10
-                    score += penalty
-                    logger.debug(f"YOE Penalty for {job['title']}: {penalty} ({min_yoe} yrs > {max_exp_limit})")
+                    logger.info(f"🚫 YOE Drop: Skipping '{job['title']}' ({min_yoe} yrs > {max_exp_limit})")
+                    continue
 
             # 3. INTERSECTION MULTIPLIER (The "Holy Grail" Boost)
             tech_hits = 0
