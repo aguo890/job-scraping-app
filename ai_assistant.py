@@ -166,7 +166,7 @@ Focus on:
         messages = [
             {
                 'role': 'system',
-                'content': 'You are a career advisor helping candidates write compelling cover letters.'
+                'content': f"You are an expert AI Career Assistant helping a candidate optimize their job search.{cv_context}"
             },
             {
                 'role': 'user',

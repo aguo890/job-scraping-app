@@ -2,7 +2,7 @@
 """
 Example usage script - demonstrates how to use the job scraping components
 """
-from fetchers import GreenhouseFetcher, LeverFetcher, AshbyFetcher
+from fetchers import GreenhouseFetcher
 from processor import JobProcessor
 from reporter import JobReporter
 
@@ -87,7 +87,7 @@ def example_report_generation():
     reporter = JobReporter()
     reports = reporter.generate_reports(sample_jobs)
     
-    print(f"Generated reports:")
+    print("Generated reports:")
     for report_type, path in reports.items():
         print(f"  - {report_type}: {path}")
     
@@ -110,7 +110,7 @@ if __name__ == "__main__":
         if processed_jobs:
             reporter = JobReporter()
             reports = reporter.generate_reports(processed_jobs)
-            print(f"\nReports generated successfully!")
+            print("\nReports generated successfully!")
             print(f"Check: {reports['json']}")
             print(f"Check: {reports['markdown']}")
     

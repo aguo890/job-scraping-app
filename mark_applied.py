@@ -4,7 +4,6 @@ Script to mark a job as applied.
 Usage: python mark_applied.py <job_url_or_id>
 """
 
-import sys
 import json
 import os
 import argparse

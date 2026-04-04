@@ -1,7 +1,6 @@
 import os
 import yaml
 import streamlit as st
-import pandas as pd
 
 # Define base paths relative to this file
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))

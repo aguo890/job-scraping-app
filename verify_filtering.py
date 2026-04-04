@@ -1,15 +1,11 @@
 import sys
 import os
-import logging
 
 # Add project root to path
 sys.path.append(os.path.abspath('.'))
 
 # processor.py is in the current directory, already handled by lines 5-6 and line 38
 
-import re
-from datetime import datetime
-import pytz
 
 # Mock Config
 config = {

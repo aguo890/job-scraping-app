@@ -1,4 +1,3 @@
-import pytest
 import logging
 from utils.schemas import JobListing
 

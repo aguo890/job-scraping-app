@@ -14,8 +14,6 @@ from pathlib import Path
 from fetchers import JobFetcherManager
 from processor import JobProcessor
 from reporter import JobReporter
-from github_integration import GitHubIntegration
-from ai_assistant import AIAssistant
 
 
 # Base directory for absolute path resolution

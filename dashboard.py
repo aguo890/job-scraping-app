@@ -9,9 +9,7 @@ sys.path.insert(0, parent_dir)
 import streamlit as st
 import pandas as pd
 import json
-import time
-import yaml
-from utils.ui_utils import render_status, format_status_df, inject_custom_css
+from utils.ui_utils import format_status_df, inject_custom_css
 from utils.data_manager import JobDataService
 
 
@@ -23,7 +21,6 @@ try:
 except ImportError:
     CVOrchestrator = None
 
-from datetime import datetime
 
 # --- Configuration ---
 # --- Configuration ---
@@ -50,7 +47,7 @@ dashboard_css = """
 # Global UI Inject (One single stMarkdownContainer for ALL styles)
 inject_custom_css(dashboard_css)
 
-from config_utils import load_config, load_companies, clean_df_list, save_yaml_safely, FILTERING_PATH, COMPANIES_PATH
+from config_utils import load_config
 
 def load_tracking():
     if os.path.exists(TRACKING_FILE):

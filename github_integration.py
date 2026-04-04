@@ -147,7 +147,7 @@ class GitHubIntegration:
         
         # Create issue body
         body = f"# Daily Job Scraping Digest - {today}\n\n"
-        body += f"## Summary\n\n"
+        body += "## Summary\n\n"
         body += f"- **Total Jobs**: {len(jobs)}\n"
         body += f"- **Report Generated**: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n"
         body += f"- **Full Report**: [View Report]({report_path})\n\n"

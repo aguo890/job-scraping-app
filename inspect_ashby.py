@@ -1,5 +1,4 @@
 import requests
-import json
 
 url = "https://api.ashbyhq.com/posting-api/job-board/linear"
 try:

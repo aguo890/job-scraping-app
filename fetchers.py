@@ -4,10 +4,9 @@ Job fetchers module for different ATS platforms (Async)
 import logging
 import asyncio
 import aiohttp
-from typing import List, Dict, Any, Optional
+from typing import List, Dict, Any
 
 import json
-import os
 from utils.network import SafeSession
 from utils.smart_filter import job_filter
 from utils.schemas import JobListing

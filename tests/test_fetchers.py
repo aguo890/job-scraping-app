@@ -1,7 +1,4 @@
-import pytest
-from fetchers import GreenhouseFetcher, LeverFetcher, AshbyFetcher
 from utils.schemas import JobListing
-from unittest.mock import MagicMock
 
 # Clearly indicated mock data payloads
 MOCK_GREENHOUSE_DATA = {

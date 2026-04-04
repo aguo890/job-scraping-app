@@ -1,6 +1,5 @@
 import asyncio
 import logging
-import time
 import sys
 from fetchers import JobFetcherManager
 

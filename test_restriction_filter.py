@@ -1,6 +1,5 @@
 import sys
 import os
-import yaml
 
 # Ensure project root is in path
 sys.path.insert(0, os.path.join(os.getcwd(), 'job-scraping-app'))

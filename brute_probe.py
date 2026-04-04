@@ -52,7 +52,7 @@ async def probe():
                             elif response.status != 404:
                                 logger.info(f"❌ {response.status} | {company} | {provider} | {slug}")
                                 
-                    except Exception as e:
+                    except Exception:
                         pass
 
 if __name__ == "__main__":

@@ -83,7 +83,7 @@ class JobReporter:
                 # Header
                 f.write(f"# Daily Job Scraping Report - {today}\n\n")
                 f.write(f"Generated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n\n")
-                f.write(f"## Summary\n\n")
+                f.write("## Summary\n\n")
                 f.write(f"- **Total Jobs Found**: {len(jobs)}\n")
                 
                 # Count by company
@@ -93,7 +93,7 @@ class JobReporter:
                     companies[company] = companies.get(company, 0) + 1
                 
                 f.write(f"- **Companies**: {len(companies)}\n")
-                f.write(f"- **Top Companies**:\n")
+                f.write("- **Top Companies**:\n")
                 for company, count in sorted(companies.items(), key=lambda x: x[1], reverse=True)[:5]:
                     f.write(f"  - {company}: {count} jobs\n")
                 
@@ -105,7 +105,7 @@ class JobReporter:
                     source = job.get('source', 'Unknown')
                     sources[source] = sources.get(source, 0) + 1
                 
-                f.write(f"- **Sources**:\n")
+                f.write("- **Sources**:\n")
                 for source, count in sorted(sources.items(), key=lambda x: x[1], reverse=True):
                     f.write(f"  - {source}: {count} jobs\n")
                 
