@@ -101,14 +101,19 @@ async def async_main(companies_filter: str = None):
         logger.info(f"Qualified {len(raw_jobs)} job postings (passed Hard Filters)")
         
         # 3. LOAD EXISTING STATE (SRE: Source of Truth)
+        # Check root data first, then submodule data as fallback
+        root_data_path = Path(__file__).resolve().parent.parent / 'data' / 'jobs_agg.json'
+        submodule_data_path = BASE_DIR / 'data' / 'jobs_agg.json'
+        
+        data_path = root_data_path if root_data_path.exists() else submodule_data_path
+        
         existing_data = []
-        data_path = BASE_DIR / 'data' / 'jobs_agg.json'
         if data_path.exists():
             try:
                 with open(data_path, 'r', encoding='utf-8') as f:
                     content = json.load(f)
                     existing_data = content.get('jobs', [])
-                logger.info(f"📂 Loaded {len(existing_data)} existing jobs for state-merge.")
+                logger.info(f"📂 Loaded {len(existing_data)} existing jobs from {data_path.name} for state-merge.")
             except Exception as e:
                 logger.error(f"Failed to load existing state for merge: {e}")
 
@@ -163,12 +168,12 @@ def execute_scraping_run(companies_filter: str = None):
     setup_logging()
     logger = logging.getLogger()
     
-    # [SRE: ANTI-BOT JITTER]
-    # To avoid a consistent "Heartbeat" signature on job boards.
-    if os.getenv("GITHUB_ACTIONS") == "true":
-        jitter = random.randint(60, 600)  # 1-10 minutes
-        logger.info(f"⏳ CI Environment detected. Jitter: Sleeping for {jitter}s...")
-        time.sleep(jitter)
+    # [SRE: ANTI-BOT JITTER - Temporarily Disabled for Verification]
+    # if os.getenv("GITHUB_ACTIONS") == "true":
+    #     import random
+    #     jitter = random.randint(60, 600)  # 1-10 minutes
+    #     logger.info(f"⏳ CI Environment detected. Jitter: Sleeping for {jitter}s...")
+    #     time.sleep(jitter)
 
     logger.info("=" * 80)
     logger.info("Starting Job Scraping Run")
