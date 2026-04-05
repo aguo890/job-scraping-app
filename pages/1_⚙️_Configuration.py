@@ -174,8 +174,18 @@ with tabs[2]:
         filter_enabled = st.toggle("Enable Filtering Logic", value=config.get('filtering', {}).get('is_enabled', True))
         
         with st.expander("🌐 Network & Browser"):
-            user_agent = st.text_input("User Agent", value=config.get('system', {}).get('user_agent', ""))
-            st.caption("Change this only if you encounter frequent bot detection.")
+            env_ua = os.getenv("USER_AGENT")
+            ua_value = env_ua or config.get('system', {}).get('user_agent', "")
+            user_agent = st.text_input(
+                "User Agent", 
+                value=ua_value, 
+                disabled=bool(env_ua),
+                help="The identity string sent to job boards to mimic a real browser."
+            )
+            if env_ua:
+                st.info("💡 **Environment Override Active:** The User Agent is locked because it's being set via your `.env` file.")
+            else:
+                st.caption("Change this only if you encounter frequent bot detection.")
 
         if st.form_submit_button("💾 Save System Settings", type="primary"):
             if 'filtering' not in config: config['filtering'] = {}

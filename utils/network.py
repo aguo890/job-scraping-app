@@ -1,3 +1,4 @@
+import os
 import yaml
 import aiohttp
 import asyncio
@@ -28,8 +29,8 @@ class SafeSession:
 
     @property
     def headers(self):
-        # Dynamic load or fallback
-        ua = self.config.get("user_agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko)")
+        # Priority: ENV > YAML > Fallback
+        ua = os.getenv("USER_AGENT") or self.config.get("user_agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko)")
         return {
             "User-Agent": ua,
             "Accept": "application/json, text/plain, */*",
