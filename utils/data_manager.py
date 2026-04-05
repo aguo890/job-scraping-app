@@ -187,7 +187,7 @@ class JobDataService:
         if not repo:
             return None
             
-        url = f"https://raw.githubusercontent.com/{repo}/data-state/job-scraping-app/data/jobs_agg.json"
+        url = f"https://raw.githubusercontent.com/{repo}/data-state/data/jobs_agg.json"
         headers = {"Authorization": f"token {token}"} if token else {}
         
         try:
