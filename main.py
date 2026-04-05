@@ -168,12 +168,13 @@ def execute_scraping_run(companies_filter: str = None):
     setup_logging()
     logger = logging.getLogger()
     
-    # [SRE: ANTI-BOT JITTER - Temporarily Disabled for Verification]
-    # if os.getenv("GITHUB_ACTIONS") == "true":
-    #     import random
-    #     jitter = random.randint(60, 600)  # 1-10 minutes
-    #     logger.info(f"⏳ CI Environment detected. Jitter: Sleeping for {jitter}s...")
-    #     time.sleep(jitter)
+    # [SRE: ANTI-BOT JITTER]
+    # To avoid a consistent "Heartbeat" signature on job boards.
+    if os.getenv("GITHUB_ACTIONS") == "true":
+        import random
+        jitter = random.randint(60, 600)  # 1-10 minutes
+        logger.info(f"⏳ CI Environment detected. Jitter: Sleeping for {jitter}s...")
+        time.sleep(jitter)
 
     logger.info("=" * 80)
     logger.info("Starting Job Scraping Run")
