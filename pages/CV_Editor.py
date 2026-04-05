@@ -14,6 +14,7 @@ import json
 import time
 import re
 from datetime import datetime
+import streamlit.components.v1 as components
 
 from utils.ui_utils import inject_custom_css
 
@@ -256,9 +257,46 @@ with st.sidebar:
 
     st.divider()
 
+    # --- ⚙️ Workspace Layout Settings ---
+    st.subheader("⚙️ Settings")
+    
+    def sync_layout_to_url():
+        st.query_params["layout"] = st.session_state["workspace_layout"]
+
+    # Initialize from URL query params (survives hard refresh)
+    if "workspace_layout" not in st.session_state:
+        url_layout = st.query_params.get("layout", "Stacked")
+        if url_layout in ["Stacked", "Side-by-Side"]:
+             st.session_state["workspace_layout"] = url_layout
+        else:
+             st.session_state["workspace_layout"] = "Stacked"
+    
+    st.radio(
+        "View Mode", 
+        ["Stacked", "Side-by-Side"], 
+        key="workspace_layout", 
+        horizontal=True,
+        on_change=sync_layout_to_url
+    )
+
+    st.divider()
+
     # Render button
-    render_clicked = st.button("🔄 Render PDF", type="primary", width="stretch", disabled=st.session_state["is_rendering"])
+    if st.button("🔄 Render PDF", type="primary", width="stretch", disabled=st.session_state["is_rendering"]):
+        st.session_state["is_rendering"] = True
+        st.rerun()
     st.caption("*Or press Ctrl+Enter in the editor*")
+
+    # --- 📄 Draft Management ---
+    st.divider()
+    save_cols = st.columns([1, 1])
+    with save_cols[0]:
+        if st.button("💾 Save Draft", help="Persist changes to disk draft file", width="stretch"):
+            content_to_save = st.session_state.get("yaml_editor", "")
+            if save_draft_to_disk(job_id, content_to_save):
+                st.toast("Draft saved to disk! 📦")
+    with save_cols[1]:
+        st.caption(f"Last Sync: {datetime.now().strftime('%H:%M:%S')}")
 
     # Download button (if PDF exists)
     display_path = st.session_state.get("current_pdf")
@@ -383,137 +421,78 @@ with st.sidebar:
                     st.error(f"Failed: {e}")
 
         if "ai_strategy" in st.session_state and st.session_state["ai_strategy"]:
-            with st.expander("📊 Strategy Report"):
+            with st.expander("📊 AI Strategy & Gaps"):
                 st.markdown(st.session_state["ai_strategy"])
-    else:
-        st.warning("AI module not available.")
-
-
-
-# --- 3. Workspace Layout: 🏛️ CV TAILORING WORKSHOP ---
-st.title("🏛️ CV Tailoring Workshop")
-
-# --- Restriction Warning ---
-res_data = job.get("restriction_data", {})
-if isinstance(res_data, dict) and res_data.get("restricted"):
-    st.error(f"🚫 **ITAR/Clearance Warning:** {res_data.get('reason')}. Ensure eligibility before tailoring.", icon="🚫")
-
-st.divider()
-
-# --- 4. Main Workflow Columns ---
-col_strat, col_editor = st.columns([1, 2], gap="large")
-
-with col_strat:
-    st.subheader("🎯 Strategy & Context")
-    
-    # A. Job Context Card
-    with st.container(border=True):
-        st.markdown(f"### {company}")
-        st.write(f"**Target Role:** {title}")
-        st.caption(f"Job ID: `{job_id}`")
-    
-    st.divider()
-    
-    # B. AI Strategy & Gaps
-    if "ai_strategy" in st.session_state and st.session_state["ai_strategy"]:
-        with st.container(border=True):
-            st.markdown("### 🧠 AI Strategy")
-            st.info(st.session_state["ai_strategy"])
-            
-            if "gap_analysis" in st.session_state and st.session_state["gap_analysis"]:
-                st.markdown("#### ⚠️ Gap Analysis")
-                st.warning(st.session_state["gap_analysis"])
                 
-            if "ai_reasoning" in st.session_state and st.session_state["ai_reasoning"]:
-                with st.expander("💭 Chain of Thought"):
+                if "gap_analysis" in st.session_state and st.session_state["gap_analysis"]:
+                    st.divider()
+                    st.markdown("### ⚠️ Gap Analysis")
+                    st.warning(st.session_state["gap_analysis"])
+                    
+                if "ai_reasoning" in st.session_state and st.session_state["ai_reasoning"]:
+                    st.divider()
+                    st.markdown("### 💭 Reasoning")
                     st.caption(st.session_state["ai_reasoning"])
     else:
-        st.info("Run **AI Tailor** to generate a strategy and gap analysis for this role.")
-
-    st.divider()
-
-    # C. AI Controls (Moved from Sidebar for context)
-    if not (is_master or is_playground):
-        if st.button("🤖 Auto-Tailor with AI", type="primary", width="stretch"):
-            with st.spinner("🧠 Rewriting CV... (DeepSeek R1)"):
-                try:
-                    strategy, new_yaml, gap, reasoning = ai_tailor.generate_tailored_resume(
-                        base_yaml_content=st.session_state["editor_yaml"],
-                        job_description=job.get("description", "No description provided"),
-                        job_title=title,
-                        company_name=company
-                    )
-                    st.session_state["editor_yaml"] = new_yaml
-                    st.session_state["yaml_editor"] = new_yaml # Sync buffer
-                    st.session_state["ai_strategy"] = strategy
-                    st.session_state["gap_analysis"] = gap
-                    st.session_state["ai_reasoning"] = reasoning
-                    orchestrator.save_job_cv(job_id, new_yaml)
-                    st.toast("AI Strategy Applied! ✨")
-                    time.sleep(1)
-                    st.rerun()
-                except Exception as e:
-                    st.error(f"Tailoring failed: {e}")
-
-with col_editor:
-    # --- Toolbar ---
-    tool_l, tool_r = st.columns([3, 1])
-    with tool_l:
-        st.subheader("📝 CV Workshop")
-    with tool_r:
-        if st.button("🔄 Render PDF", type="primary", width="stretch", disabled=st.session_state["is_rendering"]):
-            st.session_state["is_rendering"] = True
-            st.rerun()
+        st.warning("AI module not available.")# --- 4. Modular UI Components ---
+def render_editor_workspace(job_id, company, title, is_master, is_playground):
+    """
+    AI-CONTEXT: Encapsulates the CV editor and toolbar. 
+    Arguments passed explicitly to avoid scope isolation issues in modular layouts.
+    """
 
     # --- The Buffered Editor ---
     with st.container(border=True):
-        # Initialize widget state if missing
         if "yaml_editor" not in st.session_state:
             st.session_state["yaml_editor"] = st.session_state["editor_yaml"]
 
-        # The session state "yaml_editor" now acts as our persistent buffer
         edited_content = st.text_area(
             "Draft Buffer",
             value=st.session_state["yaml_editor"],
-            height=None, # CSS controlled (85vh)
+            height=None, 
             key="yaml_editor_widget",
             label_visibility="collapsed",
             on_change=lambda: st.session_state.__setitem__("yaml_editor", st.session_state["yaml_editor_widget"])
         )
-        # 1. Update In-Memory Buffers
         st.session_state["yaml_editor"] = edited_content
         st.session_state[f"buffer_{job_id}"] = edited_content
 
-        # 2. Persistence Controls
-        c1, c2, c3 = st.columns([1, 1, 3])
-        with c1:
-            if st.button("💾 Save Draft", help="Persist changes to disk draft file", width="stretch"):
-                if save_draft_to_disk(job_id, edited_content):
-                    st.toast("Draft saved to disk! 📦")
-        with c2:
-            st.caption(f"Last Buffer Sync: {datetime.now().strftime('%H:%M:%S')}")
+    # AI-CONTEXT: JavaScript injection for cross-platform hotkeys (Cmd/Ctrl + Enter).
+    # Moved to the bottom of the column to ensure it doesn't affect the top alignment 
+    # of the first visible container.
+    js_hotkey_code = """
+    <script>
+    (function() {
+        const doc = window.parent.document;
+        const handler = function(e) {
+            if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+                const buttons = Array.from(doc.querySelectorAll('button'));
+                const renderBtn = buttons.find(b => b.textContent && b.textContent.includes('Render PDF'));
+                if (renderBtn) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    if (doc.activeElement) doc.activeElement.blur();
+                    setTimeout(() => {
+                        renderBtn.click();
+                    }, 250);
+                }
+            }
+        };
+        if (window.parent._cvRenderHandler) {
+            doc.removeEventListener('keydown', window.parent._cvRenderHandler);
+        }
+        window.parent._cvRenderHandler = handler;
+        doc.addEventListener('keydown', handler, true);
+    })();
+    </script>
+    """
+    components.html(js_hotkey_code, height=0, width=0)
 
-    # --- Render Logic (Inside Col) ---
-    if st.session_state.get("is_rendering", False):
-        with st.spinner("Compiling with RenderCV..."):
-            content = st.session_state["yaml_editor"]
-            # 1. Save current buffer to disk
-            save_result = orchestrator.save_job_cv(job_id, content)
-            if isinstance(save_result, dict) and not save_result.get("success", True):
-                st.error(f"❌ Save Failed: {save_result.get('error', 'Unknown error')}")
-            else:
-                # 2. Render from content
-                pdf_path, status = orchestrator.render_from_content(job_id, content)
-                if pdf_path:
-                    st.session_state["current_pdf"] = pdf_path
-                    st.session_state["render_success_toast"] = True
-                else:
-                    st.error(f"❌ Render Failed: {status}")
-            
-            st.session_state["is_rendering"] = False
-            st.rerun()
-
-    # --- Download & Prev ---
+def render_pdf_preview(job_id, company, title):
+    """
+    AI-CONTEXT: Encapsulates the PDF visualization and download.
+    Includes cache-busting logic to prevent stale previews.
+    """
     display_path = st.session_state.get("current_pdf")
     if not display_path:
         potential = os.path.join(orchestrator.output_dir, f"{job_id}.pdf")
@@ -521,45 +500,60 @@ with col_editor:
             display_path = potential
 
     if display_path and os.path.exists(display_path):
-        with st.expander("📄 PDF Preview & Download", expanded=True):
-            btn_col_l, btn_col_r = st.columns([3, 1])
-            with btn_col_l:
-                 st.info("PDF generated successfully. Review the preview below before downloading.")
-            with btn_col_r:
-                # Provide nice filename
-                clean_t = re.sub(r'[^a-zA-Z0-9]', '_', title)
-                clean_c = re.sub(r'[^a-zA-Z0-9]', '_', company)
-                nice_name = f"Aaron_Guo_{clean_t}_{clean_c}.pdf"
-                with open(display_path, "rb") as f:
-                    st.download_button("⬇️ Download PDF", data=f.read(), file_name=nice_name, mime="application/pdf", width="stretch")
-
-            # Inline PDF Preview
+        with st.container(border=True):
+            # Inline PDF Preview (Match Editor Height: 85vh)
+            # AI-CONTEXT: Using a timestamp-based ID as a cache-buster to force the browser 
+            # to redraw the iframe after every render, preventing stale PDF previews.
+            update_time = st.session_state.get("pdf_update_time", 0)
             with open(display_path, "rb") as f:
                 base64_pdf = base64.b64encode(f.read()).decode('utf-8')
-            pdf_iframe = f'<iframe src="data:application/pdf;base64,{base64_pdf}" width="100%" style="height: 60vh; border-radius: 8px;" type="application/pdf"></iframe>'
+            pdf_iframe = f'<iframe id="pdf-preview-{update_time}" src="data:application/pdf;base64,{base64_pdf}" width="100%" style="height: 85vh; border-radius: 8px;" type="application/pdf"></iframe>'
             st.markdown(pdf_iframe, unsafe_allow_html=True)
     else:
-        st.info("Click **Render PDF** to generate the document.")
+        with st.container(border=True):
+             st.info("Click **Render PDF** to generate the document.")
 
-# Inject Keyboard Listener for Ctrl+Enter
-import streamlit.components.v1 as components
-components.html(
-    """
-    <script>
-    const doc = window.parent.document;
-    doc.addEventListener('keydown', function(e) {
-        if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
-            e.preventDefault();
-            if (doc.activeElement) { doc.activeElement.blur(); }
-            setTimeout(() => {
-                const buttons = Array.from(doc.querySelectorAll('button'));
-                const renderBtn = buttons.find(b => b.innerText.includes('Render PDF'));
-                if (renderBtn) { renderBtn.click(); }
-            }, 100);
-        }
-    });
-    </script>
-    """,
-    height=0,
-    width=0,
-)
+# --- Restriction Warning ---
+res_data = job.get("restriction_data", {})
+if isinstance(res_data, dict) and res_data.get("restricted"):
+    st.error(f"🚫 **ITAR/Clearance Warning:** {res_data.get('reason')}. Ensure eligibility before tailoring.", icon="🚫")
+
+# --- 4.5. Render Compilation Logic ---
+if st.session_state.get("is_rendering", False):
+    with st.spinner("Compiling with RenderCV..."):
+        content = st.session_state["yaml_editor"]
+        # 1. Save current buffer to disk
+        save_result = orchestrator.save_job_cv(job_id, content)
+        if isinstance(save_result, dict) and not save_result.get("success", True):
+            st.error(f"❌ Save Failed: {save_result.get('error', 'Unknown error')}")
+        else:
+            # 2. Render from content
+            pdf_path, status = orchestrator.render_from_content(job_id, content)
+            if pdf_path:
+                st.session_state["current_pdf"] = pdf_path
+                st.session_state["render_success_toast"] = True
+                # AI-CONTEXT: Cache-buster update to force UI refresh of the PDF iframe.
+                st.session_state["pdf_update_time"] = time.time()
+            else:
+                st.error(f"❌ Render Failed: {status}")
+        
+        st.session_state["is_rendering"] = False
+        st.rerun()
+
+# --- 5. Workspace Execution ---
+layout = st.session_state.get("workspace_layout", "Stacked")
+
+# Pass arguments explicitly for scope safety
+if layout == "Stacked":
+    render_editor_workspace(job_id, company, title, is_master, is_playground)
+    st.divider()
+    with st.expander("📄 PDF Preview & Download", expanded=True):
+        render_pdf_preview(job_id, company, title)
+else:
+    # Side-by-Side: 1:1 ratio
+    # AI-CONTEXT: Explicitly setting vertical_alignment to "top" for technical layout parity.
+    col_edit, col_prev = st.columns([1, 1], gap="medium", vertical_alignment="top")
+    with col_edit:
+        render_editor_workspace(job_id, company, title, is_master, is_playground)
+    with col_prev:
+        render_pdf_preview(job_id, company, title)
