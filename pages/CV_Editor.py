@@ -16,6 +16,72 @@ import re
 from datetime import datetime
 import streamlit.components.v1 as components
 
+def show_premium_toast(message="Render Complete", duration_ms=2000):
+    # AI-CONTEXT: Custom toast implementation bypassing st.toast to avoid React state conflicts.
+    # Uses a self-destructing HTML/JS payload for precise timing and CSS isolation.
+    # We use window.parent.document to ensure the toast renders over the main Streamlit app.
+    # Includes cleanup logic to prevent overlapping/bloated toasts in rapid rendering scenarios.
+    
+    toast_html = f"""
+    <script>
+        (function() {{
+            const doc = window.parent.document;
+            const toastId = 'custom-premium-toast';
+            
+            // Cleanup: Destroy the old toast instantly if it exists
+            const existingToast = doc.getElementById(toastId);
+            if (existingToast) {{
+                existingToast.remove();
+            }}
+            
+            // Create the new toast container
+            const toast = doc.createElement('div');
+            toast.id = toastId;
+            toast.innerText = "{message}";
+            
+            // Apply Premium Glassmorphic CSS directly
+            Object.assign(toast.style, {{
+                position: 'fixed',
+                bottom: '24px',
+                right: '24px',
+                background: 'rgba(46, 204, 113, 0.85)',
+                backdropFilter: 'blur(8px)',
+                WebkitBackdropFilter: 'blur(8px)',
+                color: 'white',
+                padding: '12px 24px',
+                borderRadius: '8px',
+                fontFamily: 'sans-serif',
+                fontWeight: '500',
+                boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+                zIndex: '999999',
+                transition: 'opacity 0.4s ease, transform 0.4s ease',
+                opacity: '0',
+                transform: 'translateY(20px)'
+            }});
+            
+            doc.body.appendChild(toast);
+            
+            // Trigger entry animation
+            setTimeout(() => {{
+                if (doc.getElementById(toastId) === toast) {{
+                    toast.style.opacity = '1';
+                    toast.style.transform = 'translateY(0)';
+                }}
+            }}, 50);
+            
+            // Trigger exit animation and complete DOM removal
+            setTimeout(() => {{
+                if (doc.getElementById(toastId) === toast) {{
+                    toast.style.opacity = '0';
+                    toast.style.transform = 'translateY(20px)';
+                    setTimeout(() => toast.remove(), 400); 
+                }}
+            }}, {duration_ms});
+        }})();
+    </script>
+    """
+    components.html(toast_html, height=0, width=0)
+
 from utils.ui_utils import inject_custom_css
 
 try:
@@ -231,7 +297,7 @@ if "is_rendering" not in st.session_state:
     st.session_state["is_rendering"] = False
 
 if st.session_state.pop("render_success_toast", False):
-    st.toast("✅ Render Complete! 📄")
+    show_premium_toast("✅ Render Complete! 📄", 2000)
 
 # --- SIDEBAR: Job Info, Navigation, Render, Download, AI Tools ---
 with st.sidebar:
@@ -458,8 +524,8 @@ def render_editor_workspace(job_id, company, title, is_master, is_playground):
         st.session_state[f"buffer_{job_id}"] = edited_content
 
     # AI-CONTEXT: JavaScript injection for cross-platform hotkeys (Cmd/Ctrl + Enter).
-    # Moved to the bottom of the column to ensure it doesn't affect the top alignment 
-    # of the first visible container.
+    # Moved to the end of the workspace module to ensure it doesn't affect the 
+    # top alignment of the first visible container.
     js_hotkey_code = """
     <script>
     (function() {
