@@ -157,16 +157,33 @@ def execute_scraping_run(companies_filter: str = None):
     Core logic meant to be imported by the Streamlit UI or other scripts.
     Returns a dictionary summary.
     """
-    # 1. Check for existing lock
-    if LOCK_FILE.exists():
-        return {
-            "status": "Failed: Scraper is already running in another process.", 
-            "jobs_found": 0, 
-            "duration_seconds": 0
-        }
-
     setup_logging()
     logger = logging.getLogger()
+
+    # 1. Check for existing lock
+    if LOCK_FILE.exists():
+        try:
+            with open(LOCK_FILE, "r") as f:
+                content = f.read().strip()
+                if content.startswith("locked at "):
+                    lock_time_str = content.replace("locked at ", "")
+                    lock_time = datetime.fromisoformat(lock_time_str)
+                    if (datetime.now() - lock_time).total_seconds() > 7200: # 2 hours
+                        logger.warning("Stale lock file detected (older than 2 hours). Clearing it.")
+                        LOCK_FILE.unlink()
+                    else:
+                        return {
+                            "status": "Failed: Scraper is already running in another process.", 
+                            "jobs_found": 0, 
+                            "duration_seconds": 0
+                        }
+        except Exception as e:
+            logger.warning(f"Could not parse lock file date, assuming valid lock: {e}")
+            return {
+                "status": "Failed: Scraper is already running in another process.", 
+                "jobs_found": 0, 
+                "duration_seconds": 0
+            }
     
     # [SRE: ANTI-BOT JITTER]
     # To avoid a consistent "Heartbeat" signature on job boards.
