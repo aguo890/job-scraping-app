@@ -220,8 +220,7 @@ preferred_skills:
 - Databases
 - MySQL
 - SQLite
-- HMI
- - VHDL
+- HMI - VHDL
 penalty_skills:
 - Swift
 - Objective-C
