@@ -89,6 +89,11 @@ try:
 except ImportError:
     CVOrchestrator = None
 
+try:
+    import ai_tailor
+except ImportError:
+    ai_tailor = None
+
 # AI-CONTEXT: Native Streamlit Modal (Lightbox) for Full-Screen PDF viewing.
 # Using width="large" ensures it takes up maximum screen real estate.
 # This function is defined at the TOP of the file to ensure it's in memory 
