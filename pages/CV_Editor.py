@@ -159,6 +159,30 @@ div[role="dialog"] [data-testid="stDialogHeader"] h2 {
 # Global UI Inject (includes transparent toolbar + workshop styles)
 inject_custom_css(workshop_css)
 
+# --- User Preferences Persistence ---
+def get_prefs_path():
+    return os.path.join(parent_dir, "data", "user_prefs.json")
+
+def load_user_prefs():
+    prefs_file = get_prefs_path()
+    if os.path.exists(prefs_file):
+        try:
+            with open(prefs_file, "r", encoding="utf-8") as f:
+                return json.load(f)
+        except Exception:
+            pass
+    return {}
+
+def save_user_pref(key, value):
+    prefs_file = get_prefs_path()
+    prefs = load_user_prefs()
+    prefs[key] = value
+    try:
+        with open(prefs_file, "w", encoding="utf-8") as f:
+            json.dump(prefs, f, indent=4)
+    except Exception as e:
+        st.error(f"Failed to save preference: {e}")
+
 # --- 1. Navigation Guard (with URL persistence) ---
 SPECIAL_ROUTING_JOBS = {
     "master_cv": {
@@ -369,23 +393,22 @@ with st.sidebar:
     # --- ⚙️ Workspace Layout Settings ---
     st.subheader("⚙️ Settings")
     
-    def sync_layout_to_url():
-        st.query_params["layout"] = st.session_state["workspace_layout"]
+    # AI-CONTEXT: Callback to save preference to disk immediately on change.
+    # This survives page navigation, hard reloads, and server restarts.
+    def sync_layout_to_disk():
+        save_user_pref("workspace_layout", st.session_state["workspace_layout"])
 
-    # Initialize from URL query params (survives hard refresh)
+    # AI-CONTEXT: Initialize from the JSON file on first load.
     if "workspace_layout" not in st.session_state:
-        url_layout = st.query_params.get("layout", "Stacked")
-        if url_layout in ["Stacked", "Side-by-Side"]:
-             st.session_state["workspace_layout"] = url_layout
-        else:
-             st.session_state["workspace_layout"] = "Stacked"
+        prefs = load_user_prefs()
+        st.session_state["workspace_layout"] = prefs.get("workspace_layout", "Stacked")
     
     st.radio(
         "View Mode", 
         ["Stacked", "Side-by-Side"], 
         key="workspace_layout", 
         horizontal=True,
-        on_change=sync_layout_to_url
+        on_change=sync_layout_to_disk
     )
 
     st.divider()
