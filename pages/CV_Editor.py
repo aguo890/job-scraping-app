@@ -89,10 +89,18 @@ try:
 except ImportError:
     CVOrchestrator = None
 
-try:
-    import ai_tailor
-except ImportError:
-    ai_tailor = None
+# AI-CONTEXT: Native Streamlit Modal (Lightbox) for Full-Screen PDF viewing.
+# Using width="large" ensures it takes up maximum screen real estate.
+# This function is defined at the TOP of the file to ensure it's in memory 
+# before any layout blocks (sidebar/main) try to call it.
+@st.dialog(" ", width="large")
+def show_fullscreen_preview(pdf_bytes):
+    # AI-CONTEXT: Custom close button removed. Relying on native dialog 'X' header.
+    base64_pdf = base64.b64encode(pdf_bytes).decode('utf-8')
+    
+    # AI-CONTEXT: Iframe height bumped to 85vh to maximize space.
+    pdf_display = f'<iframe src="data:application/pdf;base64,{base64_pdf}" width="100%" height="85vh" style="border-radius: 8px; border: none;" type="application/pdf"></iframe>'
+    st.markdown(pdf_display, unsafe_allow_html=True)
 
 st.set_page_config(page_title="CV Editor", layout="wide")
 
@@ -110,6 +118,41 @@ workshop_css = """
 .stMainBlockContainer {
     padding-bottom: 0rem !important;
     max-width: 100% !important;
+}
+
+/* AI-CONTEXT: Force Streamlit dialogs (modals) to act as true full-screen lightboxes. */
+/* This MUST be applied globally to override React's pre-calculated boundaries on load. */
+div[role="dialog"] {
+    width: 95vw !important;
+    max-width: 95vw !important;
+    height: 95vh !important;
+    max-height: 95vh !important;
+}
+
+/* AI-CONTEXT: The Ultimate Hammer. */
+div[role="dialog"] iframe {
+    height: 85vh !important;
+    min-height: 85vh !important;
+}
+
+/* AI-CONTEXT: The stDialogHeader hiding rule was REMOVED here to restore 
+   the native 'X' close button in the top right corner. */
+
+/* AI-CONTEXT: Lock the internal dialog scroll to prevent ugly double-scrollbars */
+div[role="dialog"] [data-testid="stDialogContent"] {
+    overflow: hidden !important;
+    padding-bottom: 0px !important;
+}
+
+/* Zero out inner padding to ensure 100% content occupancy */
+div[role="dialog"] > div > div {
+    padding: 0 !important;
+}
+
+/* AI-CONTEXT: Hide the specific title text (h2) while keeping the header visible 
+   to preserve the native 'X' close button. */
+div[role="dialog"] [data-testid="stDialogHeader"] h2 {
+    display: none !important;
 }
 """
 
@@ -384,15 +427,22 @@ with st.sidebar:
         
         with open(display_path, "rb") as f:
             pdf_data = f.read()
+
+        # --- Sidebar PDF Toolbar ---
+        pdf_cols = st.columns([1, 1])
+        with pdf_cols[0]:
             st.download_button(
-                "⏳ Rendering..." if st.session_state["is_rendering"] else "⬇️ Download PDF",
+                "⏳ Rendering..." if st.session_state["is_rendering"] else "⬇️ Download",
                 data=pdf_data,
                 file_name=nice_filename,
                 mime="application/pdf",
-                width="stretch",
+                use_container_width=True,
                 key=f"dl_{job_id}_{mtime}",
                 disabled=st.session_state["is_rendering"]
             )
+        with pdf_cols[1]:
+            if st.button("🔍 Full Screen", use_container_width=True, disabled=st.session_state["is_rendering"]):
+                show_fullscreen_preview(pdf_data)
 
     # Reset Button
     if st.button("🔄 Reset to Base", help="Discard changes and revert to Master CV"):
@@ -554,10 +604,11 @@ def render_editor_workspace(job_id, company, title, is_master, is_playground):
     """
     components.html(js_hotkey_code, height=0, width=0)
 
+
 def render_pdf_preview(job_id, company, title):
     """
-    AI-CONTEXT: Encapsulates the PDF visualization and download.
-    Includes cache-busting logic to prevent stale previews.
+    AI-CONTEXT: Encapsulates the PDF visualization and download icon toolbar.
+    Includes cache-busting logic and native lightbox integration.
     """
     display_path = st.session_state.get("current_pdf")
     if not display_path:
@@ -568,11 +619,12 @@ def render_pdf_preview(job_id, company, title):
     if display_path and os.path.exists(display_path):
         with st.container(border=True):
             # Inline PDF Preview (Match Editor Height: 85vh)
-            # AI-CONTEXT: Using a timestamp-based ID as a cache-buster to force the browser 
-            # to redraw the iframe after every render, preventing stale PDF previews.
+            # AI-CONTEXT: Pure Zen workspace. No buttons in the main content area.
+            # Iframe restored to 85vh to perfectly match the editor column.
             update_time = st.session_state.get("pdf_update_time", 0)
             with open(display_path, "rb") as f:
-                base64_pdf = base64.b64encode(f.read()).decode('utf-8')
+                pdf_bytes = f.read()
+                base64_pdf = base64.b64encode(pdf_bytes).decode('utf-8')
             pdf_iframe = f'<iframe id="pdf-preview-{update_time}" src="data:application/pdf;base64,{base64_pdf}" width="100%" style="height: 85vh; border-radius: 8px;" type="application/pdf"></iframe>'
             st.markdown(pdf_iframe, unsafe_allow_html=True)
     else:
