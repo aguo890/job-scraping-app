@@ -12,7 +12,7 @@ description = "Job scraping and analysis dashboard"
 # Add them here and run `pip-compile pyproject.toml -o requirements.txt`
 dependencies = [
     "requests==2.31.0",
-    "PyYAML==6.0.1",
+    "PyYAML==6.0.1",    
     "streamlit",
     "watchdog", # Explicitly promoted for Docker resolution drift
     "pandas",
@@ -21,7 +21,8 @@ dependencies = [
     "openai",
     "python-dotenv",
     "ruamel.yaml",
-    "schedule==1.2.1"
+    "schedule==1.2.1",
+    "streamlit-code-editor"
 ]
 
 [project.optional-dependencies]

@@ -102,6 +102,8 @@ def show_fullscreen_preview(pdf_bytes):
     pdf_display = f'<iframe src="data:application/pdf;base64,{base64_pdf}" width="100%" height="85vh" style="border-radius: 8px; border: none;" type="application/pdf"></iframe>'
     st.markdown(pdf_display, unsafe_allow_html=True)
 
+
+
 st.set_page_config(page_title="CV Editor", layout="wide")
 
 # Workshop-Specific CSS
@@ -109,11 +111,7 @@ workshop_css = """
 .stMain {
     min-height: 100vh !important;
 }
-/* Make YAML editor fill viewport like rendercv app */
-.stTextArea textarea {
-    font-family: 'Source Code Pro', monospace;
-    height: 85vh !important;
-}
+
 /* Workshop-specific container overrides */
 .stMainBlockContainer {
     padding-bottom: 0rem !important;
@@ -153,6 +151,20 @@ div[role="dialog"] > div > div {
    to preserve the native 'X' close button. */
 div[role="dialog"] [data-testid="stDialogHeader"] h2 {
     display: none !important;
+}
+
+/* [AI CONTEXT: Fix Segmented Control text blocking click events. 
+   Forces the mouse to ignore the text spans and pass the click to the background radio label.
+   Scoped specifically via data-testid to prevent breaking text selection globally.] */
+div[data-testid="stSegmentedControl"] p, 
+div[data-testid="stSegmentedControl"] span {
+    pointer-events: none !important;
+}
+
+div[data-testid="stSegmentedControl"] label {
+    pointer-events: auto !important;
+    cursor: pointer !important; /* Forces the hand icon to reassure the user */
+    z-index: 10 !important;
 }
 """
 
@@ -401,11 +413,18 @@ with st.sidebar:
     # AI-CONTEXT: Initialize from the JSON file on first load.
     if "workspace_layout" not in st.session_state:
         prefs = load_user_prefs()
-        st.session_state["workspace_layout"] = prefs.get("workspace_layout", "Stacked")
+        default_layout = prefs.get("workspace_layout", "Tabbed")
+
+        # [AI CONTEXT: Gracefully migrate legacy "Side-by-Side" preferences to prevent StreamlitAPIException 
+        # when initializing the updated radio button options.]
+        if default_layout == "Side-by-Side":
+            default_layout = "Tabbed"
+
+        st.session_state["workspace_layout"] = default_layout
     
     st.radio(
         "View Mode", 
-        ["Stacked", "Side-by-Side"], 
+        ["Stacked", "Tabbed"], 
         key="workspace_layout", 
         horizontal=True,
         on_change=sync_layout_to_disk
@@ -585,47 +604,48 @@ def render_editor_workspace(job_id, company, title, is_master, is_playground):
         if "yaml_editor" not in st.session_state:
             st.session_state["yaml_editor"] = st.session_state["editor_yaml"]
 
-        edited_content = st.text_area(
-            "Draft Buffer",
-            value=st.session_state["yaml_editor"],
-            height=None, 
-            key="yaml_editor_widget",
-            label_visibility="collapsed",
-            on_change=lambda: st.session_state.__setitem__("yaml_editor", st.session_state["yaml_editor_widget"])
-        )
-        st.session_state["yaml_editor"] = edited_content
-        st.session_state[f"buffer_{job_id}"] = edited_content
+        # [AI CONTEXT: Replaced native st.text_area with streamlit_code_editor for robust YAML editing. 
+        # State is only updated when the explicit "Save" button is clicked (type == "submit") to prevent unnecessary re-renders.]
+        from code_editor import code_editor
 
-    # AI-CONTEXT: JavaScript injection for cross-platform hotkeys (Cmd/Ctrl + Enter).
-    # Moved to the end of the workspace module to ensure it doesn't affect the 
-    # top alignment of the first visible container.
-    js_hotkey_code = """
-    <script>
-    (function() {
-        const doc = window.parent.document;
-        const handler = function(e) {
-            if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
-                const buttons = Array.from(doc.querySelectorAll('button'));
-                const renderBtn = buttons.find(b => b.textContent && b.textContent.includes('Render PDF'));
-                if (renderBtn) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    if (doc.activeElement) doc.activeElement.blur();
-                    setTimeout(() => {
-                        renderBtn.click();
-                    }, 250);
-                }
-            }
-        };
-        if (window.parent._cvRenderHandler) {
-            doc.removeEventListener('keydown', window.parent._cvRenderHandler);
-        }
-        window.parent._cvRenderHandler = handler;
-        doc.addEventListener('keydown', handler, true);
-    })();
-    </script>
-    """
-    components.html(js_hotkey_code, height=0, width=0)
+        # [AI CONTEXT: Added native Ace editor keybinds (Cmd+Enter/Ctrl+Enter) to trigger the submit action,
+        # bypassing the need for fragile global JS listeners. Updated semantics to "Save & Render".]
+        custom_btns = [{
+            "name": "Save & Render", 
+            "feather": "Play",
+            "hasText": True,
+            "alwaysOn": True,
+            "commands": ["submit"],
+            "style": {"bottom": "0.44rem", "right": "0.4rem"},
+            "bindKey": {"win": "Ctrl-Enter", "mac": "Command-Enter"}
+        }]
+
+        # [AI CONTEXT: Added a permanent explicit key so we can intercept the editor's memory payload 
+        # during view toggles before Streamlit garbage collects unmounted components.]
+        editor_dict = code_editor(
+            st.session_state["yaml_editor"], 
+            lang="yaml", 
+            height=[40, 50], 
+            buttons=custom_btns,
+            key=f"cv_code_editor_{job_id}"
+        )
+
+        # [AI CONTEXT: Decouple live text tracking from the submit hook so the dirty-state modal 
+        # accurately detects unsaved changes when the user clicks the segmented control toggle.]
+        
+        # 1. ALWAYS capture the live text from the editor if it exists, regardless of submit state.
+        # This ensures Python knows about unsaved keystrokes when the segmented control reruns the app.
+        if editor_dict.get('text'):
+            st.session_state["yaml_editor"] = editor_dict['text']
+            st.session_state[f"buffer_{job_id}"] = editor_dict['text']
+
+        # 2. ONLY lock the compile hash and trigger a hard rerun if they explicitly hit Save & Render
+        if editor_dict.get('text') and editor_dict.get('type') == "submit":
+            st.session_state[f"last_compiled_{job_id}"] = editor_dict['text']
+            st.session_state["is_rendering"] = True
+            st.rerun()
+
+
 
 
 def render_pdf_preview(job_id, company, title):
@@ -691,10 +711,68 @@ if layout == "Stacked":
     with st.expander("📄 PDF Preview & Download", expanded=True):
         render_pdf_preview(job_id, company, title)
 else:
-    # Side-by-Side: 1:1 ratio
-    # AI-CONTEXT: Explicitly setting vertical_alignment to "top" for technical layout parity.
-    col_edit, col_prev = st.columns([1, 1], gap="medium", vertical_alignment="top")
-    with col_edit:
+    # [AI CONTEXT: Fake Tabs (State-Controlled Layout)]
+    # We use st.segmented_control to impersonate tabs. Clicking this natively triggers a Python rerun.
+    view_mode = st.segmented_control(
+        "Workspace View Toggle",
+        ["📝 Code Editor", "👁️ Rendered Preview"],
+        default="📝 Code Editor",
+        label_visibility="collapsed"
+    )
+
+    if view_mode == "📝 Code Editor":
+        # Always reset the ignore flag when they go back to the editor
+        st.session_state[f"ignore_dirty_{job_id}"] = False
         render_editor_workspace(job_id, company, title, is_master, is_playground)
-    with col_prev:
-        render_pdf_preview(job_id, company, title)
+        
+    elif view_mode == "👁️ Rendered Preview":
+        
+        # [AI CONTEXT: GARBAGE COLLECTION RESCUE]
+        # Because the code_editor component isn't rendered in this block, Streamlit will wipe its data
+        # at the end of this run. We must securely extract the unsaved text from memory first so our
+        # dirty-state modal can accurately evaluate the delta.
+        editor_memory_key = f"cv_code_editor_{job_id}"
+        if editor_memory_key in st.session_state:
+            ghost_payload = st.session_state[editor_memory_key]
+            if isinstance(ghost_payload, dict) and ghost_payload.get("text"):
+                # Rescue the unsaved keystrokes into our permanent buffers
+                st.session_state["yaml_editor"] = ghost_payload["text"]
+                st.session_state[f"buffer_{job_id}"] = ghost_payload["text"]
+
+        current_yaml = st.session_state.get(f"buffer_{job_id}", "")
+        
+        # 2. INITIALIZE TRACKER ON FIRST LOAD
+        if f"last_compiled_{job_id}" not in st.session_state:
+            st.session_state[f"last_compiled_{job_id}"] = current_yaml
+            
+        last_compiled = st.session_state[f"last_compiled_{job_id}"]
+
+        # 3. ROBUST TEXT NORMALIZATION (Ignores hidden line-ending differences)
+        def clean_text(text):
+            return text.strip().replace('\r\n', '\n') if isinstance(text, str) else ""
+
+        is_dirty = clean_text(current_yaml) != clean_text(last_compiled)
+
+        # 4. INLINE WARNING UI (Bypasses the st.dialog crash bug)
+        if is_dirty and not st.session_state.get(f"ignore_dirty_{job_id}", False):
+            st.warning("⚠️ **Unsaved Changes Detected:** You have modified the YAML code since your last render.")
+            
+            col1, col2 = st.columns(2)
+            
+            if col1.button("Compile New PDF", type="primary"):
+                
+                # [AI CONTEXT: CRITICAL DISK WRITE]
+                # The compiler reads from disk. We MUST write the buffer to the hard drive here!
+                save_draft_to_disk(job_id, current_yaml)
+                
+                st.session_state[f"last_compiled_{job_id}"] = current_yaml
+                st.session_state["is_rendering"] = True
+                st.rerun()
+                
+            if col2.button("View Outdated Preview"):
+                st.session_state[f"ignore_dirty_{job_id}"] = True
+                st.rerun()
+                
+        else:
+            # State is clean, OR user bypassed warning
+            render_pdf_preview(job_id, company, title)
