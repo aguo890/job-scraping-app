@@ -11,8 +11,8 @@ description = "Job scraping and analysis dashboard"
 # Do NOT add loose dependencies directly to Dockerfiles. 
 # Add them here and run `pip-compile pyproject.toml -o requirements.txt`
 dependencies = [
-    "requests==2.31.0",
-    "PyYAML==6.0.1",    
+    "requests>=2.31.0",
+    "PyYAML>=6.0.1",    
     "streamlit",
     "watchdog", # Explicitly promoted for Docker resolution drift
     "pandas",
