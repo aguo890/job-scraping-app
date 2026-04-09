@@ -405,6 +405,26 @@ def get_user_name_from_yaml(yaml_content):
 if "editor_yaml" not in st.session_state:
     st.session_state["editor_yaml"] = orchestrator.load_job_cv(job_id)
 
+# --- Theme Swapping Logic ---
+def get_theme_from_yaml(yaml_content):
+    """Robustly extracts theme name from RenderCV YAML."""
+    import re
+    # Matches theme: classic or theme: "classic" or theme: 'classic'
+    match = re.search(r'(?m)^\s*theme\s*:\s*["\']?([a-zA-Z0-9_-]+)["\']?', yaml_content)
+    if match:
+        return match.group(1)
+    return "classic"
+
+def apply_theme_to_yaml(yaml_content, theme_name):
+    """Robustly replaces the theme value in RenderCV YAML while preserving whitespace and comments."""
+    import re
+    # Pattern captures the prefix (theme: ) and matches everything until the end of the line (including potential comments)
+    # but we only want to replace the value part.
+    # To be safe, we'll use same capturing group logic.
+    pattern = r'(?m)^(\s*theme\s*:\s*).+'
+    replacement = rf'\g<1>{theme_name}'
+    return re.sub(pattern, replacement, yaml_content)
+
 if "is_rendering" not in st.session_state:
     st.session_state["is_rendering"] = False
 
@@ -478,6 +498,40 @@ with st.sidebar:
         horizontal=True,
         on_change=sync_layout_to_disk
     )
+
+    # --- 🎨 Theme Switcher ---
+    st.divider()
+    st.subheader("🎨 Resume Theme")
+    
+    available_themes = [
+        "classic", "sb2nov", "moderncv", "engineeringresumes", 
+        "engineeringclassic"
+    ]
+    
+    current_yaml = st.session_state.get("yaml_editor", st.session_state["editor_yaml"])
+    current_theme = get_theme_from_yaml(current_yaml)
+    
+    # [AI CONTEXT: Safe Index Fallback]
+    # If the YAML contains a theme no longer in our list (e.g., from a version mismatch),
+    # fallback to "classic" (index 0) to prevent a StreamlitAPIException.
+    try:
+        default_index = available_themes.index(current_theme)
+    except ValueError:
+        default_index = 0
+
+    selected_theme = st.selectbox(
+        "Template Style",
+        options=available_themes,
+        index=default_index,
+        help="Instantly swap the visual template of your resume."
+    )
+
+    if selected_theme != current_theme:
+        new_yaml = apply_theme_to_yaml(current_yaml, selected_theme)
+        st.session_state["yaml_editor"] = new_yaml
+        st.session_state[f"buffer_{job_id}"] = new_yaml
+        st.session_state["is_rendering"] = True # Trigger auto-render on theme change
+        st.rerun()
 
     st.divider()
 
