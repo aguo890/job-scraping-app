@@ -14,7 +14,12 @@ logger = logging.getLogger(__name__)
 
 # Base path relative to this file (job-scraping-app/utils/data_manager.py)
 BASE_DIR = Path(__file__).resolve().parent.parent
-DATA_DIR = BASE_DIR / "data"
+ROOT_DIR = BASE_DIR.parent
+
+# SRE Logic: Check root directory first, then fallback to submodule data directory
+ROOT_DATA_DIR = ROOT_DIR / "data"
+DATA_DIR = ROOT_DATA_DIR if ROOT_DATA_DIR.exists() else (BASE_DIR / "data")
+
 JOB_DATA_FILE = DATA_DIR / "jobs_agg.json"
 TRACKING_FILE = DATA_DIR / "tracking.json"
 HISTORY_FILE = DATA_DIR / "scrape_history.json"

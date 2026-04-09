@@ -363,13 +363,46 @@ with tabs[5]:
         with col_dm2:
             import json
             if st.button("🗑️ Reset All Data", type="primary", use_container_width=True):
-                jobs_file = os.path.join(parent_dir, "data", "jobs_agg.json")
-                if os.path.exists(jobs_file):
-                    try:
-                        with open(jobs_file, "w", encoding="utf-8") as f:
-                            json.dump({"jobs": []}, f)
-                        st.success("Scraping history cleared successfully! You can now start a fresh search.")
-                    except Exception as e:
-                        st.error(f"Failed to clear data: {e}")
-                else:
-                    st.info("No scraping history found to clear.")
+                submodule_file = os.path.join(parent_dir, "data", "jobs_agg.json")
+                root_file = os.path.join(parent_dir, "..", "data", "jobs_agg.json")
+                tracking_file = os.path.join(parent_dir, "..", "data", "tracking.json")
+                if not os.path.exists(tracking_file):
+                    tracking_file = os.path.join(parent_dir, "data", "tracking.json")
+                
+                try:
+                    # 1. Load tracking data to know what to preserve
+                    tracked_ids = set()
+                    if os.path.exists(tracking_file):
+                        with open(tracking_file, "r", encoding="utf-8") as f:
+                            try:
+                                tracking_data = json.load(f)
+                                for jid, tdata in tracking_data.items():
+                                    if tdata.get("saved", False) or tdata.get("status", "New") != "New":
+                                        tracked_ids.add(jid)
+                            except json.JSONDecodeError:
+                                pass
+
+                    # 2. Sweep jobs_agg.json files and preserve tracked jobs
+                    cleared_any = False
+                    for file_path in [submodule_file, root_file]:
+                        if os.path.exists(file_path):
+                            preserved_jobs = []
+                            with open(file_path, "r", encoding="utf-8") as f:
+                                try:
+                                    current_data = json.load(f)
+                                    all_jobs = current_data.get("jobs", [])
+                                    preserved_jobs = [job for job in all_jobs if job.get("id") in tracked_ids]
+                                except json.JSONDecodeError:
+                                    pass
+                                    
+                            with open(file_path, "w", encoding="utf-8") as f:
+                                json.dump({"jobs": preserved_jobs, "total_jobs": len(preserved_jobs), "generated_at": "Unknown"}, f)
+                            cleared_any = True
+                            
+                    if cleared_any:
+                        st.cache_data.clear()
+                        st.success(f"Scraping history cleared successfully! {len(tracked_ids)} tracked/saved jobs were preserved.")
+                    else:
+                        st.info("No scraping history found to clear.")
+                except Exception as e:
+                    st.error(f"Failed to clear data: {e}")

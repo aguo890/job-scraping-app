@@ -629,6 +629,7 @@ def render_editor_workspace(job_id, company, title, is_master, is_playground):
             lang="yaml", 
             height=[40, 50], 
             buttons=custom_btns,
+            response_mode="blur",
             key=f"cv_code_editor_{job_id}"
         )
 
@@ -775,26 +776,12 @@ else:
 
         is_dirty = clean_text(current_yaml) != clean_text(last_compiled)
 
-        # 4. INLINE WARNING UI (Bypasses the st.dialog crash bug)
-        if is_dirty and not st.session_state.get(f"ignore_dirty_{job_id}", False):
-            st.warning("⚠️ **Unsaved Changes Detected:** You have modified the YAML code since your last render.")
+        # 4. Auto-Compile on Tab Switch (Fix for Issue #8)
+        if is_dirty:
+            st.session_state[f"last_compiled_{job_id}"] = current_yaml
+            st.session_state["is_rendering"] = True
+            st.rerun()
             
-            col1, col2 = st.columns(2)
-            
-            if col1.button("Compile New PDF", type="primary"):
-                
-                # [AI CONTEXT: CRITICAL DISK WRITE]
-                # The compiler reads from disk. We MUST write the buffer to the hard drive here!
-                save_draft_to_disk(job_id, current_yaml)
-                
-                st.session_state[f"last_compiled_{job_id}"] = current_yaml
-                st.session_state["is_rendering"] = True
-                st.rerun()
-                
-            if col2.button("View Outdated Preview"):
-                st.session_state[f"ignore_dirty_{job_id}"] = True
-                st.rerun()
-                
         else:
-            # State is clean, OR user bypassed warning
+            # State is clean
             render_pdf_preview(job_id, company, title)
