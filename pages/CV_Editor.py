@@ -158,29 +158,29 @@ div[role="dialog"] [data-testid="stDialogHeader"] h2 {
     display: none !important;
 }
 
-/* [AI CONTEXT: Fix Segmented Control text blocking click events. 
-   Forces the mouse to ignore the text spans and pass the click to the background radio label.
-   Scoped specifically via data-testid to prevent breaking text selection globally.] */
-/* [AI CONFLICT RESOLUTION: Issue #15 Fix - Reliable Toggle Clickability] */
-div[data-testid="stSegmentedControl"] [role="radiogroup"] {
-    gap: 0 !important;
+/* [AI CONTEXT: Fix Segmented Control Dead Space via Absolute Overlay] */
+/* 1. Make the outer label the anchor point for the overlay */
+div[data-testid="stSegmentedControl"] label {
+    position: relative !important;
+    cursor: pointer !important;
 }
 
-div[data-testid="stSegmentedControl"] label {
-    cursor: pointer !important;
-    width: 100% !important;
-    height: 100% !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    padding: 8px 16px !important;
+/* 2. Create an invisible pseudo-element attached to the text that stretches to the absolute edges of the label */
+div[data-testid="stSegmentedControl"] label p::before,
+div[data-testid="stSegmentedControl"] label span::before {
+    content: "" !important;
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
     z-index: 10 !important;
 }
 
-div[data-testid="stSegmentedControl"] label p {
-    pointer-events: none !important;
-    width: 100% !important;
-    text-align: center !important;
+/* 3. [AI CONTEXT: Fix Double-Click Phase 1 - Hitbox Anchoring]
+   Prevents the overlay from "jumping" when the button is depressed into its :active state. */
+div[data-testid="stSegmentedControl"] label:active::before {
+    transform: none !important;
 }
 
 /* [AI CONTEXT: Fix Code Editor custom buttons text/icons blocking click events. 
@@ -774,20 +774,19 @@ else:
     # [AI CONTEXT: Fake Tabs (State-Controlled Layout)]
     # We use st.segmented_control to impersonate tabs. Clicking this natively triggers a Python rerun.
     
-    current_view = st.session_state.get("workspace_view_mode", "📝 Code Editor")
-    
-    view_mode = st.segmented_control(
+    # [AI CONTEXT: Fix Double-Click Phase 2 - Eliminating State Loop (Fix B)]
+    # By assigning a key and dropping the default parameter, Streamlit handles the sync natively.
+    if "workspace_view_mode" not in st.session_state:
+        st.session_state["workspace_view_mode"] = "📝 Code Editor"
+
+    st.segmented_control(
         "Workspace View Toggle",
         ["📝 Code Editor", "👁️ Rendered Preview"],
-        default=current_view,
+        key="workspace_view_mode",
         label_visibility="collapsed"
     )
     
-    # Sync widget state with session
-    if view_mode:
-        st.session_state["workspace_view_mode"] = view_mode
-    else:
-        view_mode = current_view
+    view_mode = st.session_state["workspace_view_mode"]
 
     if view_mode == "📝 Code Editor":
         # Always reset the ignore flag when they go back to the editor
