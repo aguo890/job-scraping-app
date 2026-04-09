@@ -14,7 +14,7 @@ from utils.location_filter import is_us_or_remote
 from utils.smart_filter import RestrictionEngine
 
 class JobProcessor:
-    def __init__(self, config_input):
+    def __init__(self, config_input, config_override=None):
         # RESILIENT INIT: Handle dict (from main.py) or str path
         if isinstance(config_input, dict):
             self.config = config_input
@@ -22,6 +22,17 @@ class JobProcessor:
             with open(config_input, 'r') as f:
                 import yaml
                 self.config = yaml.safe_load(f)
+        
+        # [AI CONTEXT]: Inject mock config parameters (for unit testing) 
+        # specifically to allow deterministic testing of tiered weights.
+        if config_override:
+            if not isinstance(self.config, dict):
+                self.config = {}
+            for k, v in config_override.items():
+                if isinstance(v, dict) and k in self.config and isinstance(self.config[k], dict):
+                    self.config[k].update(v)
+                else:
+                    self.config[k] = v
         
         # Inject the applied jobs file path, defaulting to the production path if not provided
         # Support both dict and object configs for backward compatibility
@@ -41,6 +52,20 @@ class JobProcessor:
         # Initialize Restriction Engine (Visa/Clearance Filter)
         restriction_config = self.config.get('restrictions', {})
         self.restriction_engine = RestrictionEngine(restriction_config)
+        
+        # --- Tiered Scoring Logic (Backward Compatible) ---
+        # [AI CONTEXT]: Weights prioritized by user feedback: Tier 1 (+10), Tier 2 (+20), Tier 3 (+50).
+        tiered_cfg = self.config.get('tiered_skills', {})
+        if tiered_cfg:
+            self.tier1_skills = [k.lower() for k in tiered_cfg.get('tier1', [])]
+            self.tier2_skills = [k.lower() for k in tiered_cfg.get('tier2', [])]
+            self.tier3_skills = [k.lower() for k in tiered_cfg.get('tier3', [])]
+        else:
+            # Fallback for old schema: everything in preferred_skills goes to Tier 1
+            logger.info("⚠️ Legacy 'preferred_skills' detected. Mapping everything to Tier 1.")
+            self.tier1_skills = [k.lower() for k in self.config.get('preferred_skills', [])]
+            self.tier2_skills = []
+            self.tier3_skills = []
         
         # --- SRE Observability & Unified Config Sync ---
         # Architecture: YAML-first (Source of Truth), Environment Overrides (Testing)
@@ -235,7 +260,6 @@ class JobProcessor:
 
         # Scoring Weights from Config
         high_priority = [k.lower() for k in self.config.get('titles', {}).get('high_priority', [])]
-        preferred_skills = [k.lower() for k in self.config.get('preferred_skills', [])]
         penalty_skills = [k.lower() for k in self.config.get('penalty_skills', [])]
         
         # Domain Intersection Targets
@@ -286,19 +310,36 @@ class JobProcessor:
                     score += penalty
                     logger.debug(f"YOE Penalty for {job['title']}: {penalty} ({min_yoe} yrs > {max_exp_limit})")
 
-            # 3. INTERSECTION MULTIPLIER (The "Holy Grail" Boost)
+            # 3. TIERED KEYWORD MATCHING (The "Precision Filter")
+            # [AI AGENT CONTEXT]: Tier 1 (+10), Tier 2 (+20), Tier 3 (+50)
             tech_hits = 0
             domain_hits = 0
-            for skill in preferred_skills:
-                if skill in description_lower or skill in title_lower:
-                    if skill in domain_keywords:
-                        domain_hits += 1
-                        score += 15
-                    else:
-                        tech_hits += 1
-                        score += 10
             
-            # Linesight Multiplier (1.5x)
+            # [AI AGENT CONTEXT]: Track specific hits for frontend transparency
+            matched_tiers = {"tier1": [], "tier2": [], "tier3": []}
+
+            # Tier 3 (Ultra-Niche: SCADA, PLC, etc.) -> +50
+            for skill in self.tier3_skills:
+                if skill in description_lower or skill in title_lower:
+                    score += 50
+                    domain_hits += 1
+                    matched_tiers["tier3"].append(skill.upper())
+
+            # Tier 2 (Strong Signal) -> +20
+            for skill in self.tier2_skills:
+                if skill in description_lower or skill in title_lower:
+                    score += 20
+                    tech_hits += 1
+                    matched_tiers["tier2"].append(skill.upper())
+
+            # Tier 1 (Foundational: Python, SQL) -> +10
+            for skill in self.tier1_skills:
+                if skill in description_lower or skill in title_lower:
+                    score += 10
+                    tech_hits += 1
+                    matched_tiers["tier1"].append(skill.upper())
+            
+            # Intersection Multiplier (1.5x) - Retained for ultra-fit roles
             if tech_hits > 0 and domain_hits > 0:
                 multiplier = 1.5 + (0.1 * min(tech_hits, domain_hits))
                 score = int(score * multiplier)
@@ -353,6 +394,7 @@ class JobProcessor:
                 "location": job['location'],
                 "url": job['url'],
                 "score": score,
+                "matched_tiers": matched_tiers,
                 "date_posted": est_date.strftime('%Y-%m-%d %I:%M %p'),
                 "is_applied": is_applied,
                 "status": "Applied" if is_applied else "Active",

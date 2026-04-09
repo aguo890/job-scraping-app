@@ -60,22 +60,39 @@ with tabs[0]:
             df_ex = pd.DataFrame(ex_titles, columns=["Keyword"])
             ed_ex = st.data_editor(df_ex, num_rows="dynamic", width="stretch", hide_index=True, key="ed_ex_new")
             
-        with st.expander("🛠️ Advanced Skill & Content Filtering"):
+        with st.expander("🛠️ Advanced Skill & Content Filtering", expanded=True):
+            # [AI CONTEXT: Tiered Skills Implementation]
+            # Migration logic: If tiered_skills doesn't exist, use preferred_skills as Tier 1
+            tiered = config.get('tiered_skills', {})
+            t1_val = tiered.get('tier1', config.get('preferred_skills', []))
+            t2_val = tiered.get('tier2', [])
+            t3_val = tiered.get('tier3', [])
+
+            st.markdown("### 💎 Tiered Skill Scoring")
+            st.caption("Matched skills award jobs with specific points: Tier 1 (+10), Tier 2 (+20), Tier 3 (+50).")
+            
+            ts_c1, ts_c2, ts_c3 = st.columns(3)
+            with ts_c1:
+                st.markdown("##### 🧱 Tier 1 (Base)")
+                ed_t1 = st.data_editor(pd.DataFrame(t1_val, columns=["Skill"]), num_rows="dynamic", width="stretch", hide_index=True, key="ed_t1")
+            with ts_c2:
+                st.markdown("##### 🚀 Tier 2 (Strong)")
+                ed_t2 = st.data_editor(pd.DataFrame(t2_val, columns=["Skill"]), num_rows="dynamic", width="stretch", hide_index=True, key="ed_t2")
+            with ts_c3:
+                st.markdown("##### 🦄 Tier 3 (Niche)")
+                ed_t3 = st.data_editor(pd.DataFrame(t3_val, columns=["Skill"]), num_rows="dynamic", width="stretch", hide_index=True, key="ed_t3")
+
+            st.divider()
             col_s1, col_s2 = st.columns(2)
             with col_s1:
-                st.markdown("### 💎 Preferred Skills")
-                pref_skills = config.get('preferred_skills', [])
-                ed_sk_pref = st.data_editor(pd.DataFrame(pref_skills, columns=["Skill"]), num_rows="dynamic", width="stretch", hide_index=True, key="ed_sk_pref_new")
-            with col_s2:
                 st.markdown("### ⚠️ Penalty Skills")
                 pen_skills = config.get('penalty_skills', [])
                 ed_sk_pen = st.data_editor(pd.DataFrame(pen_skills, columns=["Skill"]), num_rows="dynamic", width="stretch", hide_index=True, key="ed_sk_pen_new")
-            
-            st.divider()
-            st.markdown("### 🛑 Content Blocklist")
-            st.caption("Exclude jobs containing these specific terms (e.g., 'PhD', 'Security Clearance').")
-            bl_titles = config.get('title_blocklist', [])
-            ed_bl = st.data_editor(pd.DataFrame(bl_titles, columns=["Restricted Match"]), num_rows="dynamic", width="stretch", hide_index=True, key="ed_bl_new")
+            with col_s2:
+                st.markdown("### 🛑 Content Blocklist")
+                st.caption("Exclude jobs containing these terms.")
+                bl_titles = config.get('title_blocklist', [])
+                ed_bl = st.data_editor(pd.DataFrame(bl_titles, columns=["Restricted Match"]), num_rows="dynamic", width="stretch", hide_index=True, key="ed_bl_new")
 
 
 
@@ -104,7 +121,13 @@ with tabs[0]:
             config['locations']['include'] = clean_df_list(ed_loc_inc, "Region")
             config['locations']['exclude'] = clean_df_list(ed_loc_ex, "Region")
             
-            config['preferred_skills'] = clean_df_list(ed_sk_pref, "Skill")
+            config['tiered_skills'] = {
+                'tier1': clean_df_list(ed_t1, "Skill"),
+                'tier2': clean_df_list(ed_t2, "Skill"),
+                'tier3': clean_df_list(ed_t3, "Skill")
+            }
+            if 'preferred_skills' in config:
+                del config['preferred_skills']
             config['penalty_skills'] = clean_df_list(ed_sk_pen, "Skill")
             
             if save_yaml_safely(config, FILTERING_PATH):

@@ -161,15 +161,32 @@ div[role="dialog"] [data-testid="stDialogHeader"] h2 {
 /* [AI CONTEXT: Fix Segmented Control text blocking click events. 
    Forces the mouse to ignore the text spans and pass the click to the background radio label.
    Scoped specifically via data-testid to prevent breaking text selection globally.] */
-div[data-testid="stSegmentedControl"] p, 
-div[data-testid="stSegmentedControl"] span {
-    pointer-events: none !important;
+/* [AI CONFLICT RESOLUTION: Issue #15 Fix - Reliable Toggle Clickability] */
+div[data-testid="stSegmentedControl"] [role="radiogroup"] {
+    gap: 0 !important;
 }
 
 div[data-testid="stSegmentedControl"] label {
-    pointer-events: auto !important;
-    cursor: pointer !important; /* Forces the hand icon to reassure the user */
+    cursor: pointer !important;
+    width: 100% !important;
+    height: 100% !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 8px 16px !important;
     z-index: 10 !important;
+}
+
+div[data-testid="stSegmentedControl"] label p {
+    pointer-events: none !important;
+    width: 100% !important;
+    text-align: center !important;
+}
+
+/* [AI CONTEXT: Fix Code Editor custom buttons text/icons blocking click events. 
+   Ensures clicks on the "Save & Render" text or Play icon are captured by the button container.] */
+.code_editor-buttons-container button * {
+    pointer-events: none !important;
 }
 """
 
@@ -373,6 +390,17 @@ if st.session_state["current_editing_job_id"] != job_id:
     st.session_state.pop("render_status", None)
     st.session_state.pop("ai_strategy", None)
 
+# [AI CONTEXT: Dynamic Naming Fix #17]
+def get_user_name_from_yaml(yaml_content):
+    """Safely extracts name from RenderCV YAML for generic filename generation."""
+    try:
+        import yaml as pyyaml
+        data = pyyaml.safe_load(yaml_content)
+        name = data.get("cv", {}).get("name", "User")
+        return name
+    except Exception:
+        return "User"
+
 # Ensure editor_yaml is loaded if it's missing (e.g. first run)
 if "editor_yaml" not in st.session_state:
     st.session_state["editor_yaml"] = orchestrator.load_job_cv(job_id)
@@ -404,6 +432,22 @@ with st.sidebar:
             st.session_state.pop("active_job", None)
             st.session_state.pop("current_editing_job_id", None)
         st.switch_page("dashboard.py")
+
+    st.divider()
+
+    # --- Workspaces (Corrected Navigation) ---
+    st.header("🛠️ Workspaces")
+    col_w1, col_w2 = st.columns(2)
+    with col_w1:
+        if st.button("🛠️ Master CV", use_container_width=True, help="Edit Master Template", key="editor_nav_master"):
+            st.query_params.update({"job_id": "master_cv"})
+            st.session_state["active_job"] = SPECIAL_ROUTING_JOBS["master_cv"]
+            st.rerun()
+    with col_w2:
+        if st.button("🧪 Playground", use_container_width=True, help="Scratch Pad", key="editor_nav_playground"):
+            st.query_params.update({"job_id": "playground"})
+            st.session_state["active_job"] = SPECIAL_ROUTING_JOBS["playground"]
+            st.rerun()
 
     st.divider()
 
@@ -463,10 +507,12 @@ with st.sidebar:
         clean_company = re.sub(r'[^a-zA-Z0-9]', '_', company)
         clean_title = re.sub(r'[^a-zA-Z0-9]', '_', title)
         # Collapse multiple underscores
-        clean_company = re.sub(r'_+', '_', clean_company).strip('_')
-        clean_title = re.sub(r'_+', '_', clean_title).strip('_')
+        # [AI CONTEXT: Dynamic Naming Fix #17]
+        user_name = get_user_name_from_yaml(st.session_state["editor_yaml"])
+        clean_name = re.sub(r'[^a-zA-Z0-9]+', '_', user_name).strip('_')
         
-        nice_filename = f"Aaron_Guo_{clean_title}_{clean_company}.pdf"
+        today_str = datetime.now().strftime("%Y-%m-%d")
+        nice_filename = f"{clean_name}_{clean_title}_{clean_company}_{today_str}.pdf"
         mtime = int(os.path.getmtime(display_path))
         
         with open(display_path, "rb") as f:

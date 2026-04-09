@@ -187,40 +187,44 @@ locations:
   - mountain view
   - sunnyvale
   - santa clara
-preferred_skills:
-- Python
-- React
-- SQL
-- AWS
-- Docker
-- FastAPI
-- PostgreSQL
-- Data Engineering
-- Kotlin
-- Java
-- Typescript
-- React Native
-- Flutter
-- Next.js
-- Node.js
-- Vite
-- Git
-- GitHub
-- Linesight
-- ERP
-- PLC
-- MES
-- Manufacturing
-- SCADA
-- Industry 4.0
-- IIoT
-- Smart Factory
-- Controls
-- Controls Engineering
-- Databases
-- MySQL
-- SQLite
-- HMI - VHDL
+tiered_skills:
+  tier1: # Foundation (+10)
+    - Python
+    - SQL
+    - AWS
+    - Docker
+    - FastAPI
+    - PostgreSQL
+    - Data Engineering
+    - Kotlin
+    - Java
+    - Typescript
+    - Git
+    - GitHub
+    - React
+    - Databases
+    - MySQL
+    - SQLite
+  tier2: # Strong Signal (+20)
+    - React Native
+    - Flutter
+    - Next.js
+    - Node.js
+    - Vite
+  tier3: # Ultra-Niche/Domain (+50)
+    - Linesight
+    - ERP
+    - PLC
+    - MES
+    - Manufacturing
+    - SCADA
+    - Industry 4.0
+    - IIoT
+    - Smart Factory
+    - Controls
+    - Controls Engineering
+    - HMI
+    - VHDL
 penalty_skills:
 - Swift
 - Objective-C

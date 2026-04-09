@@ -207,6 +207,7 @@ with st.sidebar:
     col_w1, col_w2 = st.columns(2)
     with col_w1:
         if st.button("🛠️ Master CV", use_container_width=True, help="Edit Master Template"):
+            st.query_params.update({"job_id": "master_cv"})
             st.session_state["active_job"] = {
                 "id": "master_cv",
                 "company": "[SYSTEM] MASTER RECORD",
@@ -216,6 +217,7 @@ with st.sidebar:
             st.switch_page("pages/CV_Editor.py")
     with col_w2:
         if st.button("🧪 Playground", use_container_width=True, help="Scratch Pad"):
+            st.query_params.update({"job_id": "playground"})
             st.session_state["active_job"] = {
                 "id": "playground",
                 "company": "[SYSTEM] PLAYGROUND",
@@ -322,54 +324,6 @@ with st.sidebar:
         with col_f2:
             hide_hidden = st.checkbox("👻 Hide Hidden", value=True, key="filter_hide_hidden")
 
-    # --- Standard Filters ---
-    st.subheader("Refine", divider="gray")
-
-    # Status multi-select
-    all_statuses = sorted(df_jobs['Status'].unique().tolist())
-    sel_statuses = st.multiselect("Status", all_statuses, default=[], key="filter_status",
-                                   help="Leave empty to show all statuses")
-
-    show_saved = False # implicitly handled by views, but keep valid for logic below if needed
-    companies = ["All"] + sorted(df_jobs['company'].unique().tolist())
-    sel_company = st.selectbox("Company", companies, key="filter_company")
-    min_score = st.slider("Min Score", 0, int(df_jobs['score'].max()), 0, key="filter_min_score")
-
-    # Title keyword search
-    search_query = st.text_input("🔍 Search Title", key="filter_search",
-                                  placeholder="e.g. intern, frontend, data...")
-
-    # Date range filter
-    date_range = None  # Initialize safely
-    if 'date_posted' in df_jobs.columns:
-        dates = pd.to_datetime(df_jobs['date_posted'], errors='coerce', format='ISO8601').dropna()
-        if not dates.empty:
-            min_date = dates.min().date()
-            max_date = dates.max().date()
-            date_range = st.date_input("📅 Date Range", value=(min_date, max_date),
-                                        min_value=min_date, max_value=max_date,
-                                        key="filter_date_range")
-
-    # --- Mobility Filtering (Granular Control) ---
-    config = load_config()
-    mobility_enabled = config.get('restrictions', {}).get('enabled', False)
-    
-    selected_mobility = [] # Initialize fallback
-    if mobility_enabled:
-        st.subheader("🛂 Mobility Filter", divider="gray")
-        mobility_options = {
-            "🟢 Friendly": "FRIENDLY",
-            "🟡 Neutral": "NEUTRAL", 
-            "🔴 Restricted": "RESTRICTED"
-        }
-        selected_labels = st.multiselect(
-            "Include Statuses:",
-            options=list(mobility_options.keys()),
-            default=["🟢 Friendly", "🟡 Neutral"],
-            help="🟢 Friendly: Mentioned sponsorship | 🟡 Neutral: No mention | 🔴 Restricted: ITAR/Clearance required",
-            key="filter_mobility_multiselect"
-        )
-        selected_mobility = [mobility_options[label] for label in selected_labels]
 
 # --- Main Dashboard Area ---
 # PURPOSELY HIDDEN (Architectural Decision) - Moving Scraper to a separate page. 
@@ -384,6 +338,54 @@ else:
     if JobDataService.is_scraper_running():
         st.info("🚀 **Scraper In Progress:** The background engine is currently searching for new listings. Refresh in a few minutes.")
         st.divider()
+
+
+# --- 🔍 PERSISTENT FILTERS (Architectural Refactor) ---
+# [AI CONTEXT: Moved from sidebar to main area via an expander. 
+# State is linked to st.session_state keys to ensure persistence after returning from CV Editor.]
+with st.expander("🔍 Advanced Filters & Refinement", expanded=False):
+    f_col1, f_col2, f_col3 = st.columns([1.5, 1.5, 2])
+    
+    with f_col1:
+        # Status multi-select
+        all_statuses = sorted(df_jobs['Status'].unique().tolist())
+        sel_statuses = st.multiselect("Status", all_statuses, default=[], key="filter_status")
+        
+        # Company filter
+        companies = ["All"] + sorted(df_jobs['company'].unique().tolist())
+        sel_company = st.selectbox("Company", companies, key="filter_company")
+
+    with f_col2:
+        # Score filter (uses session state to survive page swap)
+        max_score_found = int(df_jobs['score'].max()) if not df_jobs.empty else 100
+        min_score = st.slider("Min Score", 0, max_score_found, key="filter_min_score")
+        
+        # Title search
+        search_query = st.text_input("🔍 Search Title", key="filter_search", placeholder="e.g. intern, data...")
+
+    with f_col3:
+        # Date and Mobility
+        date_range = None
+        if 'date_posted' in df_jobs.columns:
+            dates = pd.to_datetime(df_jobs['date_posted'], errors='coerce', format='ISO8601').dropna()
+            if not dates.empty:
+                min_date, max_date = dates.min().date(), dates.max().date()
+                date_range = st.date_input("📅 Date Range", value=(min_date, max_date), key="filter_date_range")
+        
+        # Mobility (Visa/ITAR)
+        config = load_config()
+        mobility_enabled = config.get('restrictions', {}).get('enabled', False)
+        selected_mobility = [] 
+        if mobility_enabled:
+            mobility_options = {"🟢 Friendly": "FRIENDLY", "🟡 Neutral": "NEUTRAL", "🔴 Restricted": "RESTRICTED"}
+            selected_labels = st.multiselect("Mobility", options=list(mobility_options.keys()), default=["🟢 Friendly", "🟡 Neutral"], key="filter_mobility")
+            selected_mobility = [mobility_options[lb] for lb in selected_labels]
+
+    # Reset Button for Convenience
+    if st.button("🔄 Clear All Filters"):
+        for key in ["filter_status", "filter_company", "filter_min_score", "filter_search", "filter_date_range", "filter_mobility"]:
+            if key in st.session_state: del st.session_state[key]
+        st.rerun()
 
 
 # --- Apply Filters ---
@@ -625,6 +627,22 @@ if selected_indices:
                 if st.button(btn_label, type="primary", width="stretch"):
                     st.session_state["active_job"] = selected_job_row.to_dict()
                     st.switch_page("pages/CV_Editor.py")
+        
+        # [AI CONTEXT: Scoring Transparency Breakdown]
+        # Displays exactly which keywords triggered the scoring engine for each tier.
+        matched_tiers = selected_job_row.get('matched_tiers', {})
+        if isinstance(matched_tiers, dict) and any(matched_tiers.values()):
+            with st.expander("🛠️ Scoring Breakdown", expanded=False):
+                t_cols = st.columns(3)
+                hints = {"tier1": "Foundation (+10)", "tier2": "Signal (+20)", "tier3": "Niche (+50)"}
+                for i, tier in enumerate(["tier1", "tier2", "tier3"]):
+                    with t_cols[i]:
+                        st.markdown(f"**{hints[tier]}**")
+                        skills = matched_tiers.get(tier, [])
+                        if skills:
+                            for s in skills: st.caption(f"• {s}")
+                        else:
+                            st.caption("No matches")
     else:
         with st.container(border=True):
             col_cv1, col_cv2 = st.columns([3, 1], vertical_alignment="center")
