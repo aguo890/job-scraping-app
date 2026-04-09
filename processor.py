@@ -262,13 +262,6 @@ class JobProcessor:
         high_priority = [k.lower() for k in self.config.get('titles', {}).get('high_priority', [])]
         penalty_skills = [k.lower() for k in self.config.get('penalty_skills', [])]
         
-        # Domain Intersection Targets
-        domain_keywords = {
-            "linesight", "erp", "plc", "mes", "manufacturing", "scada", 
-            "industry 4.0", "iiot", "smart factory", "automation", 
-            "digital twin", "supply chain"
-        }
-        
         # [AI AGENT CONTEXT]: Experience limit and penalty now managed via __init__ 
         # using environment variables for parity across Docker services.
         max_exp_limit = self.max_exp_limit

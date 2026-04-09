@@ -71,8 +71,8 @@ def test_tiered_weights():
 if __name__ == "__main__":
     try:
         test_tiered_weights()
-    except AssertionError as e:
-        print(f"❌ Test FAILED: Assertion Error")
+    except AssertionError:
+        print("❌ Test FAILED: Assertion Error")
         sys.exit(1)
     except Exception as e:
         print(f"❌ Test FAILED: {e}")
