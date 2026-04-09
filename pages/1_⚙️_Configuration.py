@@ -38,7 +38,7 @@ ai_config = load_ai_config()
 st.title("⚙️ Configuration")
 st.markdown("Manage your job automation rules, AI prompts, and system preferences.")
 
-tabs = st.tabs(["🕸️ Scraping Rules", "🧠 AI & Prompts", "🖥️ System Options", "🏢 Companies", "🛂 Restrictions"])
+tabs = st.tabs(["🕸️ Scraping Rules", "🧠 AI & Prompts", "🖥️ System Options", "🏢 Companies", "🛂 Restrictions", "🚨 Data Management"])
 
 # --- TAB 1: SCRAPING RULES ---
 with tabs[0]:
@@ -349,3 +349,27 @@ with tabs[4]:
                     st.info("🟡 **Neutral:** No status markers found.")
             else:
                 st.warning("Please paste a description to test.")
+
+# --- TAB 6: DATA MANAGEMENT ---
+with tabs[5]:
+    st.subheader("🚨 Danger Zone")
+    st.warning("These operations act on your raw data files. Proceed with caution.", icon="⚠️")
+    
+    with st.container(border=True):
+        col_dm1, col_dm2 = st.columns([3, 1], vertical_alignment="center")
+        with col_dm1:
+            st.markdown("### Erase Stale Scraping History")
+            st.caption("Clears all scraped jobs from `jobs_agg.json` so you can start a fresh search with new configuration parameters. Your `tracking.json` (applied/saved statuses) and generated resumes will REMAIN safe.")
+        with col_dm2:
+            import json
+            if st.button("🗑️ Reset All Data", type="primary", use_container_width=True):
+                jobs_file = os.path.join(parent_dir, "data", "jobs_agg.json")
+                if os.path.exists(jobs_file):
+                    try:
+                        with open(jobs_file, "w", encoding="utf-8") as f:
+                            json.dump({"jobs": []}, f)
+                        st.success("Scraping history cleared successfully! You can now start a fresh search.")
+                    except Exception as e:
+                        st.error(f"Failed to clear data: {e}")
+                else:
+                    st.info("No scraping history found to clear.")

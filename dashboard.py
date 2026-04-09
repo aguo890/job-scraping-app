@@ -202,6 +202,30 @@ with st.sidebar:
 
     st.divider()
 
+    # --- Workspaces ---
+    st.header("🛠️ Workspaces")
+    col_w1, col_w2 = st.columns(2)
+    with col_w1:
+        if st.button("🛠️ Master CV", use_container_width=True, help="Edit Master Template"):
+            st.session_state["active_job"] = {
+                "id": "master_cv",
+                "company": "[SYSTEM] MASTER RECORD",
+                "title": "Base CV",
+                "is_master": True
+            }
+            st.switch_page("pages/CV_Editor.py")
+    with col_w2:
+        if st.button("🧪 Playground", use_container_width=True, help="Scratch Pad"):
+            st.session_state["active_job"] = {
+                "id": "playground",
+                "company": "[SYSTEM] PLAYGROUND",
+                "title": "Scratch Pad",
+                "is_playground": True
+            }
+            st.switch_page("pages/CV_Editor.py")
+
+    st.divider()
+
     # --- Filters ---
     st.header("Filters")
 

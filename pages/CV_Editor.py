@@ -438,10 +438,7 @@ with st.sidebar:
     st.divider()
 
     # Render button
-    if st.button("🔄 Render PDF", type="primary", width="stretch", disabled=st.session_state["is_rendering"]):
-        st.session_state["is_rendering"] = True
-        st.rerun()
-    st.caption("*Or press Ctrl+Enter in the editor*")
+    st.info("💡 **To Render PDF**, please use the **Save & Render** button inside the editor window or press `Cmd/Ctrl + Enter`.")
 
     # --- 📄 Draft Management ---
     st.divider()
@@ -684,6 +681,9 @@ res_data = job.get("restriction_data", {})
 if isinstance(res_data, dict) and res_data.get("restricted"):
     st.error(f"🚫 **ITAR/Clearance Warning:** {res_data.get('reason')}. Ensure eligibility before tailoring.", icon="🚫")
 
+if "render_error" in st.session_state and st.session_state["render_error"]:
+    st.error(st.session_state["render_error"])
+
 # --- 4.5. Render Compilation Logic ---
 if st.session_state.get("is_rendering", False):
     with st.spinner("Compiling with RenderCV..."):
@@ -691,7 +691,7 @@ if st.session_state.get("is_rendering", False):
         # 1. Save current buffer to disk
         save_result = orchestrator.save_job_cv(job_id, content)
         if isinstance(save_result, dict) and not save_result.get("success", True):
-            st.error(f"❌ Save Failed: {save_result.get('error', 'Unknown error')}")
+            st.session_state["render_error"] = f"❌ Save Failed: {save_result.get('error', 'Unknown error')}"
         else:
             # 2. Render from content
             pdf_path, status = orchestrator.render_from_content(job_id, content)
@@ -700,8 +700,16 @@ if st.session_state.get("is_rendering", False):
                 st.session_state["render_success_toast"] = True
                 # AI-CONTEXT: Cache-buster update to force UI refresh of the PDF iframe.
                 st.session_state["pdf_update_time"] = time.time()
+                
+                # Clear previous render error
+                if "render_error" in st.session_state:
+                    del st.session_state["render_error"]
+                    
+                # Auto-switch to preview mode
+                if st.session_state.get("workspace_layout") != "Stacked":
+                    st.session_state["workspace_view_mode"] = "👁️ Rendered Preview"
             else:
-                st.error(f"❌ Render Failed: {status}")
+                st.session_state["render_error"] = f"❌ Render Failed: {status}"
         
         st.session_state["is_rendering"] = False
         st.rerun()
@@ -718,12 +726,21 @@ if layout == "Stacked":
 else:
     # [AI CONTEXT: Fake Tabs (State-Controlled Layout)]
     # We use st.segmented_control to impersonate tabs. Clicking this natively triggers a Python rerun.
+    
+    current_view = st.session_state.get("workspace_view_mode", "📝 Code Editor")
+    
     view_mode = st.segmented_control(
         "Workspace View Toggle",
         ["📝 Code Editor", "👁️ Rendered Preview"],
-        default="📝 Code Editor",
+        default=current_view,
         label_visibility="collapsed"
     )
+    
+    # Sync widget state with session
+    if view_mode:
+        st.session_state["workspace_view_mode"] = view_mode
+    else:
+        view_mode = current_view
 
     if view_mode == "📝 Code Editor":
         # Always reset the ignore flag when they go back to the editor
