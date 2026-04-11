@@ -62,7 +62,10 @@ def save_tracking(data):
 # --- Main App ---
 
 # Fetch Data Envelope via Centralized Service
-payload = JobDataService.fetch_dashboard_payload()
+# [AI CONTEXT]: Pass file mtime to handle cache invalidation for local files
+data_file = getattr(JobDataService, 'JOB_DATA_FILE', JOB_DATA_FILE)
+mtime = os.path.getmtime(data_file) if os.path.exists(data_file) else None
+payload = JobDataService.fetch_dashboard_payload(file_mtime=mtime)
 raw_data_obj = payload.get("data", pd.DataFrame())
 is_mock = payload.get("is_mock", False)
 df_jobs_raw = raw_data_obj.copy()
@@ -325,6 +328,7 @@ with st.sidebar:
             hide_hidden = st.checkbox("👻 Hide Hidden", value=True, key="filter_hide_hidden")
 
 
+
 # --- Main Dashboard Area ---
 # PURPOSELY HIDDEN (Architectural Decision) - Moving Scraper to a separate page. 
 # DO NOT RE-ENABLE WITHOUT EXPLICIT USER CONSENT.
@@ -340,10 +344,32 @@ else:
         st.divider()
 
 
+# --- 🔍 PRIMARY DASHBOARD CONTROLS ---
+# [AGENT_NOTE]: Elevated for top-level visibility and immediate discoverability.
+cmd_col1, cmd_col2 = st.columns([2, 1])
+
+with cmd_col1:
+    # Title search (Primary Filter)
+    search_query = st.text_input("🔍 Search Job Titles", key="filter_search", placeholder="e.g. intern, data, robotics...")
+
+with cmd_col2:
+    # Target Season (Primary Filter - Issue #22)
+    # Defensive logic for empty stats or missing columns
+    sel_seasons = []
+    if 'Season_Display' in df_jobs.columns and not df_jobs['Season_Display'].isnull().all():
+        all_seasons = sorted(df_jobs['Season_Display'].unique().tolist())
+        if all_seasons:
+            if "Other" in all_seasons:
+                all_seasons.remove("Other")
+                all_seasons.append("Other")
+            sel_seasons = st.multiselect("Target Season", all_seasons, key="dashboard_season_filter", help="Filter by placement window (e.g. Summer 2026)")
+        else:
+            st.info("💡 No Seasons Found")
+    else:
+        st.info("💡 No Season Data")
+
 # --- 🔍 PERSISTENT FILTERS (Architectural Refactor) ---
-# [AI CONTEXT: Moved from sidebar to main area via an expander. 
-# State is linked to st.session_state keys to ensure persistence after returning from CV Editor.]
-with st.expander("🔍 Advanced Filters & Refinement", expanded=False):
+with st.expander("🔍 More Filters & Refinement", expanded=False):
     f_col1, f_col2, f_col3 = st.columns([1.5, 1.5, 2])
     
     with f_col1:
@@ -359,9 +385,6 @@ with st.expander("🔍 Advanced Filters & Refinement", expanded=False):
         # Score filter (uses session state to survive page swap)
         max_score_found = int(df_jobs['score'].max()) if not df_jobs.empty else 100
         min_score = st.slider("Min Score", 0, max_score_found, key="filter_min_score")
-        
-        # Title search
-        search_query = st.text_input("🔍 Search Title", key="filter_search", placeholder="e.g. intern, data...")
 
     with f_col3:
         # Date and Mobility
@@ -381,9 +404,10 @@ with st.expander("🔍 Advanced Filters & Refinement", expanded=False):
             selected_labels = st.multiselect("Mobility", options=list(mobility_options.keys()), default=["🟢 Friendly", "🟡 Neutral"], key="filter_mobility")
             selected_mobility = [mobility_options[lb] for lb in selected_labels]
 
+
     # Reset Button for Convenience
     if st.button("🔄 Clear All Filters"):
-        for key in ["filter_status", "filter_company", "filter_min_score", "filter_search", "filter_date_range", "filter_mobility"]:
+        for key in ["filter_status", "filter_company", "filter_min_score", "filter_search", "filter_date_range", "filter_mobility", "dashboard_season_filter"]:
             if key in st.session_state: del st.session_state[key]
         st.rerun()
 
@@ -464,6 +488,10 @@ if sel_statuses:
 if search_query:
     filtered_df = filtered_df[filtered_df['title'].str.contains(search_query, case=False, na=False)]
 
+# Season filter
+if sel_seasons:
+    filtered_df = filtered_df[filtered_df['Season_Display'].isin(sel_seasons)]
+
 # Date range filter
 if 'date_posted' in df_jobs.columns and date_range is not None:
     dates_parsed = pd.to_datetime(filtered_df['date_posted'], errors='coerce', format='ISO8601')
@@ -493,7 +521,8 @@ event = st.dataframe(
     column_config={
         "Mobility": st.column_config.TextColumn("🛂 Status", width="small", help="🟢 Friendly | 🟡 Neutral | 🔴 Restricted"),
         "url": st.column_config.LinkColumn("Link", display_text="Open"),
-        "score": st.column_config.ProgressColumn("Score", format="%d", min_value=0, max_value=50),
+        # [REFACTORED]: Issue #20 - Progress Bar Scaling (Clamped to 100)
+        "score": st.column_config.ProgressColumn("Score", format="%d", min_value=0, max_value=100),
         "id": None
     },
     width="stretch",

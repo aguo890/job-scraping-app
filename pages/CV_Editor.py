@@ -293,6 +293,9 @@ def load_cv_content(job_id):
             pass
             
     # 3 & 4. Orchestrator Logic (Tailored or Master)
+    # # AGENT_NOTE: The orchestrator load_job_cv method is the final fallback 
+    # ensuring that if all session state and disk drafts are missing, 
+    # we still have the original source.
     return orchestrator.load_job_cv(job_id)
 
 # --- Robust Data Loading ---
@@ -382,6 +385,9 @@ if st.session_state["current_editing_job_id"] != job_id:
     content = load_cv_content(job_id)
     st.session_state["editor_yaml"] = content
     st.session_state["yaml_editor"] = content
+    # # AGENT_NOTE: When switching between Stacked and Tabbed modes, the 
+    # code_editor component may be unmounted. We MUST preserve the buffer 
+    # in st.session_state[f"buffer_{job_id}"] to prevent data loss.
     st.session_state[f"buffer_{job_id}"] = content
     st.session_state["current_editing_job_id"] = job_id
     
@@ -532,6 +538,16 @@ with st.sidebar:
         st.session_state[f"buffer_{job_id}"] = new_yaml
         st.session_state["is_rendering"] = True # Trigger auto-render on theme change
         st.rerun()
+
+    # --- # AGENT_NOTE: Issue #21 Persistence Fix ---
+    # Provision for setting the selected theme as the global default for the Master CV.
+    if st.button("📌 Set as Default Theme", help="Updates the Master CV source file to use this theme for all future jobs.", width="stretch"):
+        with st.spinner("Updating Master CV..."):
+            result = orchestrator.set_master_theme(selected_theme)
+            if result.get("success"):
+                st.success(f"Master theme set to **{selected_theme}**! 🎉")
+            else:
+                st.error(f"Failed to update master theme: {result.get('error')}")
 
     st.divider()
 

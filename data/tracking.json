@@ -656,5 +656,61 @@
     "status": "Applied",
     "saved": true,
     "date_applied": "2026-04-05T06:05:05.354306"
+  },
+  "ashby_zettabyte-space_50a9c6dc-7225-4ff0-a914-69d1dd325d6a": {
+    "status": "Applied",
+    "saved": true,
+    "date_applied": "2026-04-10T23:51:48.018789"
+  },
+  "gh_spacex_8395276002": {
+    "saved": true
+  },
+  "gh_spacex_8499650002": {
+    "saved": true
+  },
+  "gh_spacex_8218449002": {
+    "saved": true
+  },
+  "gh_spacex_8245092002": {
+    "saved": true
+  },
+  "gh_spacex_8456214002": {
+    "saved": true
+  },
+  "gh_spacex_8461521002": {
+    "saved": true
+  },
+  "gh_spacex_8362097002": {
+    "saved": true
+  },
+  "gh_spacex_8342125002": {
+    "saved": true
+  },
+  "gh_spacex_8403219002": {
+    "saved": true
+  },
+  "gh_figureai_4574734006": {
+    "status": "Applied",
+    "saved": true,
+    "date_applied": "2026-04-10T23:54:56.773036"
+  },
+  "gh_andurilindustries_5089044007": {
+    "status": "Applied",
+    "saved": true,
+    "date_applied": "2026-04-10T23:58:37.065361"
+  },
+  "gh_vannevarlabs_5089923007": {
+    "status": "Applied",
+    "saved": true,
+    "date_applied": "2026-04-11T00:03:40.888030"
+  },
+  "ashby_mach_46f389f4-e4e9-4298-a747-4b3adb6e424e": {
+    "status": "Applied",
+    "saved": true,
+    "date_applied": "2026-04-11T00:09:24.125985"
+  },
+  "ashby_reflexrobotics_1b9f4970-f21b-4e08-b12a-99f192c054f3": {
+    "status": "Hidden",
+    "saved": false
   }
 }

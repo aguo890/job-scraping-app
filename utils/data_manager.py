@@ -7,6 +7,7 @@ import time
 from pathlib import Path
 from datetime import datetime
 import random
+import re
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -104,11 +105,14 @@ class JobDataService:
             return False
 
     @staticmethod
-    @st.cache_data(ttl=60)
-    def fetch_dashboard_payload():
+    @st.cache_data(ttl=3600)
+    def fetch_dashboard_payload(file_mtime=None):
         """
         Returns a 'Data Envelope' containing the job dataframe 
         and metadata (mock status, last updated).
+        
+        [AI CONTEXT]: file_mtime is used as a cache key to force invalidation 
+        when the underlying jobs_agg.json is updated on disk.
         """
         # OPTION: High-Frequency Remote Pull (SRE: Live Dashboard)
         if os.getenv("USE_GITHUB_DATA") == "true":
@@ -151,6 +155,21 @@ class JobDataService:
                 gen_at = raw_data.get("generated_at", "Unknown")
             
             df = pd.DataFrame(jobs)
+            
+            # --- Season & Year Extraction (Performance: Pre-computed in cache) ---
+            # [REGARDLESS OF SOURCE]: Standardize attributes for filtering
+            if not df.empty and 'title' in df.columns:
+                # Regex Expansion: Captures Internship Seasons, Quarters, Co-ops, and Grad placements
+                season_regex = r'(Summer|Fall|Spring|Winter|Q[1-4]|Co-op|Grad Intern)\s+(\d{4})'
+                extracted = df['title'].str.extract(season_regex, flags=re.IGNORECASE)
+                df['Season'] = extracted[0].fillna('Other')
+                df['Year'] = extracted[1].fillna('N/A')
+                # Combine for UI display in filters: "Summer 2026"
+                df['Season_Display'] = df.apply(
+                    lambda x: f"{x['Season']} {x['Year']}" if x['Year'] != 'N/A' else x['Season'], 
+                    axis=1
+                )
+
             logger.info(f"✅ Cache Miss/Reload: Parsed {len(df)} jobs from disk.")
             
             return {
