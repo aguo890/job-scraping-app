@@ -1,0 +1,49 @@
+2026-04-13 23:41:24,532 - asyncio - DEBUG - Using selector: KqueueSelector
+2026-04-13 23:41:24,533 - __main__ - INFO - Starting async fetch for 2 companies...
+2026-04-13 23:41:24,551 - fetchers - INFO - Starting async fetch for 2 companies...
+2026-04-13 23:41:24,729 - fetchers - INFO - iCIMS fetcher connected to University Hospitals successfully, but parsing logic requires BS4 integration.
+2026-04-13 23:41:25,518 - root - DEBUG - Date Parsing: Format not recognized for 'Posted Today': Unknown string format: Posted Today. Defaulting to 'Keep'.
+2026-04-13 23:41:25,518 - root - DEBUG - Dropped (Not Tech): Managing Consultant, Advisors & Consulting Services, Deploy
+2026-04-13 23:41:25,518 - root - DEBUG - Date Parsing: Format not recognized for 'Posted Today': Unknown string format: Posted Today. Defaulting to 'Keep'.
+2026-04-13 23:41:25,518 - root - DEBUG - Dropped (Location): Vice President, Enterprise Strategy, North LAC @ Mexico City, Mexico
+2026-04-13 23:41:25,518 - root - DEBUG - Date Parsing: Format not recognized for 'Posted Today': Unknown string format: Posted Today. Defaulting to 'Keep'.
+2026-04-13 23:41:25,518 - root - DEBUG - Dropped (Location): Senior Specialist, Content Design @ Toronto, Canada
+2026-04-13 23:41:25,518 - root - DEBUG - Date Parsing: Format not recognized for 'Posted Today': Unknown string format: Posted Today. Defaulting to 'Keep'.
+2026-04-13 23:41:25,518 - root - DEBUG - Dropped (Location): Associate Consultant, Strategy & Transformation, Launch Program 2026 - Mexico City, Mexico @ Mexico City, Mexico
+2026-04-13 23:41:25,518 - root - DEBUG - Date Parsing: Format not recognized for 'Posted Today': Unknown string format: Posted Today. Defaulting to 'Keep'.
+2026-04-13 23:41:25,518 - root - DEBUG - Dropped (Location): Principal Project Manager @ Bogota, Colombia
+2026-04-13 23:41:25,519 - root - DEBUG - Date Parsing: Format not recognized for 'Posted Today': Unknown string format: Posted Today. Defaulting to 'Keep'.
+2026-04-13 23:41:25,519 - root - DEBUG - Dropped (Banned Title): Senior Analyst, Sourcing & Supplier Management due to 'Senior'
+2026-04-13 23:41:25,519 - root - DEBUG - Date Parsing: Format not recognized for 'Posted Today': Unknown string format: Posted Today. Defaulting to 'Keep'.
+2026-04-13 23:41:25,519 - root - DEBUG - Dropped (Banned Title): Manager, Account Management, Digital Assets, EEMEA due to 'Manager'
+2026-04-13 23:41:25,519 - root - DEBUG - Date Parsing: Format not recognized for 'Posted Today': Unknown string format: Posted Today. Defaulting to 'Keep'.
+2026-04-13 23:41:25,519 - root - DEBUG - Dropped (Banned Title): Director, Account Management due to 'Director'
+2026-04-13 23:41:25,519 - root - DEBUG - Date Parsing: Format not recognized for 'Posted Today': Unknown string format: Posted Today. Defaulting to 'Keep'.
+2026-04-13 23:41:25,519 - root - DEBUG - Dropped (Banned Title): Senior Software Engineer due to 'Senior'
+2026-04-13 23:41:25,519 - root - DEBUG - Date Parsing: Format not recognized for 'Posted Today': Unknown string format: Posted Today. Defaulting to 'Keep'.
+2026-04-13 23:41:25,519 - root - DEBUG - Date Parsing: Format not recognized for 'Posted Today': Unknown string format: Posted Today. Defaulting to 'Keep'.
+2026-04-13 23:41:25,519 - root - DEBUG - Dropped (Location): Information Security Operations Analyst @ Bogota, Colombia
+2026-04-13 23:41:25,519 - root - DEBUG - Date Parsing: Format not recognized for 'Posted Today': Unknown string format: Posted Today. Defaulting to 'Keep'.
+2026-04-13 23:41:25,519 - root - DEBUG - Dropped (Banned Title): Director, Product Management  - Network Strategy due to 'Director'
+2026-04-13 23:41:25,519 - root - DEBUG - Date Parsing: Format not recognized for 'Posted Today': Unknown string format: Posted Today. Defaulting to 'Keep'.
+2026-04-13 23:41:25,519 - root - DEBUG - Dropped (Location): Senior Analyst, Finance Business Partner @ Bogota, Colombia (Bldg 978)
+2026-04-13 23:41:25,519 - root - DEBUG - Date Parsing: Format not recognized for 'Posted Today': Unknown string format: Posted Today. Defaulting to 'Keep'.
+2026-04-13 23:41:25,519 - root - DEBUG - Dropped (Location): Manager, Finance Business Partner @ Bogota, Colombia (Bldg 978)
+2026-04-13 23:41:25,519 - root - DEBUG - Date Parsing: Format not recognized for 'Posted Today': Unknown string format: Posted Today. Defaulting to 'Keep'.
+2026-04-13 23:41:25,519 - root - DEBUG - Dropped (Location): Senior Specialist, Product Management @ Pune, India
+2026-04-13 23:41:25,519 - root - DEBUG - Date Parsing: Format not recognized for 'Posted Today': Unknown string format: Posted Today. Defaulting to 'Keep'.
+2026-04-13 23:41:25,519 - root - DEBUG - Dropped (Banned Title): Lead Product Manager- Technical - CI/CD Infra & SCM due to 'Lead'
+2026-04-13 23:41:25,519 - root - DEBUG - Date Parsing: Format not recognized for 'Posted Today': Unknown string format: Posted Today. Defaulting to 'Keep'.
+2026-04-13 23:41:25,519 - root - DEBUG - Dropped (Banned Title): Senior Managing Consultant, Advisors & Consulting Services, Deploy due to 'Senior'
+2026-04-13 23:41:25,519 - root - DEBUG - Date Parsing: Format not recognized for 'Posted Today': Unknown string format: Posted Today. Defaulting to 'Keep'.
+2026-04-13 23:41:25,519 - root - DEBUG - Dropped (Location): VP Mercado Pago LAC @ Buenos Aires, Argentina
+2026-04-13 23:41:25,519 - root - DEBUG - Date Parsing: Format not recognized for 'Posted Today': Unknown string format: Posted Today. Defaulting to 'Keep'.
+2026-04-13 23:41:25,519 - root - DEBUG - Dropped (Location): Global Economic Intelligence Director – Product Management @ Toronto, Canada
+2026-04-13 23:41:25,519 - root - DEBUG - Date Parsing: Format not recognized for 'Posted Today': Unknown string format: Posted Today. Defaulting to 'Keep'.
+2026-04-13 23:41:25,520 - root - DEBUG - Dropped (Banned Title): Senior Site Reliability Engineer due to 'Senior'
+2026-04-13 23:41:25,520 - fetchers - INFO - Qualified 1 jobs from Workday for Mastercard (Benchmark)
+2026-04-13 23:41:25,520 - fetchers - INFO - Total jobs qualified (passed Hard Filters): 1
+2026-04-13 23:41:25,520 - __main__ - INFO - Successfully fetched 1 total jobs.
+2026-04-13 23:41:25,520 - __main__ - INFO - Job Counts by Company:
+2026-04-13 23:41:25,520 - __main__ - INFO - ✅ Mastercard (Benchmark): 1 jobs
+2026-04-13 23:41:25,520 - __main__ - INFO - ❌ University Hospitals: 0 jobs
