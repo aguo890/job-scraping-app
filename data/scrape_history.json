@@ -178,5 +178,35 @@
         "jobs_found": 1509,
         "duration_seconds": 68.43,
         "status": "Success"
+    },
+    {
+        "timestamp": "2026-04-11 22:20:40",
+        "jobs_found": 1418,
+        "duration_seconds": 50.81,
+        "status": "Success"
+    },
+    {
+        "timestamp": "2026-04-13 19:06:19",
+        "jobs_found": 0,
+        "duration_seconds": 0,
+        "status": "Failed: Scraper is already running in another process."
+    },
+    {
+        "timestamp": "2026-04-13 19:08:29",
+        "jobs_found": 0,
+        "duration_seconds": 0,
+        "status": "Failed: Scraper is already running in another process."
+    },
+    {
+        "timestamp": "2026-04-14 02:03:20",
+        "jobs_found": 1365,
+        "duration_seconds": 42.57,
+        "status": "Success"
+    },
+    {
+        "timestamp": "2026-04-14 02:21:27",
+        "jobs_found": 1365,
+        "duration_seconds": 56.38,
+        "status": "Success"
     }
 ]

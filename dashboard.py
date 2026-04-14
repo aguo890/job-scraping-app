@@ -383,7 +383,14 @@ with st.expander("🔍 More Filters & Refinement", expanded=False):
 
     with f_col2:
         # Score filter (uses session state to survive page swap)
-        max_score_found = int(df_jobs['score'].max()) if not df_jobs.empty else 100
+        @st.cache_data
+        def get_max_score(score_series):
+            # PATTERN: Memoization - Prevent expensive recalculation of max score
+            if score_series is None or score_series.empty:
+                return 100
+            return int(score_series.max())
+            
+        max_score_found = get_max_score(df_jobs['score'])
         min_score = st.slider("Min Score", 0, max_score_found, key="filter_min_score")
 
     with f_col3:
@@ -511,6 +518,11 @@ filtered_df = filtered_df.sort_values(by=["status_prio", "is_saved", "date_poste
 st.caption(f"Showing **{len(filtered_df)}** of {len(df_jobs)} jobs")
 
 display_cols = ['Mobility', 'score', 'date_posted', 'company', 'title', 'location', 'url', 'id']
+
+# AGENT_NOTE: Only show the user stages/status in the Tracking view to prevent clutter in the general Feed
+if selected_view == "Tracking":
+    display_cols.insert(1, 'Status_Display')
+
 final_cols = [c for c in display_cols if c in filtered_df.columns]
 
 event = st.dataframe(
@@ -521,8 +533,9 @@ event = st.dataframe(
     column_config={
         "Mobility": st.column_config.TextColumn("🛂 Status", width="small", help="🟢 Friendly | 🟡 Neutral | 🔴 Restricted"),
         "url": st.column_config.LinkColumn("Link", display_text="Open"),
-        # [REFACTORED]: Issue #20 - Progress Bar Scaling (Clamped to 100)
-        "score": st.column_config.ProgressColumn("Score", format="%d", min_value=0, max_value=100),
+        # [REFACTORED]: Issue #20 - Progress Bar Scaling (Clamped dynamically)
+        "score": st.column_config.ProgressColumn("Score", format="%d", min_value=0, max_value=max_score_found),
+        "Status_Display": st.column_config.TextColumn("Stage"),
         "id": None
     },
     width="stretch",

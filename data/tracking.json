@@ -120,7 +120,7 @@
   },
   "gh_ripple_7467151": {
     "saved": true,
-    "status": "Applied"
+    "status": "Rejected"
   },
   "gh_ripple_7469777": {
     "saved": true,
@@ -181,7 +181,7 @@
   },
   "gh_andurilindustries_4991618007": {
     "saved": true,
-    "status": "Interviewing",
+    "status": "Rejected",
     "cv_yaml_path": "C:\\Users\\19803\\Projects\\Job-Automation-Suite\\generated_cvs\\gh_andurilindustries_4991618007.yaml",
     "cv_pdf_path": "C:\\Users\\19803\\Projects\\Job-Automation-Suite\\generated_cvs\\gh_andurilindustries_4991618007.pdf",
     "cv_status": "Tailored"
@@ -690,9 +690,12 @@
     "saved": true
   },
   "gh_figureai_4574734006": {
-    "status": "Applied",
+    "status": "Interviewing",
     "saved": true,
-    "date_applied": "2026-04-10T23:54:56.773036"
+    "date_applied": "2026-04-10T23:54:56.773036",
+    "cv_yaml_path": "/app/generated_cvs/gh_figureai_4574734006.yaml",
+    "cv_pdf_path": "/app/generated_cvs/gh_figureai_4574734006.pdf",
+    "cv_status": "Tailored"
   },
   "gh_andurilindustries_5089044007": {
     "status": "Applied",
@@ -712,5 +715,37 @@
   "ashby_reflexrobotics_1b9f4970-f21b-4e08-b12a-99f192c054f3": {
     "status": "Hidden",
     "saved": false
+  },
+  "ashby_openai_89f58eb2-519f-4a36-8be0-2e594724e1bc": {
+    "status": "Hidden",
+    "saved": false
+  },
+  "gh_verkada_5099422007": {
+    "status": "Applied",
+    "saved": true,
+    "date_applied": "2026-04-11T22:44:30.716818"
+  },
+  "ashby_notion_5b15697c-fa91-4511-9482-c98a6ff29f90": {
+    "status": "Applied",
+    "saved": true
+  },
+  "ashby_sentry_5e112240-922a-48f1-8865-9e7f89687f39": {
+    "status": "Applied",
+    "saved": true,
+    "date_applied": "2026-04-11T22:51:06.051167"
+  },
+  "gh_verkada_5099529007": {
+    "status": "Applied",
+    "saved": true,
+    "date_applied": "2026-04-11T22:56:13.466573"
+  },
+  "ashby_ramp_5fe4c64e-9336-4384-9e6f-ff32eeb3fdae": {
+    "status": "Hidden",
+    "saved": false
+  },
+  "ashby_eventualcomputing_becb5675-3480-4d2b-b126-2acad40fd088": {
+    "status": "Applied",
+    "saved": true,
+    "date_applied": "2026-04-12T14:49:34.423598"
   }
 }

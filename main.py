@@ -168,8 +168,9 @@ def execute_scraping_run(companies_filter: str = None):
                 if content.startswith("locked at "):
                     lock_time_str = content.replace("locked at ", "")
                     lock_time = datetime.fromisoformat(lock_time_str)
-                    if (datetime.now() - lock_time).total_seconds() > 7200: # 2 hours
-                        logger.warning("Stale lock file detected (older than 2 hours). Clearing it.")
+                    # AGENT_NOTE: Timeout synchronized to 900s (15m) to match global standard in utils/data_manager.py
+                    if (datetime.now() - lock_time).total_seconds() > 900: # 15 minutes
+                        logger.warning("Stale lock file detected (older than 15 minutes). Clearing it.")
                         LOCK_FILE.unlink()
                     else:
                         return {
@@ -255,10 +256,19 @@ def main():
     import argparse
     parser = argparse.ArgumentParser(description="Job Dashboard Scraper (CLI)")
     parser.add_argument("--companies", type=str, help="Comma-separated list of companies to scrape")
+    parser.add_argument("--output", type=str, help="Path to write the output result JSON")
     args = parser.parse_args()
     
     print("🚀 Starting Job Scraper CLI...")
     result = execute_scraping_run(args.companies)
+    
+    if args.output:
+        import json
+        try:
+            with open(args.output, "w") as f:
+                json.dump(result, f)
+        except Exception as e:
+            print(f"Failed to write output to {args.output}: {e}")
     
     if "Success" in result["status"]:
         print(f"✅ Success! Found {result['jobs_found']} jobs in {result['duration_seconds']}s.")

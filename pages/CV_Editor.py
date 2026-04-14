@@ -107,7 +107,53 @@ def show_fullscreen_preview(pdf_bytes):
     pdf_display = f'<iframe src="data:application/pdf;base64,{base64_pdf}" width="100%" height="85vh" style="border-radius: 8px; border: none;" type="application/pdf"></iframe>'
     st.markdown(pdf_display, unsafe_allow_html=True)
 
+@st.dialog("📘 AI Prompt Guide", width="large")
+def show_ai_prompt_guide():
+    st.markdown("Copy and paste this prompt into your favorite AI model (ChatGPT, Claude, Gemini) alongside the **Job Description** and your **Master CV** YAML.")
+    
+    prompt_text = """**Role:** Act as a ruthless Executive Recruiter and Resume Strategist who specializes in placing candidates in top-tier tech and business roles.
 
+**Goal:** Rewrite my resume to ensure I get an interview. Optimize for both the ATS and the human recruiter who spends 6 seconds scanning.
+
+**Philosophy:** Maximum Impact, Zero Fluff. Frame every experience in the most impressive light possible without fabricating facts that will fail a background check.
+
+**Instructions:**
+
+**PHASE 1: THE STRATEGY**
+Scan the Job Description (JD) and identify the top 5 Hard Skills or Keywords. Use these to anchor the resume. Understand what the company needs and make the resume perfectly compliment that role.
+
+**PHASE 2: DRAFTING RULES**
+1. **THE VISUAL ANCHORING RULE:**
+   Apply bold formatting (`**like this**`) strictly to:
+   - ALL Metrics & Numbers (e.g., **20%**, **$1.5M**, **50+ users**).
+   - Hard Skills & Tech Stack matching the JD.
+   - Do NOT bold soft words.
+
+2. **THE GOOGLE XYZ FORMULA:**
+   Structure bullets as: "Accomplished [X] as measured by [Y], by doing [Z]."
+
+3. **THE KEYWORD MATCH RULE:**
+   Ensure terminology matches the JD verbatim.
+
+4. **AGGRESSIVE REFRAMING (The Stretch):**
+   Transform passive tasks into high-impact achievements. Remove weak verbs (Learned, Helped, Supported) and replace with (Built, Engineered, Spearheaded).
+
+5. **QUANTIFY EVERYTHING:**
+   Every bullet point MUST have a number. If exact data is missing, confidently estimate a realistic number without adding placeholders.
+
+6. **LIMITATIONS:**
+   [INSERT YOUR CONSTRAINTS HERE, e.g., "Do not claim experience past my current role date"]
+
+**OUTPUT FORMAT:**
+1. Strategy Brief: List Top 5 Keywords.
+2. The Resume: Clean Markdown YAML.
+3. Gap Analysis: Identify where we stretched the truth heavily so I can prep.
+
+**INPUT DATA:**
+[PASTE YAML RESUME HERE]
+[PASTE JOB DESCRIPTION HERE]
+"""
+    st.code(prompt_text, language="markdown")
 
 st.set_page_config(page_title="CV Editor", layout="wide")
 
@@ -452,12 +498,78 @@ with st.sidebar:
 
     st.divider()
 
-    if st.button("⬅️ Back to Dashboard", width="stretch"):
-        if is_master or is_playground:
-            # Clear special mode state on exit
-            st.session_state.pop("active_job", None)
-            st.session_state.pop("current_editing_job_id", None)
-        st.switch_page("dashboard.py")
+    # --- 📄 Draft Management ---
+    save_cols = st.columns([1, 1])
+    with save_cols[0]:
+        if st.button("💾 Save Draft", help="Persist changes to disk draft file", width="stretch"):
+            content_to_save = st.session_state.get("yaml_editor", "")
+            if save_draft_to_disk(job_id, content_to_save):
+                st.toast("Draft saved to disk! 📦")
+    with save_cols[1]:
+        st.caption(f"Last Sync: {datetime.now().strftime('%H:%M:%S')}")
+
+    # Download button (if PDF exists)
+    display_path = st.session_state.get("current_pdf")
+    if not display_path:
+        potential_path = os.path.join(orchestrator.output_dir, f"{job_id}.pdf")
+        if os.path.exists(potential_path):
+            display_path = potential_path
+
+    if display_path and os.path.exists(display_path):
+        # Sanitize for filename
+        clean_company = re.sub(r'[^a-zA-Z0-9]', '_', company)
+        clean_title = re.sub(r'[^a-zA-Z0-9]', '_', title)
+        # Collapse multiple underscores
+        # [AI CONTEXT: Dynamic Naming Fix #17]
+        user_name = get_user_name_from_yaml(st.session_state["editor_yaml"])
+        clean_name = re.sub(r'[^a-zA-Z0-9]+', '_', user_name).strip('_')
+        
+        today_str = datetime.now().strftime("%Y-%m-%d")
+        nice_filename = f"{clean_name}_{clean_title}_{clean_company}_{today_str}.pdf"
+        mtime = int(os.path.getmtime(display_path))
+        
+        with open(display_path, "rb") as f:
+            pdf_data = f.read()
+
+        # --- Sidebar PDF Toolbar ---
+        pdf_cols = st.columns([1, 1])
+        with pdf_cols[0]:
+            st.download_button(
+                "⏳ Rendering..." if st.session_state["is_rendering"] else "⬇️ Download",
+                data=pdf_data,
+                file_name=nice_filename,
+                mime="application/pdf",
+                use_container_width=True,
+                key=f"dl_{job_id}_{mtime}",
+                disabled=st.session_state["is_rendering"]
+            )
+        with pdf_cols[1]:
+            if st.button("🔍 Full Screen", use_container_width=True, disabled=st.session_state["is_rendering"]):
+                show_fullscreen_preview(pdf_data)
+
+    # Reset Button
+    if st.button("🔄 Reset to Base", help="Discard changes and revert to Master CV"):
+        try:
+            # 1. Remove tailored file if it exists (not for master mode)
+            if not is_master:
+                tailored_path = os.path.join(orchestrator.output_dir, f"{job_id}.yaml")
+                if os.path.exists(tailored_path):
+                    os.remove(tailored_path)
+            
+            # 2. Reload base CV
+            if os.path.exists(orchestrator.base_cv_path):
+                with open(orchestrator.base_cv_path, 'r', encoding='utf-8') as f:
+                    base_content = f.read()
+                st.session_state["editor_yaml"] = base_content
+                st.session_state["yaml_editor"] = base_content # Force widget update
+                st.session_state["current_editing_job_id"] = job_id  # Ensure synced
+                st.toast("Reverted to Master CV! 🔄")
+                time.sleep(1)
+                st.rerun()
+            else:
+                st.error("Master CV file not found!")
+        except Exception as e:
+            st.error(f"Error resetting: {e}")
 
     st.divider()
 
@@ -551,84 +663,56 @@ with st.sidebar:
 
     st.divider()
 
-    # Render button
+    # --- 🧠 AI Assistance & Strategy ---
+    st.subheader("🧠 AI Assistance & Strategy")
     st.info("💡 **To Render PDF**, please use the **Save & Render** button inside the editor window or press `Cmd/Ctrl + Enter`.")
-
-    # --- 📄 Draft Management ---
-    st.divider()
-    save_cols = st.columns([1, 1])
-    with save_cols[0]:
-        if st.button("💾 Save Draft", help="Persist changes to disk draft file", width="stretch"):
-            content_to_save = st.session_state.get("yaml_editor", "")
-            if save_draft_to_disk(job_id, content_to_save):
-                st.toast("Draft saved to disk! 📦")
-    with save_cols[1]:
-        st.caption(f"Last Sync: {datetime.now().strftime('%H:%M:%S')}")
-
-    # Download button (if PDF exists)
-    display_path = st.session_state.get("current_pdf")
-    if not display_path:
-        potential_path = os.path.join(orchestrator.output_dir, f"{job_id}.pdf")
-        if os.path.exists(potential_path):
-            display_path = potential_path
-
-    if display_path and os.path.exists(display_path):
-        # Sanitize for filename
-        clean_company = re.sub(r'[^a-zA-Z0-9]', '_', company)
-        clean_title = re.sub(r'[^a-zA-Z0-9]', '_', title)
-        # Collapse multiple underscores
-        # [AI CONTEXT: Dynamic Naming Fix #17]
-        user_name = get_user_name_from_yaml(st.session_state["editor_yaml"])
-        clean_name = re.sub(r'[^a-zA-Z0-9]+', '_', user_name).strip('_')
+    
+    if st.button("📘 AI Prompt Guide", use_container_width=True, help="Get the manual copy/paste prompt for external LLMs"):
+        show_ai_prompt_guide()
         
-        today_str = datetime.now().strftime("%Y-%m-%d")
-        nice_filename = f"{clean_name}_{clean_title}_{clean_company}_{today_str}.pdf"
-        mtime = int(os.path.getmtime(display_path))
-        
-        with open(display_path, "rb") as f:
-            pdf_data = f.read()
+    if is_master or is_playground:
+        st.info("Auto AI Tailoring is disabled in this mode (no job context).")
+    elif ai_tailor:
+        if st.button("🤖 Auto-Tailor with AI", type="primary", width="stretch", help="Auto-update CV using DeepSeek R1."):
+            with st.spinner("🧠 Rewriting CV... (30-60s)"):
+                try:
+                    strategy, new_yaml, gap, reasoning = ai_tailor.generate_tailored_resume(
+                        base_yaml_content=st.session_state["editor_yaml"],
+                        job_description=job.get("description", "No description provided"),
+                        job_title=title,
+                        company_name=company
+                    )
+                    st.session_state["editor_yaml"] = new_yaml
+                    st.session_state["ai_strategy"] = strategy
+                    st.session_state["ai_reasoning"] = reasoning
+                    orchestrator.save_job_cv(job_id, new_yaml)
+                    st.toast("AI updates applied! ✨")
+                    st.rerun()
+                except Exception as e:
+                    st.error(f"Failed: {e}")
 
-        # --- Sidebar PDF Toolbar ---
-        pdf_cols = st.columns([1, 1])
-        with pdf_cols[0]:
-            st.download_button(
-                "⏳ Rendering..." if st.session_state["is_rendering"] else "⬇️ Download",
-                data=pdf_data,
-                file_name=nice_filename,
-                mime="application/pdf",
-                use_container_width=True,
-                key=f"dl_{job_id}_{mtime}",
-                disabled=st.session_state["is_rendering"]
-            )
-        with pdf_cols[1]:
-            if st.button("🔍 Full Screen", use_container_width=True, disabled=st.session_state["is_rendering"]):
-                show_fullscreen_preview(pdf_data)
+        if "ai_strategy" in st.session_state and st.session_state["ai_strategy"]:
+            with st.expander("📊 AI Strategy & Gaps"):
+                st.markdown(st.session_state["ai_strategy"])
+                
+                if "gap_analysis" in st.session_state and st.session_state["gap_analysis"]:
+                    st.divider()
+                    st.markdown("### ⚠️ Gap Analysis")
+                    st.warning(st.session_state["gap_analysis"])
+                    
+                if "ai_reasoning" in st.session_state and st.session_state["ai_reasoning"]:
+                    st.divider()
+                    st.markdown("### 💭 Reasoning")
+                    st.caption(st.session_state["ai_reasoning"])
+    else:
+        st.warning("AI module not available.")
 
-    # Reset Button
-    if st.button("🔄 Reset to Base", help="Discard changes and revert to Master CV"):
-        try:
-            # 1. Remove tailored file if it exists (not for master mode)
-            if not is_master:
-                tailored_path = os.path.join(orchestrator.output_dir, f"{job_id}.yaml")
-                if os.path.exists(tailored_path):
-                    os.remove(tailored_path)
-            
-            # 2. Reload base CV
-            if os.path.exists(orchestrator.base_cv_path):
-                with open(orchestrator.base_cv_path, 'r', encoding='utf-8') as f:
-                    base_content = f.read()
-                st.session_state["editor_yaml"] = base_content
-                st.session_state["yaml_editor"] = base_content # Force widget update
-                st.session_state["current_editing_job_id"] = job_id  # Ensure synced
-                st.toast("Reverted to Master CV! 🔄")
-                time.sleep(1)
-                st.rerun()
-            else:
-                st.error("Master CV file not found!")
-        except Exception as e:
-            st.error(f"Error resetting: {e}")
-
-    st.divider()
+    if st.button("⬅️ Back to Dashboard", width="stretch"):
+        if is_master or is_playground:
+            # Clear special mode state on exit
+            st.session_state.pop("active_job", None)
+            st.session_state.pop("current_editing_job_id", None)
+        st.switch_page("dashboard.py")
 
     # Application Workflow
     def mark_as_applied(target_id):
@@ -668,49 +752,7 @@ with st.sidebar:
         mark_as_applied(job_id)
         st.toast("Application Submitted! Returning to Dashboard...", icon="🚀")
         time.sleep(1.5)
-        st.switch_page("dashboard.py")
-
-    st.divider()
-
-    # AI Tailoring Tools
-    st.subheader("🤖 AI Tailoring")
-    if is_master or is_playground:
-        st.info("AI Tailoring is disabled in this mode (no job context).")
-    elif ai_tailor:
-        st.write("Auto-update CV using DeepSeek R1.")
-        if st.button("Auto-Tailor with AI", type="primary", width="stretch"):
-            with st.spinner("🧠 Rewriting CV... (30-60s)"):
-                try:
-                    strategy, new_yaml, gap, reasoning = ai_tailor.generate_tailored_resume(
-                        base_yaml_content=st.session_state["editor_yaml"],
-                        job_description=job.get("description", "No description provided"),
-                        job_title=title,
-                        company_name=company
-                    )
-                    st.session_state["editor_yaml"] = new_yaml
-                    st.session_state["ai_strategy"] = strategy
-                    st.session_state["ai_reasoning"] = reasoning
-                    orchestrator.save_job_cv(job_id, new_yaml)
-                    st.toast("AI updates applied! ✨")
-                    st.rerun()
-                except Exception as e:
-                    st.error(f"Failed: {e}")
-
-        if "ai_strategy" in st.session_state and st.session_state["ai_strategy"]:
-            with st.expander("📊 AI Strategy & Gaps"):
-                st.markdown(st.session_state["ai_strategy"])
-                
-                if "gap_analysis" in st.session_state and st.session_state["gap_analysis"]:
-                    st.divider()
-                    st.markdown("### ⚠️ Gap Analysis")
-                    st.warning(st.session_state["gap_analysis"])
-                    
-                if "ai_reasoning" in st.session_state and st.session_state["ai_reasoning"]:
-                    st.divider()
-                    st.markdown("### 💭 Reasoning")
-                    st.caption(st.session_state["ai_reasoning"])
-    else:
-        st.warning("AI module not available.")# --- 4. Modular UI Components ---
+        st.switch_page("dashboard.py")# --- 4. Modular UI Components ---
 def render_editor_workspace(job_id, company, title, is_master, is_playground):
     """
     AI-CONTEXT: Encapsulates the CV editor and toolbar. 
