@@ -51,3 +51,7 @@ jobs_*.csv
 # Data files (optional - uncomment if you don't want to commit data)
 # data/
 # report/
+
+# Ignore personal config files but allow templates
+config/*.yaml
+!config/*.yaml.example
