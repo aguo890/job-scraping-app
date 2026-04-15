@@ -11,19 +11,31 @@ in prose. This eliminates hallucinated extra keys and ensures the output
 matches our exact parser expectations.
 """
 
-CV_GENERATION_PROMPT = '''You are a resume-to-YAML converter. The user will attach their resume (PDF, DOCX, or image).
-Extract ALL information and output it as a single YAML code block conforming EXACTLY to this schema.
+CV_GENERATION_PROMPT = '''**Role:** Act as a ruthless Executive Recruiter and Resume Strategist who specializes in placing candidates in top-tier tech and business roles.
 
-STRICT RULES:
-1. Output ONLY a single ```yaml code block. No explanations before or after.
-2. ZERO hallucination — extract only what exists in the resume. Do not invent companies, titles, dates, or skills.
-3. Bold all technical keywords in highlights using **keyword** markdown syntax.
-4. Use action verbs to start every highlight bullet (Architected, Engineered, Developed, Deployed, etc.)
-5. Quantify results wherever the resume provides numbers (e.g., "reducing latency by **40%**").
-6. For dates, use the format: YYYY-MM (e.g., 2024-06) or "Present" for current roles.
-   Date ranges use: "2024-06 – Present" or "2023-01 – 2024-06"
+**Goal:** Rewrite the attached resume to ensure the candidate gets an interview. Optimize for both the ATS and the human recruiter who spends 6 seconds scanning.
 
-EXACT SCHEMA (fill in from the resume):
+**Philosophy:** Maximum Impact, Zero Fluff. Frame every experience in the most impressive light possible without fabricating facts that will fail a background check.
+
+**PHASE 1: THE STRATEGY**
+Identify the top 5 Hard Skills or Keywords from the candidate's background that anchor their profile for high-tier tech roles.
+
+**PHASE 2: DRAFTING RULES**
+1. **THE VISUAL ANCHORING RULE:**
+   Apply bold formatting (`**like this**`) strictly to:
+   - ALL Metrics & Numbers (e.g., **20%**, **$1.5M**, **50+ users**).
+   - Hard Skills & Tech Stack.
+   - Do NOT bold soft words.
+2. **THE GOOGLE XYZ FORMULA:**
+   Structure bullets as: "Accomplished [X] as measured by [Y], by doing [Z]."
+3. **AGGRESSIVE REFRAMING:**
+   Transform passive tasks into high-impact achievements. Remove weak verbs (Learned, Helped, Supported) and replace with (Built, Engineered, Spearheaded, Architected).
+4. **QUANTIFY EVERYTHING:**
+   Every bullet point MUST have a number. If exact data is missing, confidently estimate a realistic number without adding placeholders.
+5. **YAML OUTPUT ONLY:**
+   While you should provide a Strategy Brief and Gap Analysis in your chat response, ensure the resume itself is in a single, clean ```yaml code block conforming EXACTLY to the schema below.
+
+**STRICT YAML SCHEMA:**
 
 cv:
   name: "Full Name"
@@ -37,15 +49,13 @@ cv:
   - network: GitHub
     username: your-github-handle
   sections:
-    summary:
-    - "A 1-2 sentence professional summary. Write one if the resume doesn't have one."
     experience:
     - company: "Company Name"
       position: "Job Title"
       location: "City, State"
       date: "YYYY-MM – YYYY-MM"
       highlights:
-      - "Action verb + **bold keywords** + quantified result."
+      - "Accomplished [X] as measured by [Y], by doing [Z] with **bolded metrics** and **tech keywords**."
     education:
     - institution: "University Name"
       area: "Major / Field of Study"
@@ -57,7 +67,7 @@ cv:
       date: "YYYY-MM – Present"
       summary: "One-line summary with **bold tech stack**."
       highlights:
-      - "Action verb + what you built + impact."
+      - "Spearheaded [X] resulting in [Y] using **bolded keywords**."
     skills:
     - label: "Languages"
       details: "Python, JavaScript, SQL, etc."
@@ -68,8 +78,10 @@ cv:
 design:
   theme: sb2nov
 
-If a section doesn't exist in the resume (e.g., no projects), omit that section entirely.
-If a field doesn't exist (e.g., no website), omit that field.'''
+**OUTPUT FORMAT:**
+1. Strategy Brief: List Top 5 Keywords.
+2. The Resume: Clean Markdown YAML mirroring the schema above.
+3. Gap Analysis: Identify where we stretched the truth heavily so the candidate can prep.'''
 
 
 FILTERING_GENERATION_PROMPT = '''You are a job search configuration generator. Based on the resume the user just converted (or will attach), generate a YAML configuration for an automated job scraping engine.
@@ -136,7 +148,7 @@ Adjust the experience-level title keywords based on their years of experience:
 CV_PROMPT_INSTRUCTIONS = """### Step 1: Generate Your Master CV
 
 1. **Copy** the prompt below
-2. **Open** your AI assistant (ChatGPT, Claude, DeepSeek, etc.)
+2. **Open** your AI assistant (ChatGPT, Claude, Gemini, etc.)
 3. **Paste** the prompt and **attach your resume** (PDF, DOCX, or screenshot)
 4. **Copy** the YAML output the AI generates
 5. **Paste** it into the text box in Step 2

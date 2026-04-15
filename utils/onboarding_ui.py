@@ -36,7 +36,7 @@ def render_wizard_ui(is_standalone=False):
     else:
         st.markdown(
             "Set up your personalized job search in minutes. "
-            "Use **your own AI** (ChatGPT, Claude, DeepSeek) to convert your resume — "
+            "Use **your own AI** (ChatGPT, Claude, Gemini) to convert your resume — "
             "no API keys needed."
         )
 
