@@ -385,8 +385,26 @@ if isinstance(res_data, dict) and res_data.get("restricted"):
     st.warning(f"⚠️ **Restriction Alert:** {res_data.get('reason')}. Please ensure you meet the eligibility requirements before tailoring.", icon="⚠️")
 
 # --- 2. Initialize Orchestrator ---
-# Uses default (Aaron_Guo_CV.yaml) which is mounted at root in Docker
+# Uses default discovery logic
 orchestrator = CVOrchestrator()
+
+# [UX FIX]: If no Master CV is found, show a helpful prompt instead of letting the UI crash or show error strings.
+if orchestrator.base_cv_path is None:
+    st.title("📄 CV Editor")
+    st.error("### ⚠️ Master CV Not Found")
+    st.markdown("""
+    It looks like you haven't set up your Master CV yet, or it's not in the `rendercv/` folder. 
+    A valid Master CV (a YAML file with a `cv:` root key) is required to use the editor and generate tailored resumes.
+    """)
+    
+    col1, col2 = st.columns([1, 1])
+    with col1:
+        if st.button("🚀 Set up My Resume (Import)", type="primary", use_container_width=True):
+            st.switch_page("pages/5_📥_Import_Resume.py")
+    with col2:
+        if st.button("⬅️ Back to Dashboard", use_container_width=True):
+            st.switch_page("dashboard.py")
+    st.stop()
 
 # --- 3. Load State (with Job Switch Detection) ---
 if "current_editing_job_id" not in st.session_state:

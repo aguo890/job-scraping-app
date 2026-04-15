@@ -14,6 +14,8 @@ dependencies = [
     "requests>=2.31.0",
     "PyYAML>=6.0.1",    
     "streamlit",
+    "plotly",
+    "altair",
     "watchdog", # Explicitly promoted for Docker resolution drift
     "pandas",
     "pytz",
