@@ -507,11 +507,10 @@ if 'date_posted' in df_jobs.columns and date_range is not None:
         mask = (dates_parsed.dt.date >= start_date) & (dates_parsed.dt.date <= end_date)
         filtered_df = filtered_df[mask | dates_parsed.isna()]
 
-# Sort: Saved/Special Status first, then Date, then Score
-# We create a simple priority map for sorting
+# Sort: Score first (highest match at top), then Status priority, then Saved
 status_priority = {"Offer": 5, "Interviewing": 4, "Applied": 3, "New": 1, "Rejected": 0, "Hidden": -1}
 filtered_df['status_prio'] = filtered_df['Status'].map(status_priority).fillna(1)
-filtered_df = filtered_df.sort_values(by=["status_prio", "is_saved", "date_posted", "score"], ascending=[False, False, False, False]).reset_index(drop=True)
+filtered_df = filtered_df.sort_values(by=["score", "status_prio", "is_saved", "date_posted"], ascending=[False, False, False, False]).reset_index(drop=True)
 
 
 # --- TABLE ---
