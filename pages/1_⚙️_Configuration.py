@@ -181,6 +181,16 @@ with tabs[1]:
             except Exception as e:
                 st.error(f"Failed to save AI configuration: {e}")
 
+    # --- Re-Import Resume (Outside Form — allows st.button) ---
+    st.divider()
+    st.subheader("📥 Re-Import Resume")
+    st.caption(
+        "Re-run the onboarding wizard to regenerate your Master CV and filtering "
+        "config from a new resume using your own AI assistant."
+    )
+    if st.button("🔄 Launch Import Wizard", use_container_width=True):
+        st.switch_page("pages/5_📥_Import_Resume.py")
+
 # --- TAB 3: SYSTEM OPTIONS ---
 with tabs[2]:
     with st.form("form_sys_settings", border=False):

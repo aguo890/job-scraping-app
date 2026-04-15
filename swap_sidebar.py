@@ -1,6 +1,6 @@
 import sys
 
-with open("job-scraping-app/pages/CV_Editor.py", "r") as f:
+with open("job-scraping-app/pages/4_📝_CV_Editor.py", "r") as f:
     lines = f.readlines()
 
 # 1. Fix the newline issue from the previous step
@@ -63,7 +63,7 @@ while i < len(lines):
         
     new_lines.append(lines[i])
 
-with open("job-scraping-app/pages/CV_Editor.py", "w") as f:
+with open("job-scraping-app/pages/4_📝_CV_Editor.py", "w") as f:
     f.writelines(new_lines)
 
 print("Done")

@@ -47,7 +47,41 @@ dashboard_css = """
 # Global UI Inject (One single stMarkdownContainer for ALL styles)
 inject_custom_css(dashboard_css)
 
-from config_utils import load_config
+from pathlib import Path
+from config_utils import load_config, save_yaml_safely, FILTERING_PATH
+
+# --- BYOA Onboarding Wizard ---
+# [AI CONTEXT]: Detects new users (no CV YAML in rendercv/) and shows a guided
+# "Bring Your Own Agent" wizard. Users copy engineered prompts into their own
+# ChatGPT/Claude/DeepSeek, paste back the generated YAML, and we validate + save.
+
+def is_new_user() -> bool:
+    """Check if user has set up their Master CV yet."""
+    cv_dir = Path(__file__).resolve().parent.parent / "rendercv"
+    if not cv_dir.exists():
+        return True
+    yaml_files = [
+        f for f in cv_dir.glob("*.yaml")
+        if "example" not in f.name.lower()
+        and "bad" not in f.name.lower()
+        and "temp" not in f.name.lower()
+        and "mkdocs" not in f.name.lower()
+        and "schema" not in f.name.lower()
+    ]
+    return len(yaml_files) == 0
+
+
+@st.dialog("🚀 Welcome to Job Automation Suite!", width="large")
+def onboarding_wizard():
+    """BYOA Onboarding Wizard — zero API keys, zero dependencies."""
+    from utils.onboarding_ui import render_wizard_ui
+    render_wizard_ui(is_standalone=False)
+
+
+# --- Trigger Onboarding ---
+if is_new_user() or st.session_state.get("force_onboarding"):
+    onboarding_wizard()
+
 
 def load_tracking():
     if os.path.exists(TRACKING_FILE):
@@ -217,7 +251,7 @@ with st.sidebar:
                 "title": "Base CV",
                 "is_master": True
             }
-            st.switch_page("pages/CV_Editor.py")
+            st.switch_page("pages/4_📝_CV_Editor.py")
     with col_w2:
         if st.button("🧪 Playground", use_container_width=True, help="Scratch Pad"):
             st.query_params.update({"job_id": "playground"})
@@ -227,7 +261,7 @@ with st.sidebar:
                 "title": "Scratch Pad",
                 "is_playground": True
             }
-            st.switch_page("pages/CV_Editor.py")
+            st.switch_page("pages/4_📝_CV_Editor.py")
 
     st.divider()
 
@@ -667,7 +701,7 @@ if selected_indices:
                 btn_label = "📄 View Resume" if has_resume else "📝 Create Resume"
                 if st.button(btn_label, type="primary", width="stretch"):
                     st.session_state["active_job"] = selected_job_row.to_dict()
-                    st.switch_page("pages/CV_Editor.py")
+                    st.switch_page("pages/4_📝_CV_Editor.py")
         
         # [AI CONTEXT: Scoring Transparency Breakdown]
         # Displays exactly which keywords triggered the scoring engine for each tier.
