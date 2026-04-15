@@ -331,3 +331,141 @@ class JobDataService:
             except Exception as e:
                 logger.warning(f"Failed to cleanup draft {draft_file}: {e}")
 
+    @staticmethod
+    @st.cache_data(ttl=3600)
+    def get_analytics_summary(file_mtime=None):
+        """
+        Aggregates tracking + job data into a single analytics payload
+        for the Analytics page. Memoized to prevent recalculation on
+        every Streamlit interaction.
+
+        [AI CONTEXT]: file_mtime is a cache-busting key (same pattern
+        as fetch_dashboard_payload). Pass os.path.getmtime() of both
+        tracking.json and jobs_agg.json so the cache invalidates when
+        either file changes on disk.
+        """
+        # 1. Load raw data
+        tracking = {}
+        if TRACKING_FILE.exists():
+            try:
+                with open(TRACKING_FILE, 'r', encoding='utf-8') as f:
+                    tracking = json.load(f)
+            except Exception as e:
+                logger.error(f"Analytics: Failed to load tracking: {e}")
+
+        jobs = []
+        if JOB_DATA_FILE.exists():
+            try:
+                with open(JOB_DATA_FILE, 'r', encoding='utf-8') as f:
+                    content = json.load(f)
+                    jobs = content.get("jobs", [])
+            except Exception as e:
+                logger.error(f"Analytics: Failed to load jobs: {e}")
+
+        # 2. Compute status counts
+        total_scraped = len(jobs)
+        status_counts = {"New": 0, "Saved": 0, "Applied": 0,
+                         "Interviewing": 0, "Offer": 0, "Rejected": 0, "Hidden": 0}
+
+        saved_ids = set()
+        for job_id, meta in tracking.items():
+            status = meta.get("status", "New")
+            if status in status_counts:
+                status_counts[status] += 1
+            if meta.get("saved", False):
+                saved_ids.add(job_id)
+
+        num_saved = len(saved_ids)
+        num_applied = status_counts["Applied"]
+        num_interviewing = status_counts["Interviewing"]
+        num_offer = status_counts["Offer"]
+        num_rejected = status_counts["Rejected"]
+
+        # 3. Sankey flow data (source → target → value)
+        # Stages: Total → Saved → Applied → Interviewing → Offer
+        #         with rejection branches at Applied and Interviewing
+        sankey_nodes = [
+            "Total Scraped",  # 0
+            "Saved",          # 1
+            "Applied",        # 2
+            "Interviewing",   # 3
+            "Offer",          # 4
+            "Unsaved",        # 5
+            "Not Applied",    # 6
+            "Rejected",       # 7
+            "No Response",    # 8
+        ]
+
+        # Calculate flow values
+        unsaved = total_scraped - num_saved
+        not_applied = max(num_saved - num_applied - num_interviewing - num_offer - num_rejected, 0)
+        applied_forward = num_interviewing + num_offer
+        applied_rejected = num_rejected
+        applied_no_response = max(num_applied - applied_forward - applied_rejected, 0)
+        interview_to_offer = num_offer
+        interview_no_response = max(num_interviewing - num_offer, 0)
+
+        sankey_sources = [0, 0, 1, 1, 2, 2, 2, 3, 3]
+        sankey_targets = [1, 5, 2, 6, 3, 7, 8, 4, 8]
+        sankey_values  = [
+            num_saved,              # Total → Saved
+            unsaved,                # Total → Unsaved
+            num_applied + num_interviewing + num_offer + num_rejected,  # Saved → Applied (all who progressed)
+            not_applied,            # Saved → Not Applied
+            applied_forward,        # Applied → Interviewing
+            applied_rejected,       # Applied → Rejected
+            applied_no_response,    # Applied → No Response
+            interview_to_offer,     # Interviewing → Offer
+            interview_no_response,  # Interviewing → No Response
+        ]
+
+        # Filter out zero-value flows for clean rendering
+        filtered = [(s, t, v) for s, t, v in zip(sankey_sources, sankey_targets, sankey_values) if v > 0]
+        if filtered:
+            sankey_sources, sankey_targets, sankey_values = zip(*filtered)
+        else:
+            sankey_sources, sankey_targets, sankey_values = [], [], []
+
+        # 4. Company breakdown (top 15 by tracked jobs)
+        company_status = {}
+        job_lookup = {j["id"]: j for j in jobs}
+        for job_id, meta in tracking.items():
+            if meta.get("saved") or meta.get("status") not in (None, "New", "Hidden"):
+                job = job_lookup.get(job_id, {})
+                company = job.get("company", "Unknown")
+                status = meta.get("status", "Saved")
+                if company not in company_status:
+                    company_status[company] = {}
+                company_status[company][status] = company_status[company].get(status, 0) + 1
+
+        # 5. Score distribution
+        scores = [j.get("score", 0) for j in jobs if j.get("score") is not None]
+        saved_scores = [job_lookup[jid].get("score", 0) for jid in saved_ids if jid in job_lookup]
+
+        # 6. Timeline data (applications over time)
+        timeline_data = []
+        for job_id, meta in tracking.items():
+            status = meta.get("status", "New")
+            if status in ("Applied", "Interviewing", "Offer", "Rejected"):
+                job = job_lookup.get(job_id, {})
+                date = job.get("date_posted", "")
+                if date:
+                    timeline_data.append({"date": date, "status": status})
+
+        return {
+            "total_scraped": total_scraped,
+            "num_saved": num_saved,
+            "num_applied": num_applied,
+            "num_interviewing": num_interviewing,
+            "num_offer": num_offer,
+            "num_rejected": num_rejected,
+            "sankey_nodes": sankey_nodes,
+            "sankey_sources": list(sankey_sources),
+            "sankey_targets": list(sankey_targets),
+            "sankey_values": list(sankey_values),
+            "company_status": company_status,
+            "scores": scores,
+            "saved_scores": saved_scores,
+            "timeline_data": timeline_data,
+        }
+

@@ -102,11 +102,11 @@
   },
   "ashby_ramp_31f7e045-9a51-4a75-9ffc-d815d6db6daa": {
     "saved": true,
-    "status": "Applied"
+    "status": "Rejected"
   },
   "ashby_ramp_a1229aec-1105-4c47-8533-b912e732ed89": {
     "saved": true,
-    "status": "Applied"
+    "status": "Rejected"
   },
   "ashby_ramp_c50962b5-c641-4d44-bbe5-7f1d6e7ce51f": {
     "saved": true
@@ -256,7 +256,7 @@
   },
   "gh_andurilindustries_5039332007": {
     "saved": true,
-    "status": "Applied"
+    "status": "Rejected"
   },
   "gh_redventures_7242879": {
     "status": "Applied",
@@ -264,7 +264,7 @@
   },
   "gh_andurilindustries_5045894007": {
     "saved": true,
-    "status": "Applied"
+    "status": "Rejected"
   },
   "gh_andurilindustries_5022086007": {
     "saved": true,
@@ -283,7 +283,7 @@
   },
   "gh_andurilindustries_4869264007": {
     "saved": true,
-    "status": "Applied"
+    "status": "Rejected"
   },
   "gh_andurilindustries_4836302007": {
     "saved": true,
@@ -298,7 +298,7 @@
     "cv_yaml_path": "C:\\Users\\19803\\Projects\\Job-Automation-Suite\\generated_cvs\\gh_andurilindustries_5025619007.yaml",
     "cv_pdf_path": "C:\\Users\\19803\\Projects\\Job-Automation-Suite\\generated_cvs\\gh_andurilindustries_5025619007.pdf",
     "cv_status": "Tailored",
-    "status": "Applied",
+    "status": "Rejected",
     "date_applied": "2026-02-14T21:19:06.162822"
   },
   "gh_andurilindustries_4981903007": {
@@ -357,7 +357,7 @@
     "cv_yaml_path": "C:\\Users\\19803\\Projects\\Job-Automation-Suite\\generated_cvs\\ashby_posthog_20ab9628-20ff-4ae3-bd6a-46ae7e9dc6b8.yaml",
     "cv_pdf_path": "C:\\Users\\19803\\Projects\\Job-Automation-Suite\\generated_cvs\\ashby_posthog_20ab9628-20ff-4ae3-bd6a-46ae7e9dc6b8.pdf",
     "cv_status": "Tailored",
-    "status": "Applied",
+    "status": "Rejected",
     "date_applied": "2026-02-14T20:08:14.685405"
   },
   "lever_saronic_fd6beae0-1af2-45d9-ad84-02f48e7ae643": {
@@ -506,7 +506,7 @@
     "cv_yaml_path": "C:\\Users\\19803\\Projects\\Job-Automation-Suite\\generated_cvs\\ashby_posthog_3a7e914b-a993-46e6-9029-6a0f54652497.yaml",
     "cv_pdf_path": "C:\\Users\\19803\\Projects\\Job-Automation-Suite\\generated_cvs\\ashby_posthog_3a7e914b-a993-46e6-9029-6a0f54652497.pdf",
     "cv_status": "Tailored",
-    "status": "Applied",
+    "status": "Rejected",
     "date_applied": "2026-02-15T00:56:56.918683"
   },
   "lever_shieldai_7f7a89cc-4208-43e1-9a62-8f2bab52e1fb": {
@@ -698,7 +698,7 @@
     "cv_status": "Tailored"
   },
   "gh_andurilindustries_5089044007": {
-    "status": "Applied",
+    "status": "Rejected",
     "saved": true,
     "date_applied": "2026-04-10T23:58:37.065361"
   },
