@@ -16,7 +16,7 @@ from utils.yaml_validator import (
     validate_cv_yaml, validate_filtering_yaml,
     merge_filtering_with_defaults, extract_cv_filename, clean_yaml_input
 )
-from config_utils import save_yaml_safely, FILTERING_PATH
+from config_utils import save_yaml_safely, FILTERING_PATH, save_user_pref
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -64,18 +64,22 @@ def render_wizard_ui(is_standalone=False):
 
         st.info("💡 **Tip:** Use the same AI chat session for both prompts — it will remember your resume context.", icon="💡")
 
-        col_next, col_exit = st.columns([3, 1])
+        col_next, col_skip, col_dismiss = st.columns([2, 1, 1])
         with col_next:
-            if st.button("✅ I've generated both outputs → Next", type="primary", use_container_width=True):
+            if st.button("✅ Generated Both → Next", type="primary", use_container_width=True):
                 st.session_state.onboarding_step = 2
                 st.rerun()
-        with col_exit:
-            exit_label = "⬅️ Back to Dashboard" if is_standalone else "⏭️ Skip"
-            exit_help = "Return to the main dashboard" if is_standalone else "Configure manually later"
-            if st.button(exit_label, use_container_width=True, help=exit_help):
+        with col_skip:
+            if st.button("⏭️ Skip for Now", use_container_width=True, help="Hide for this session"):
                 st.session_state.pop("force_onboarding", None)
                 st.session_state.pop("onboarding_step", None)
-                st.switch_page("dashboard.py")
+                st.rerun() # Refresh to clear modal
+        with col_dismiss:
+            if st.button("🚫 Dismiss Forever", use_container_width=True, help="Never show this prompt again"):
+                save_user_pref("show_onboarding", False)
+                st.session_state.pop("force_onboarding", None)
+                st.session_state.pop("onboarding_step", None)
+                st.rerun() 
 
     # =====================================================
     # STEP 2: Paste Zone + Validate & Save
@@ -161,6 +165,7 @@ def render_wizard_ui(is_standalone=False):
 
                     if not has_error:
                         st.balloons()
+                        save_user_pref("show_onboarding", False)
                         st.session_state.pop("force_onboarding", None)
                         st.session_state.pop("onboarding_step", None)
                         import time

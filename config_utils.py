@@ -1,5 +1,6 @@
 import os
 import yaml
+import json
 import streamlit as st
 
 # Define base paths relative to this file
@@ -52,3 +53,28 @@ def load_config():
 
 def load_companies():
     return load_config_file(COMPANIES_PATH)
+
+def load_user_prefs():
+    """Load persistent user preferences from the data directory."""
+    prefs_file = os.path.join(BASE_DIR, "data", "user_prefs.json")
+    if os.path.exists(prefs_file):
+        try:
+            with open(prefs_file, "r", encoding="utf-8") as f:
+                return json.load(f)
+        except Exception:
+            pass
+    return {}
+
+def save_user_pref(key, value):
+    """Save a single persistent user preference."""
+    prefs_file = os.path.join(BASE_DIR, "data", "user_prefs.json")
+    prefs = load_user_prefs()
+    prefs[key] = value
+    try:
+        os.makedirs(os.path.dirname(prefs_file), exist_ok=True)
+        with open(prefs_file, "w", encoding="utf-8") as f:
+            json.dump(prefs, f, indent=4)
+        return True
+    except Exception as e:
+        st.error(f"Failed to save preference: {e}")
+        return False

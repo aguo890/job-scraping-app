@@ -48,7 +48,7 @@ dashboard_css = """
 inject_custom_css(dashboard_css)
 
 from pathlib import Path
-from config_utils import load_config, save_yaml_safely, FILTERING_PATH
+from config_utils import load_config, save_yaml_safely, FILTERING_PATH, load_user_prefs
 
 # --- BYOA Onboarding Wizard ---
 # [AI CONTEXT]: Detects new users (no CV YAML in rendercv/) and shows a guided
@@ -56,19 +56,17 @@ from config_utils import load_config, save_yaml_safely, FILTERING_PATH
 # ChatGPT/Claude/DeepSeek, paste back the generated YAML, and we validate + save.
 
 def is_new_user() -> bool:
-    """Check if user has set up their Master CV yet."""
-    cv_dir = Path(__file__).resolve().parent.parent / "rendercv"
-    if not cv_dir.exists():
+    """
+    Check if user has set up their Master CV yet.
+    Leverages logic from CVOrchestrator to ensure consistency.
+    """
+    if not CVOrchestrator:
         return True
-    yaml_files = [
-        f for f in cv_dir.glob("*.yaml")
-        if "example" not in f.name.lower()
-        and "bad" not in f.name.lower()
-        and "temp" not in f.name.lower()
-        and "mkdocs" not in f.name.lower()
-        and "schema" not in f.name.lower()
-    ]
-    return len(yaml_files) == 0
+    try:
+        orch = CVOrchestrator()
+        return orch.base_cv_path is None
+    except Exception:
+        return True
 
 
 @st.dialog("🚀 Welcome to Job Automation Suite!", width="large")
@@ -79,7 +77,8 @@ def onboarding_wizard():
 
 
 # --- Trigger Onboarding ---
-if is_new_user() or st.session_state.get("force_onboarding"):
+prefs = load_user_prefs()
+if st.session_state.get("force_onboarding") or (is_new_user() and prefs.get("show_onboarding", True)):
     onboarding_wizard()
 
 

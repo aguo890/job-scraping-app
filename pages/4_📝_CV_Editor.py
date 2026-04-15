@@ -15,6 +15,7 @@ import time
 import re
 from datetime import datetime
 import streamlit.components.v1 as components
+from config_utils import load_user_prefs, save_user_pref
 
 def show_premium_toast(message="Render Complete", duration_ms=2000):
     # AI-CONTEXT: Custom toast implementation bypassing st.toast to avoid React state conflicts.
@@ -238,30 +239,6 @@ div[data-testid="stSegmentedControl"] label:active::before {
 
 # Global UI Inject (includes transparent toolbar + workshop styles)
 inject_custom_css(workshop_css)
-
-# --- User Preferences Persistence ---
-def get_prefs_path():
-    return os.path.join(parent_dir, "data", "user_prefs.json")
-
-def load_user_prefs():
-    prefs_file = get_prefs_path()
-    if os.path.exists(prefs_file):
-        try:
-            with open(prefs_file, "r", encoding="utf-8") as f:
-                return json.load(f)
-        except Exception:
-            pass
-    return {}
-
-def save_user_pref(key, value):
-    prefs_file = get_prefs_path()
-    prefs = load_user_prefs()
-    prefs[key] = value
-    try:
-        with open(prefs_file, "w", encoding="utf-8") as f:
-            json.dump(prefs, f, indent=4)
-    except Exception as e:
-        st.error(f"Failed to save preference: {e}")
 
 # --- 1. Navigation Guard (with URL persistence) ---
 SPECIAL_ROUTING_JOBS = {
