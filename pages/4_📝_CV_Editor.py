@@ -142,8 +142,48 @@ Scan the Job Description (JD) and identify the top 5 Hard Skills or Keywords. Us
 5. **QUANTIFY EVERYTHING:**
    Every bullet point MUST have a number. If exact data is missing, confidently estimate a realistic number without adding placeholders.
 
-6. **LIMITATIONS:**
+6. **CITE TAG RULE:**
+   If the source text contains `[cite_start]` or `[cite: N]` tags:
+   - They MUST be placed INSIDE the quote marks of the YAML value.
+   - NEVER place tags outside of the quote marks or before a YAML key.
+   - **Negative Constraint:** DO NOT start any YAML line with a square bracket `[` unless it is part of a quoted string.
+
+7. **LIMITATIONS:**
    [INSERT YOUR CONSTRAINTS HERE, e.g., "Do not claim experience past my current role date"]
+
+8. **FORMATTING PRESERVATION (STRICT):**
+   The generated YAML MUST include this exact design/settings configuration to ensure a 1-page high-impact layout:
+   ```yaml
+   design:
+     theme: sb2nov
+     page:
+       top_margin: 0.5in
+       bottom_margin: 0.5in
+       left_margin: 0.5in
+       right_margin: 0.5in
+       show_footer: false
+     typography:
+       font_size:
+         name: 11pt
+         body: 10pt
+         section_titles: 12pt
+       line_spacing: 0.5em
+     section_titles:
+       space_above: 0.3cm
+       space_below: 0.2cm
+     sections:
+       space_between_regular_entries: 0.2cm
+     header:
+       space_below_name: 0.2cm
+       space_below_headline: 0.2cm
+       space_below_connections: 0.2cm
+     entries:
+       side_space: 0cm
+   settings:
+     render_command:
+       pdf_path: "rendercv_output/tailored_cv.pdf"
+       png_path: "rendercv_output/tailored_cv.png"
+   ```
 
 **OUTPUT FORMAT:**
 1. Strategy Brief: List Top 5 Keywords.

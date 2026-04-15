@@ -32,8 +32,14 @@ Identify the top 5 Hard Skills or Keywords from the candidate's background that 
    Transform passive tasks into high-impact achievements. Remove weak verbs (Learned, Helped, Supported) and replace with (Built, Engineered, Spearheaded, Architected).
 4. **QUANTIFY EVERYTHING:**
    Every bullet point MUST have a number. If exact data is missing, confidently estimate a realistic number without adding placeholders.
-5. **YAML OUTPUT ONLY:**
+5. **CITE TAG RULE:**
+   If the source text contains `[cite_start]` or `[cite: N]` tags:
+   - They MUST be placed INSIDE the quote marks of the YAML value.
+   - Example Correct: - "[cite_start]Engineered a **scalable** backend...[cite: 12]."
+   - NEVER place tags outside of the quote marks or before a YAML key.
+6. **YAML OUTPUT ONLY:**
    While you should provide a Strategy Brief and Gap Analysis in your chat response, ensure the resume itself is in a single, clean ```yaml code block conforming EXACTLY to the schema below.
+   - **Negative Constraint:** DO NOT start any YAML line with a square bracket `[` unless it is part of a quoted string.
 
 **STRICT YAML SCHEMA:**
 
@@ -77,6 +83,33 @@ cv:
       details: "Docker, AWS, Git, etc."
 design:
   theme: sb2nov
+  page:
+    top_margin: 0.5in
+    bottom_margin: 0.5in
+    left_margin: 0.5in
+    right_margin: 0.5in
+    show_footer: false
+  typography:
+    font_size:
+      name: 11pt
+      body: 10pt
+      section_titles: 12pt
+    line_spacing: 0.5em
+  section_titles:
+    space_above: 0.3cm
+    space_below: 0.2cm
+  sections:
+    space_between_regular_entries: 0.2cm
+  header:
+    space_below_name: 0.2cm
+    space_below_headline: 0.2cm
+    space_below_connections: 0.2cm
+  entries:
+    side_space: 0cm
+settings:
+  render_command:
+    pdf_path: "rendercv_output/master_cv.pdf"
+    png_path: "rendercv_output/master_cv.png"
 
 **OUTPUT FORMAT:**
 1. Strategy Brief: List Top 5 Keywords.
