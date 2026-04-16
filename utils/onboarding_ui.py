@@ -137,14 +137,15 @@ def render_wizard_ui(is_standalone=False):
                     # --- Save CV YAML ---
                     try:
                         cv_filename = extract_cv_filename(cv_data)
-                        # Go up one level from utils/ to root/rendercv
-                        cv_dir = Path(BASE_DIR).resolve() / "rendercv"
-                        cv_path = cv_dir / cv_filename
-
-                        # Use clean content (fences stripped) for saving
                         clean_cv = sanitize_llm_payload(cv_input)
 
+                        # Root is one level up from job-scraping-app/
+                        cv_dir = Path(BASE_DIR).resolve().parent / "rendercv"
+                        cv_dir.mkdir(parents=True, exist_ok=True)
+                        cv_path = cv_dir / cv_filename
+
                         cv_path.write_text(clean_cv, encoding="utf-8")
+
 
                         st.success(f"✅ Master CV saved as `{cv_filename}`")
                     except Exception as e:
@@ -154,7 +155,8 @@ def render_wizard_ui(is_standalone=False):
                     # --- Save Filtering Config ---
                     if not has_error:
                         try:
-                            defaults_path = os.path.join(BASE_DIR, "job-scraping-app", "config", "filtering.yaml.example")
+                            defaults_path = os.path.join(BASE_DIR, "config", "filtering.yaml.example")
+
                             merged_config = merge_filtering_with_defaults(filter_data, defaults_path)
 
                             if save_yaml_safely(merged_config, FILTERING_PATH):
