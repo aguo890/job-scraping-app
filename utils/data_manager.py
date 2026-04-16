@@ -17,9 +17,8 @@ logger = logging.getLogger(__name__)
 BASE_DIR = Path(__file__).resolve().parent.parent
 ROOT_DIR = BASE_DIR.parent
 
-# SRE Logic: Check root directory first, then fallback to submodule data directory
-ROOT_DATA_DIR = ROOT_DIR / "data"
-DATA_DIR = ROOT_DATA_DIR if ROOT_DATA_DIR.exists() else (BASE_DIR / "data")
+# Standard Data Directory (Must match the persistent volume mapping in docker-compose.yml)
+DATA_DIR = BASE_DIR / "data"
 
 JOB_DATA_FILE = DATA_DIR / "jobs_agg.json"
 TRACKING_FILE = DATA_DIR / "tracking.json"

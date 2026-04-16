@@ -17,12 +17,9 @@ class JobReporter:
     """Generates reports and output files"""
     
     def __init__(self, output_dir: str = None, report_dir: str = None):
-        # SRE: Default to the repository root folders if they exist (persistence-first)
-        root_data = BASE_DIR.parent / "data"
-        root_report = BASE_DIR.parent / "report"
-
-        self.output_dir = output_dir or (str(root_data) if root_data.exists() else str(BASE_DIR / "data"))
-        self.report_dir = report_dir or (str(root_report) if root_report.exists() else str(BASE_DIR / "report"))
+        # Standard Data & Report Directories (Persistent Volume)
+        self.output_dir = output_dir or str(BASE_DIR / "data")
+        self.report_dir = report_dir or str(BASE_DIR / "report")
         
         # Ensure directories exist
         os.makedirs(self.output_dir, exist_ok=True)
