@@ -450,6 +450,9 @@ if orchestrator.base_cv_path is None:
 if "current_editing_job_id" not in st.session_state:
     st.session_state["current_editing_job_id"] = None
 
+if "editor_version" not in st.session_state:
+    st.session_state["editor_version"] = 0
+
 # If we switched jobs, force a reload and persist old draft
 if st.session_state["current_editing_job_id"] != job_id:
     # --- Auto-Save Old Job Draft before switching ---
@@ -709,22 +712,41 @@ with st.sidebar:
         st.info("Auto AI Tailoring is disabled in this mode (no job context).")
     elif ai_tailor:
         if st.button("🤖 Auto-Tailor with AI", type="primary", width="stretch", help="Auto-update CV using DeepSeek R1."):
-            with st.spinner("🧠 Rewriting CV... (30-60s)"):
+            with st.status("🧠 Ghostwriter is working...", expanded=True) as status:
                 try:
+                    st.session_state["ai_loading"] = True
+                    
+                    def update_status(msg):
+                        status.write(f"  * {msg}")
+                        # If the message starts with a success icon, update the label too
+                        if "🔍" in msg or "🧠" in msg or "📝" in msg or "🛂" in msg or "🎨" in msg:
+                            status.update(label=f"🧠 {msg}")
+
                     strategy, new_yaml, gap, reasoning = ai_tailor.generate_tailored_resume(
                         base_yaml_content=st.session_state["editor_yaml"],
                         job_description=job.get("description", "No description provided"),
                         job_title=title,
-                        company_name=company
+                        company_name=company,
+                        status_callback=update_status
                     )
+                    
                     st.session_state["editor_yaml"] = new_yaml
+                    st.session_state["yaml_editor"] = new_yaml # Sync to widget source
+                    st.session_state["editor_version"] += 1    # Force widget remount
+                    
                     st.session_state["ai_strategy"] = strategy
                     st.session_state["ai_reasoning"] = reasoning
                     orchestrator.save_job_cv(job_id, new_yaml)
+                    
+                    status.update(label="✅ Tailoring Complete!", state="complete", expanded=False)
                     st.toast("AI updates applied! ✨")
+                    time.sleep(0.5)
                     st.rerun()
                 except Exception as e:
-                    st.error(f"Failed: {e}")
+                    status.update(label="❌ Tailoring Failed!", state="error", expanded=True)
+                    st.error(f"Failed to tailor CV: {e}")
+                finally:
+                    st.session_state["ai_loading"] = False
 
         if "ai_strategy" in st.session_state and st.session_state["ai_strategy"]:
             with st.expander("📊 AI Strategy & Gaps"):
@@ -823,7 +845,7 @@ def render_editor_workspace(job_id, company, title, is_master, is_playground):
             height=[40, 50], 
             buttons=custom_btns,
             response_mode="blur",
-            key=f"cv_code_editor_{job_id}"
+            key=f"cv_code_editor_{job_id}_{st.session_state['editor_version']}"
         )
 
         # [AI CONTEXT: Decouple live text tracking from the submit hook so the dirty-state modal 
