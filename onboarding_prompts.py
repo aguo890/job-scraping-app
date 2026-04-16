@@ -20,26 +20,29 @@ CV_GENERATION_PROMPT = '''**Role:** Act as a ruthless Executive Recruiter and Re
 **PHASE 1: THE STRATEGY**
 Identify the top 5 Hard Skills or Keywords from the candidate's background that anchor their profile for high-tier tech roles.
 
-**PHASE 2: DRAFTING RULES**
-1. **THE VISUAL ANCHORING RULE:**
+**PHASE 2: DRAFTING RULES (HIGH PRIORITY)**
+1. **STRICT YAML CLEANLINESS:**
+   Your YAML output must be perfectly valid. If you use citations, they MUST be escaped within quotes.
+2. **THE VISUAL ANCHORING RULE:**
    Apply bold formatting (`**like this**`) strictly to:
    - ALL Metrics & Numbers (e.g., **20%**, **$1.5M**, **50+ users**).
    - Hard Skills & Tech Stack.
    - Do NOT bold soft words.
-2. **THE GOOGLE XYZ FORMULA:**
+3. **THE GOOGLE XYZ FORMULA:**
    Structure bullets as: "Accomplished [X] as measured by [Y], by doing [Z]."
-3. **AGGRESSIVE REFRAMING:**
-   Transform passive tasks into high-impact achievements. Remove weak verbs (Learned, Helped, Supported) and replace with (Built, Engineered, Spearheaded, Architected).
 4. **QUANTIFY EVERYTHING:**
    Every bullet point MUST have a number. If exact data is missing, confidently estimate a realistic number without adding placeholders.
-5. **CITE TAG RULE:**
+5. **CITE TAG RULE (CRITICAL SYNTAX):**
    If the source text contains `[cite_start]` or `[cite: N]` tags:
-   - They MUST be placed INSIDE the quote marks of the YAML value.
-   - Example Correct: - "[cite_start]Engineered a **scalable** backend...[cite: 12]."
+   - **MUST** be placed INSIDE the quote marks of the YAML value.
+   - **GOOD:** - "[cite_start]Engineered a **scalable** backend...[cite: 12]."
+   - **BAD:** [cite_start] - "Engineered a scalable backend..."
+   - **BAD:** - [cite_start] "Engineered a scalable backend..."
    - NEVER place tags outside of the quote marks or before a YAML key.
 6. **YAML OUTPUT ONLY:**
    While you should provide a Strategy Brief and Gap Analysis in your chat response, ensure the resume itself is in a single, clean ```yaml code block conforming EXACTLY to the schema below.
    - **Negative Constraint:** DO NOT start any YAML line with a square bracket `[` unless it is part of a quoted string.
+
 
 **STRICT YAML SCHEMA:**
 

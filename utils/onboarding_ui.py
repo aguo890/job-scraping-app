@@ -12,10 +12,11 @@ from onboarding_prompts import (
     CV_GENERATION_PROMPT, FILTERING_GENERATION_PROMPT,
     CV_PROMPT_INSTRUCTIONS, FILTERING_PROMPT_INSTRUCTIONS
 )
-from utils.yaml_validator import (
+from core.llm_sanitizer import (
     validate_cv_yaml, validate_filtering_yaml,
-    merge_filtering_with_defaults, extract_cv_filename, clean_yaml_input
+    merge_filtering_with_defaults, extract_cv_filename, sanitize_llm_payload
 )
+
 from config_utils import save_yaml_safely, FILTERING_PATH, save_user_pref
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -141,7 +142,8 @@ def render_wizard_ui(is_standalone=False):
                         cv_path = cv_dir / cv_filename
 
                         # Use clean content (fences stripped) for saving
-                        clean_cv = clean_yaml_input(cv_input)
+                        clean_cv = sanitize_llm_payload(cv_input)
+
                         cv_path.write_text(clean_cv, encoding="utf-8")
 
                         st.success(f"✅ Master CV saved as `{cv_filename}`")
