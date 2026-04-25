@@ -1,4 +1,4 @@
-Aaron Guo
+John Doe
 (980) 337-0681 | aguo890@gwmail.gwu.edu | https://www.linkedin.com/in/guo-aaron/ | https://github.com/aguo890 
 Work Experience
 Multi-State Tax Optimization Platform | Project Demo 	Oct 2025- Present
@@ -57,7 +57,7 @@ Tools & Cloud: Docker, Git, Makefile, Tailwind CSS, AWS Lambda
 Spoken Languages: English (Native), Mandarin (Fluent)
 
 
-Aaron Guo - George Washington University Degree Audit
+John Doe - George Washington University Degree Audit
 Student Information
 Student Name: Guo, Aaron
 Degree: Bachelor of Science, Major in Computer Science
