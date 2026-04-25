@@ -50,11 +50,10 @@ companies:
     source: manual
     last_verified: 2026-04-04
 - name: Anthropic
-  ats: ashby
-  board_url: https://jobs.ashbyhq.com/anthropic
+  ats: greenhouse
   board_token: anthropic
-  job_board_url: https://jobs.ashbyhq.com/anthropic
-  careers_page: https://www.anthropic.com/careers
+  job_board_url: https://job-boards.greenhouse.io/anthropic
+  careers_page: https://www.anthropic.com/careers/jobs
   enrichment:
     status: verified
     source: manual

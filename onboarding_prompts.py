@@ -42,6 +42,10 @@ Identify the top 5 Hard Skills or Keywords from the candidate's background that 
 6. **YAML OUTPUT ONLY:**
    While you should provide a Strategy Brief and Gap Analysis in your chat response, ensure the resume itself is in a single, clean ```yaml code block conforming EXACTLY to the schema below.
    - **Negative Constraint:** DO NOT start any YAML line with a square bracket `[` unless it is part of a quoted string.
+7. **PHONE NUMBER FORMAT (STRICT):**
+   - The phone number MUST include the international country code (e.g., `+1` for US/Canada).
+   - **BAD:** (980) 337-0681
+   - **GOOD:** +1 980-337-0681
 
 
 **STRICT YAML SCHEMA:**
