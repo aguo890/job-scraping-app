@@ -78,7 +78,7 @@ def onboarding_wizard():
 
 # --- Trigger Onboarding ---
 prefs = load_user_prefs()
-if st.session_state.get("force_onboarding") or (is_new_user() and prefs.get("show_onboarding", True)):
+if st.session_state.get("force_onboarding") or prefs.get("show_onboarding", True):
     onboarding_wizard()
 
 

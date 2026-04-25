@@ -13,11 +13,22 @@ if not os.path.exists(CONFIG_DIR):
 FILTERING_PATH = os.path.join(CONFIG_DIR, "filtering.yaml")
 COMPANIES_PATH = os.path.join(CONFIG_DIR, "companies.yaml")
 
+import shutil
+
 @st.cache_data(ttl=3600)
 def load_config_file(filepath):
     try:
         if not os.path.exists(filepath):
-            return {}
+            example_filepath = filepath + ".example"
+            if os.path.exists(example_filepath):
+                try:
+                    shutil.copy2(example_filepath, filepath)
+                    # print(f"Initialized default configuration from {os.path.basename(example_filepath)}")
+                except Exception as e:
+                    st.error(f"Failed to initialize default config: {e}")
+                    return {}
+            else:
+                return {}
         with open(filepath, "r", encoding='utf-8') as f:
             config = yaml.safe_load(f)
             return config if config is not None else {}

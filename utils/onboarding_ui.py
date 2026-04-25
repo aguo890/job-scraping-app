@@ -78,6 +78,7 @@ def render_wizard_ui(is_standalone=False):
         with col_dismiss:
             if st.button("🚫 Dismiss Forever", use_container_width=True, help="Never show this prompt again"):
                 save_user_pref("show_onboarding", False)
+                st.session_state["show_onboarding"] = False
                 st.session_state.pop("force_onboarding", None)
                 st.session_state.pop("onboarding_step", None)
                 st.rerun() 
@@ -170,8 +171,10 @@ def render_wizard_ui(is_standalone=False):
                     if not has_error:
                         st.balloons()
                         save_user_pref("show_onboarding", False)
+                        # Ensure we also update session_state if it's referenced anywhere locally
+                        st.session_state["show_onboarding"] = False
                         st.session_state.pop("force_onboarding", None)
                         st.session_state.pop("onboarding_step", None)
                         import time
                         time.sleep(1.5)
-                        st.switch_page("dashboard.py")
+                        st.switch_page("pages/2_🚀_Scraper.py")
