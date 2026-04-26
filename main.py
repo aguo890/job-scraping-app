@@ -53,13 +53,30 @@ def setup_logging():
 
 
 def load_config(config_file: str):
-    """Load YAML configuration file"""
+    """Load YAML configuration file.
+    
+    If the config file doesn't exist but a .example counterpart does,
+    automatically initializes the config from the example template.
+    This handles fresh clones where config/*.yaml is gitignored.
+    """
+    config_path = Path(config_file)
+
+    # Auto-initialize from .example template if missing
+    if not config_path.exists():
+        example_path = config_path.with_suffix('.yaml.example')
+        if example_path.exists():
+            import shutil
+            shutil.copy2(str(example_path), str(config_path))
+            logging.getLogger().info(
+                f"Initialized {config_path.name} from {example_path.name}"
+            )
+        else:
+            logging.getLogger().error(f"Configuration file not found: {config_file}")
+            raise FileNotFoundError(f"No such file or directory: '{config_file}'")
+
     try:
         with open(config_file, 'r', encoding='utf-8') as f:
             return yaml.safe_load(f)
-    except FileNotFoundError:
-        logging.getLogger().error(f"Configuration file not found: {config_file}")
-        raise
     except yaml.YAMLError as e:
         logging.getLogger().error(f"Error parsing YAML configuration: {e}")
         raise
