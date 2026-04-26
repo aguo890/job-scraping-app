@@ -14,7 +14,7 @@ from onboarding_prompts import (
 )
 from core.llm_sanitizer import (
     validate_cv_yaml, validate_filtering_yaml,
-    merge_filtering_with_defaults, extract_cv_filename, sanitize_llm_payload
+    merge_filtering_with_defaults, sanitize_llm_payload
 )
 
 from config_utils import save_yaml_safely, FILTERING_PATH, save_user_pref
@@ -137,18 +137,17 @@ def render_wizard_ui(is_standalone=False):
                 if not has_error:
                     # --- Save CV YAML ---
                     try:
-                        cv_filename = extract_cv_filename(cv_data)
                         clean_cv = sanitize_llm_payload(cv_input)
 
-                        # Root is one level up from job-scraping-app/
+                        # Always overwrite Master_CV.yaml — this replaces the
+                        # default template with the user's actual resume.
                         cv_dir = Path(BASE_DIR).resolve().parent / "rendercv"
                         cv_dir.mkdir(parents=True, exist_ok=True)
-                        cv_path = cv_dir / cv_filename
+                        cv_path = cv_dir / "Master_CV.yaml"
 
                         cv_path.write_text(clean_cv, encoding="utf-8")
 
-
-                        st.success(f"✅ Master CV saved as `{cv_filename}`")
+                        st.success("✅ Master CV saved as `Master_CV.yaml`")
                     except Exception as e:
                         st.error(f"❌ Failed to save Master CV: {e}")
                         has_error = True
