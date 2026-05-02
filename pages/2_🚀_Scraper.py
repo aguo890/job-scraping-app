@@ -4,6 +4,7 @@ import subprocess
 import sys
 import os
 import json
+import ast
 import tempfile
 from utils.data_manager import JobDataService
 from main import execute_scraping_run
@@ -130,12 +131,32 @@ from config_utils import load_config
 config = load_config()
 mobility_enabled = config.get('restrictions', {}).get('enabled', False)
 
+def safe_extract_skills(tier_data):
+    # If pandas loaded it as a string, evaluate it back into a dictionary
+    if isinstance(tier_data, str):
+        try:
+            tier_data = ast.literal_eval(tier_data)
+        except (ValueError, SyntaxError):
+            return [] # Fail gracefully if the string is corrupt
+            
+    # Now that we are sure it's a dict, flatten it
+    if isinstance(tier_data, dict):
+        return [skill for tier in tier_data.values() for skill in tier]
+        
+    return []
+
 payload = JobDataService.fetch_dashboard_payload()
 df_recent = payload.get("data", None)
 
 if df_recent is not None and not df_recent.empty:
+    # 0. Safe Data Transformation for Matched Skills
+    if 'matched_tiers' in df_recent.columns:
+        df_recent['Matched_Skills'] = df_recent['matched_tiers'].apply(safe_extract_skills)
+    else:
+        df_recent['Matched_Skills'] = [[] for _ in range(len(df_recent))]
+
     # 1. Inject Mobility Icons for Preview (Conditional)
-    display_cols = ['company', 'title', 'location', 'score']
+    display_cols = ['url', 'score', 'title', 'company', 'location', 'Matched_Skills']
     
     if mobility_enabled and 'restriction_data' in df_recent.columns:
         def get_mobility_icon(res):
@@ -162,7 +183,9 @@ if df_recent is not None and not df_recent.empty:
         hide_index=True,
         column_config={
             "🛂": st.column_config.TextColumn("🛂", width="small", help="🟢 Friendly | 🟡 Neutral | 🔴 Restricted"),
-            "score": st.column_config.NumberColumn("Score", format="%d")
+            "url": st.column_config.LinkColumn("Link", display_text="Link"),
+            "score": st.column_config.NumberColumn("Score", format="%d"),
+            "Matched_Skills": st.column_config.ListColumn("Matched Skills", width="medium")
         }
     )
     st.caption("💡 Full details and filtering controls are available on the main [Dashboard](Dashboard).")

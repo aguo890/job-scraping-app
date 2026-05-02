@@ -17,6 +17,7 @@ class JobListing:
     source: Optional[str] = "Unknown"
     score: float = 0.0
     match_reason: Optional[str] = ""
+    matched_tiers: Optional[Dict[str, Any]] = field(default_factory=dict)
     restriction_data: Optional[Dict[str, Any]] = field(default_factory=lambda: {"restricted": False, "reason": None})
     fetch_date: Optional[str] = ""
     raw_data: Dict[str, Any] = field(default_factory=dict)

@@ -9,6 +9,7 @@ sys.path.insert(0, parent_dir)
 import streamlit as st
 import pandas as pd
 import json
+import ast
 from utils.ui_utils import format_status_df, inject_custom_css
 from utils.data_manager import JobDataService
 
@@ -135,9 +136,29 @@ df_jobs['cv_status'] = df_jobs['id'].map(cv_status_map).fillna('Generic')
 df_jobs['resume'] = df_jobs['id'].map(resume_map).fillna('')
 
 # --- Prettify Title ---
+def safe_extract_skills(tier_data):
+    # If pandas loaded it as a string, evaluate it back into a dictionary
+    if isinstance(tier_data, str):
+        try:
+            tier_data = ast.literal_eval(tier_data)
+        except (ValueError, SyntaxError):
+            return [] # Fail gracefully if the string is corrupt
+            
+    # Now that we are sure it's a dict, flatten it
+    if isinstance(tier_data, dict):
+        return [skill for tier in tier_data.values() for skill in tier]
+        
+    return []
+
 # --- Prettify Title (Vectorized) ---
 # Initialize with original title
 df_jobs['display_title'] = df_jobs['title']
+
+# 1. Prepend star if saved
+if 'matched_tiers' in df_jobs.columns:
+    df_jobs['Matched_Skills'] = df_jobs['matched_tiers'].apply(safe_extract_skills)
+else:
+    df_jobs['Matched_Skills'] = [[] for _ in range(len(df_jobs))]
 
 # 1. Prepend star if saved
 saved_mask = df_jobs['is_saved'] == True
@@ -549,7 +570,7 @@ filtered_df = filtered_df.sort_values(by=["score", "status_prio", "is_saved", "d
 # --- TABLE ---
 st.caption(f"Showing **{len(filtered_df)}** of {len(df_jobs)} jobs")
 
-display_cols = ['Mobility', 'score', 'date_posted', 'company', 'title', 'location', 'url', 'id']
+display_cols = ['url', 'score', 'title', 'company', 'location', 'date_posted', 'Matched_Skills', 'Mobility', 'id']
 
 # AGENT_NOTE: Only show the user stages/status in the Tracking view to prevent clutter in the general Feed
 if selected_view == "Tracking":
@@ -564,9 +585,10 @@ event = st.dataframe(
     key=f"job_dashboard_table_{st.session_state.table_version}",
     column_config={
         "Mobility": st.column_config.TextColumn("🛂 Status", width="small", help="🟢 Friendly | 🟡 Neutral | 🔴 Restricted"),
-        "url": st.column_config.LinkColumn("Link", display_text="Open"),
+        "url": st.column_config.LinkColumn("Link", display_text="Link"),
         # [REFACTORED]: Issue #20 - Progress Bar Scaling (Clamped dynamically)
         "score": st.column_config.ProgressColumn("Score", format="%d", min_value=0, max_value=max_score_found),
+        "Matched_Skills": st.column_config.ListColumn("Matched Skills", width="medium"),
         "Status_Display": st.column_config.TextColumn("Stage"),
         "id": None
     },
