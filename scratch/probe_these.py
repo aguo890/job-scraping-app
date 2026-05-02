@@ -40,7 +40,7 @@ async def probe():
                                 
                                 if count > 0:
                                     print(f"FOUND: {company} | {provider} | {slug} | {count} jobs | {url}")
-                    except Exception as e:
+                    except Exception:
                         pass
 
 if __name__ == "__main__":
