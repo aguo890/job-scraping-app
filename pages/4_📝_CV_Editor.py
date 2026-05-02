@@ -586,7 +586,7 @@ with st.sidebar:
                 show_fullscreen_preview(pdf_data)
 
     # Reset Button
-    if st.button("🔄 Reset to Base", help="Discard changes and revert to Master CV"):
+    if st.button("🔄 Sync with Master CV", help="Discard current edits and pull the latest data from your Master CV. (You can then re-tailor with AI)"):
         try:
             # 1. Remove tailored file if it exists (not for master mode)
             if not is_master:
